@@ -255,7 +255,7 @@ export class GameComponent implements OnInit {
                 rectangle2: {
                   ...boundary,
                   position: {
-                    x: boundary.position.x + 3ds,
+                    x: boundary.position.x + 3,
                     y: boundary.position.y,
                   },
                 },
