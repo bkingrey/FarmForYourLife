@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { GameState, SpriteMetrics, KeyWASD } from './../_store/models';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { intializeState } from '../_store/reducer';
 
 @Component({
   selector: 'app-game',
@@ -6,27 +8,12 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./game.component.scss'],
 })
 export class GameComponent implements OnInit {
+  @Input() gameData: GameState = intializeState();
+  @Output() keyChange = new EventEmitter();
   canvasId: string = 'game-canvas';
-  walkingSrc: string = '';
-  mapSrc: string = 'assets/maps/SunnyMap.png';
-  spriteSheetSrc: string = 'assets/characters/character-sheet1-export.png';
-  playerIdleLeftSrc: string = 'assets/characters/sprite-idle-left.png';
-  playerIdleRightSrc: string = 'assets/characters/sprite-idle-right.png';
-  playerWalkLeftSrc: string = 'assets/characters/sprite-walk-left.png';
-  playerWalkRightSrc: string = 'assets/characters/sprite-walk-right.png';
-
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
-  map = new Image();
-  mapImage = {
-    position: {
-      x: 237,
-      y: -40,
-    },
-  };
-
-  velocity = 3;
-  player = {
+  player: SpriteMetrics = {
     width: 0,
     height: 0,
     position: {
@@ -34,127 +21,25 @@ export class GameComponent implements OnInit {
       y: 0,
     },
   };
-  spriteSheet = new Image();
-  frames = 5;
-  keys = {
-    w: {
-      pressed: false,
-    },
-    a: {
-      pressed: false,
-    },
-    s: {
-      pressed: false,
-    },
-    d: {
-      pressed: false,
+  map = new Image();
+  foregroundMap = new Image();
+  mapImage = {
+    position: {
+      x: 237,
+      y: -40,
     },
   };
-  collisions: Array<number> = [
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0,
-    4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 0, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0,
-    0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 0, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097,
-    4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0,
-    4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097,
-    4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097,
-    4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097,
-    0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097,
-    4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0,
-    0, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097,
-    4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097,
-    4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097,
-    0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097,
-    4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    4097, 4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    4097, 0, 0, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097,
-    4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 0, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 0, 0, 4097,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 0, 0, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-    4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097, 4097,
-  ];
-  collisonMap: Array<Array<number>> = [];
   boundary = {
     position: { x: this.mapImage.position.x, y: this.mapImage.position.y },
     width: 64,
     height: 64,
   };
-  movables: any = [];
   boundaries: any = [];
+  spriteSheet = new Image();
+  movables: Array<any> = [];
   animate: any;
 
   constructor() {
-    for (let i = 0; i < this.collisions.length; i += 36) {
-      this.collisonMap.push(this.collisions.slice(i, 36 + i));
-    }
-    this.collisonMap.forEach((row, i) => {
-      row.forEach((symbol, j) => {
-        if (symbol === 4097) {
-          const newBoundary = {
-            position: {
-              x: j * this.boundary.width + this.mapImage.position.x,
-              y: i * this.boundary.height + this.mapImage.position.y,
-            },
-            width: this.boundary.width,
-            height: this.boundary.height,
-          };
-          this.boundaries.push(newBoundary);
-        }
-      });
-    });
-    this.movables = [this.mapImage, ...this.boundaries];
     this.animate = () => {
       requestAnimationFrame(this.animate);
       if (this.ctx) {
@@ -168,10 +53,18 @@ export class GameComponent implements OnInit {
             this.drawBoundary(boundary);
           }
         });
-        this.drawSpriteAnimation(this.spriteSheet, this.frames);
+        this.drawSpriteAnimation(
+          this.spriteSheet,
+          this.gameData.spriteAnimations['playerIdleRight'].frames
+        );
+        this.ctx.drawImage(
+          this.foregroundMap,
+          this.mapImage.position.x,
+          this.mapImage.position.y
+        );
         // MOVEMENT
         let moving = true;
-        if (this.keys.w.pressed) {
+        if (this.gameData.keys.w.pressed) {
           for (let i = 0; i < this.boundaries.length; i++) {
             const boundary = this.boundaries[i];
             if (
@@ -186,17 +79,16 @@ export class GameComponent implements OnInit {
                 },
               })
             ) {
-              console.log('is colliding');
               moving = false;
             }
           }
           if (moving) {
             this.movables.forEach((element) => {
-              element.position.y += this.velocity;
+              element.position.y += this.gameData.velocity;
             });
           }
         }
-        if (this.keys.s.pressed) {
+        if (this.gameData.keys.s.pressed) {
           for (let i = 0; i < this.boundaries.length; i++) {
             const boundary = this.boundaries[i];
             if (
@@ -211,17 +103,16 @@ export class GameComponent implements OnInit {
                 },
               })
             ) {
-              console.log('is colliding');
               moving = false;
             }
           }
           if (moving) {
             this.movables.forEach((element) => {
-              element.position.y -= this.velocity;
+              element.position.y -= this.gameData.velocity;
             });
           }
         }
-        if (this.keys.d.pressed) {
+        if (this.gameData.keys.d.pressed) {
           for (let i = 0; i < this.boundaries.length; i++) {
             const boundary = this.boundaries[i];
             if (
@@ -236,17 +127,16 @@ export class GameComponent implements OnInit {
                 },
               })
             ) {
-              console.log('is colliding');
               moving = false;
             }
           }
           if (moving) {
             this.movables.forEach((element) => {
-              element.position.x -= this.velocity;
+              element.position.x -= this.gameData.velocity;
             });
           }
         }
-        if (this.keys.a.pressed) {
+        if (this.gameData.keys.a.pressed) {
           for (let i = 0; i < this.boundaries.length; i++) {
             const boundary = this.boundaries[i];
             if (
@@ -261,13 +151,12 @@ export class GameComponent implements OnInit {
                 },
               })
             ) {
-              console.log('is colliding');
               moving = false;
             }
           }
           if (moving) {
             this.movables.forEach((element) => {
-              element.position.x += this.velocity;
+              element.position.x += this.gameData.velocity;
             });
           }
         }
@@ -275,9 +164,27 @@ export class GameComponent implements OnInit {
     };
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log(this.gameData);
+  }
   ngOnChanges(): void {}
   ngAfterViewInit(): void {
+    this.gameData.collisionMap.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol === 4097 && this.mapImage) {
+          const newBoundary = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+          };
+          this.boundaries.push(newBoundary);
+        }
+      });
+    });
+    this.movables = [this.mapImage, ...this.boundaries];
     this.loadCanvas();
   }
   loadCanvas() {
@@ -290,7 +197,9 @@ export class GameComponent implements OnInit {
   }
 
   loadMap() {
-    this.map.src = this.mapSrc;
+    this.map.src = this.gameData.spriteAnimations['map'].src;
+    this.foregroundMap.src =
+      this.gameData.spriteAnimations['mapForeground'].src;
     this.map.onload = () => {
       if (this.canvas) {
         this.ctx = this.canvas.getContext('2d');
@@ -309,7 +218,8 @@ export class GameComponent implements OnInit {
   }
 
   loadPlayer() {
-    this.spriteSheet.src = this.playerIdleRightSrc;
+    this.spriteSheet.src =
+      this.gameData.spriteAnimations['playerIdleRight'].src;
     this.spriteSheet.onload = () => {
       this.animate();
     };
@@ -396,15 +306,31 @@ export class GameComponent implements OnInit {
   }
 
   moveUp(bool: boolean) {
-    this.keys.w.pressed = bool;
+    this.keyChange.emit({
+      w: {
+        pressed: bool,
+      },
+    } as KeyWASD);
   }
   moveLeft(bool: boolean) {
-    this.keys.a.pressed = bool;
+    this.keyChange.emit({
+      a: {
+        pressed: bool,
+      },
+    } as KeyWASD);
   }
   moveRight(bool: boolean) {
-    this.keys.d.pressed = bool;
+    this.keyChange.emit({
+      d: {
+        pressed: bool,
+      },
+    } as KeyWASD);
   }
   moveDown(bool: boolean) {
-    this.keys.s.pressed = bool;
+    this.keyChange.emit({
+      s: {
+        pressed: bool,
+      },
+    } as KeyWASD);
   }
 }
