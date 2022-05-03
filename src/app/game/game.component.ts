@@ -35,9 +35,18 @@ export class GameComponent implements OnInit {
     height: 64,
   };
   boundaries: any = [];
-  spriteSheet = new Image();
+  spriteSheetIdleRight = new Image();
+  spriteSheetIdleLeft = new Image();
+  spriteSheetWalkRight = new Image();
+  spriteSheetWalkLeft = new Image();
   movables: Array<any> = [];
   animate: any;
+  frameIndex = 0;
+  framesDrawn = 0;
+  mousePos = {
+    x: 0,
+    y: 0,
+  };
 
   constructor() {
     this.animate = () => {
@@ -53,138 +62,21 @@ export class GameComponent implements OnInit {
             this.drawBoundary(boundary);
           }
         });
-        this.drawSpriteAnimation(
-          this.spriteSheet,
-          this.gameData.spriteAnimations['playerIdleRight'].frames
-        );
+        // MOVEMENT
+        this.movement();
         this.ctx.drawImage(
           this.foregroundMap,
           this.mapImage.position.x,
           this.mapImage.position.y
         );
-        // MOVEMENT
-        let moving = true;
-        if (this.gameData.keys.w.pressed) {
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x,
-                    y: boundary.position.y + 3,
-                  },
-                },
-              })
-            ) {
-              moving = false;
-            }
-          }
-          if (moving) {
-            this.movables.forEach((element) => {
-              element.position.y += this.gameData.velocity;
-            });
-          }
-        }
-        if (this.gameData.keys.s.pressed) {
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x,
-                    y: boundary.position.y - 30,
-                  },
-                },
-              })
-            ) {
-              moving = false;
-            }
-          }
-          if (moving) {
-            this.movables.forEach((element) => {
-              element.position.y -= this.gameData.velocity;
-            });
-          }
-        }
-        if (this.gameData.keys.d.pressed) {
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x - 3,
-                    y: boundary.position.y,
-                  },
-                },
-              })
-            ) {
-              moving = false;
-            }
-          }
-          if (moving) {
-            this.movables.forEach((element) => {
-              element.position.x -= this.gameData.velocity;
-            });
-          }
-        }
-        if (this.gameData.keys.a.pressed) {
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x + 3,
-                    y: boundary.position.y,
-                  },
-                },
-              })
-            ) {
-              moving = false;
-            }
-          }
-          if (moving) {
-            this.movables.forEach((element) => {
-              element.position.x += this.gameData.velocity;
-            });
-          }
-        }
       }
     };
   }
 
-  ngOnInit() {
-    console.log(this.gameData);
-  }
+  ngOnInit() {}
   ngOnChanges(): void {}
   ngAfterViewInit(): void {
-    this.gameData.collisionMap.forEach((row, i) => {
-      row.forEach((symbol, j) => {
-        if (symbol === 4097 && this.mapImage) {
-          const newBoundary = {
-            position: {
-              x: j * this.boundary.width + this.mapImage.position.x,
-              y: i * this.boundary.height + this.mapImage.position.y,
-            },
-            width: this.boundary.width,
-            height: this.boundary.height,
-          };
-          this.boundaries.push(newBoundary);
-        }
-      });
-    });
-    this.movables = [this.mapImage, ...this.boundaries];
+    this.createCollisionsAndMovables();
     this.loadCanvas();
   }
   loadCanvas() {
@@ -218,16 +110,33 @@ export class GameComponent implements OnInit {
   }
 
   loadPlayer() {
-    this.spriteSheet.src =
+    this.spriteSheetIdleRight.src =
       this.gameData.spriteAnimations['playerIdleRight'].src;
-    this.spriteSheet.onload = () => {
+    this.spriteSheetIdleLeft.src =
+      this.gameData.spriteAnimations['playerIdleLeft'].src;
+    this.spriteSheetWalkRight.src =
+      this.gameData.spriteAnimations['playerWalkRight'].src;
+    this.spriteSheetWalkLeft.src =
+      this.gameData.spriteAnimations['playerWalkLeft'].src;
+    this.gameData.spriteAnimations['playerIdleRight'].src;
+    this.spriteSheetIdleRight.onload = () => {
       this.animate();
     };
   }
 
-  drawSpriteAnimation(spriteSheet: HTMLImageElement, columns: number) {
+  drawSpriteAnimation(spriteSheet: HTMLImageElement, frames: number) {
+    if (this.framesDrawn > 15) {
+      if (this.frameIndex < frames - 1) {
+        this.frameIndex++;
+      } else {
+        this.frameIndex = 0;
+      }
+      this.framesDrawn = 0;
+    } else {
+      this.framesDrawn++;
+    }
     if (this.canvas) {
-      this.player.width = spriteSheet.width / columns;
+      this.player.width = 13;
       this.player.height = spriteSheet.height;
       this.player.position = {
         x: this.canvas.width / 2 - this.player.width,
@@ -235,13 +144,13 @@ export class GameComponent implements OnInit {
       };
       this.ctx?.drawImage(
         spriteSheet,
-        0,
+        this.player.width * this.frameIndex,
         0,
         this.player.width,
         spriteSheet.height,
         this.player.position.x,
         this.player.position.y,
-        (spriteSheet.width * 4) / columns,
+        52,
         spriteSheet.height * 4
       );
     }
@@ -266,6 +175,25 @@ export class GameComponent implements OnInit {
       rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
       rectangle1.position.y + rectangle1.height >= rectangle2.position.y
     );
+  }
+
+  createCollisionsAndMovables() {
+    this.gameData.collisionMap.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol === 4097 && this.mapImage) {
+          const newBoundary = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+          };
+          this.boundaries.push(newBoundary);
+        }
+      });
+    });
+    this.movables = [this.mapImage, ...this.boundaries];
   }
 
   keyDownEvent(e: KeyboardEvent) {
@@ -332,5 +260,146 @@ export class GameComponent implements OnInit {
         pressed: bool,
       },
     } as KeyWASD);
+  }
+
+  getMousePos(evt) {
+    if (this.canvas) {
+      const rect = this.canvas.getBoundingClientRect();
+      this.mousePos = {
+        x:
+          ((evt.clientX - rect.left) / (rect.right - rect.left)) *
+          this.canvas.width,
+        y:
+          ((evt.clientY - rect.top) / (rect.bottom - rect.top)) *
+          this.canvas.height,
+      };
+    }
+    return;
+  }
+
+  movement() {
+    let useRightAnims;
+    if (this.mousePos.x > this.player.position.x) {
+      useRightAnims = true;
+    } else {
+      useRightAnims = false;
+    }
+    let moving = true;
+    if (this.gameData.keys.w.pressed) {
+      for (let i = 0; i < this.boundaries.length; i++) {
+        const boundary = this.boundaries[i];
+        if (
+          this.retangularCollision({
+            rectangle1: this.player,
+            rectangle2: {
+              ...boundary,
+              position: {
+                x: boundary.position.x,
+                y: boundary.position.y + 3,
+              },
+            },
+          })
+        ) {
+          moving = false;
+        }
+      }
+      if (moving) {
+        this.movables.forEach((element) => {
+          element.position.y += this.gameData.velocity;
+        });
+      }
+    }
+    if (this.gameData.keys.s.pressed) {
+      for (let i = 0; i < this.boundaries.length; i++) {
+        const boundary = this.boundaries[i];
+        if (
+          this.retangularCollision({
+            rectangle1: this.player,
+            rectangle2: {
+              ...boundary,
+              position: {
+                x: boundary.position.x,
+                y: boundary.position.y - 30,
+              },
+            },
+          })
+        ) {
+          moving = false;
+        }
+      }
+      if (moving) {
+        this.movables.forEach((element) => {
+          element.position.y -= this.gameData.velocity;
+        });
+      }
+    }
+    if (this.gameData.keys.d.pressed) {
+      for (let i = 0; i < this.boundaries.length; i++) {
+        const boundary = this.boundaries[i];
+        if (
+          this.retangularCollision({
+            rectangle1: this.player,
+            rectangle2: {
+              ...boundary,
+              position: {
+                x: boundary.position.x - 3,
+                y: boundary.position.y,
+              },
+            },
+          })
+        ) {
+          moving = false;
+        }
+      }
+      if (moving) {
+        this.movables.forEach((element) => {
+          element.position.x -= this.gameData.velocity;
+        });
+      }
+    }
+    if (this.gameData.keys.a.pressed) {
+      for (let i = 0; i < this.boundaries.length; i++) {
+        const boundary = this.boundaries[i];
+        if (
+          this.retangularCollision({
+            rectangle1: this.player,
+            rectangle2: {
+              ...boundary,
+              position: {
+                x: boundary.position.x + 3,
+                y: boundary.position.y,
+              },
+            },
+          })
+        ) {
+          moving = false;
+        }
+      }
+      if (moving) {
+        this.movables.forEach((element) => {
+          element.position.x += this.gameData.velocity;
+        });
+      }
+    }
+    if (
+      !this.gameData.keys.w.pressed &&
+      !this.gameData.keys.a.pressed &&
+      !this.gameData.keys.s.pressed &&
+      !this.gameData.keys.d.pressed
+    ) {
+      this.drawSpriteAnimation(
+        useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
+        useRightAnims
+          ? this.gameData.spriteAnimations['playerIdleRight'].frames
+          : this.gameData.spriteAnimations['playerIdleLeft'].frames
+      );
+    } else {
+      this.drawSpriteAnimation(
+        useRightAnims ? this.spriteSheetWalkRight : this.spriteSheetWalkLeft,
+        useRightAnims
+          ? this.gameData.spriteAnimations['playerWalkRight'].frames
+          : this.gameData.spriteAnimations['playerWalkLeft'].frames
+      );
+    }
   }
 }
