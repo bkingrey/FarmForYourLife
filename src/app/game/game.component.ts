@@ -50,8 +50,10 @@ export class GameComponent implements OnInit {
 
   constructor() {
     this.animate = () => {
-      requestAnimationFrame(this.animate);
-      if (this.ctx) {
+      if (this.ctx && this.canvas) {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        requestAnimationFrame(this.animate);
+
         this.ctx.drawImage(
           this.map,
           this.mapImage.position.x,
@@ -135,14 +137,14 @@ export class GameComponent implements OnInit {
     } else {
       this.framesDrawn++;
     }
-    if (this.canvas) {
+    if (this.canvas && this.ctx) {
       this.player.width = 13;
       this.player.height = spriteSheet.height;
       this.player.position = {
         x: this.canvas.width / 2 - this.player.width,
         y: this.canvas.height / 2 - this.player.height,
       };
-      this.ctx?.drawImage(
+      this.ctx.drawImage(
         spriteSheet,
         this.player.width * this.frameIndex,
         0,
@@ -153,12 +155,20 @@ export class GameComponent implements OnInit {
         52,
         spriteSheet.height * 4
       );
+      this.ctx.beginPath();
+      this.ctx.rect(
+        this.player.position.x,
+        this.player.position.y,
+        this.player.width * 4,
+        this.player.height * 4
+      );
+      this.ctx.stroke();
     }
   }
 
   drawBoundary(boundary) {
     if (this.ctx) {
-      this.ctx.fillStyle = 'transparent';
+      this.ctx.fillStyle = 'red';
       this.ctx.fillRect(
         boundary.position.x,
         boundary.position.y,
@@ -170,7 +180,7 @@ export class GameComponent implements OnInit {
 
   retangularCollision({ rectangle1, rectangle2 }) {
     return (
-      rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
+      rectangle1.position.x + rectangle1.width * 4 >= rectangle2.position.x &&
       rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
       rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
       rectangle1.position.y + rectangle1.height >= rectangle2.position.y
