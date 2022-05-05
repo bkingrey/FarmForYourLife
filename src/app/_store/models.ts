@@ -2,7 +2,9 @@ export interface GameState {
   loaded: boolean;
   loading: boolean;
   collisions: Array<number> | [];
+  farmableAreas: Array<number> | [];
   collisionMap: any | [];
+  farmableAreaMap: any | [];
   spriteAnimations: SpriteAnimation;
   mapImage: SpriteMetrics;
   player: SpriteMetrics;
@@ -25,8 +27,11 @@ export interface SpriteMetrics {
   };
   width?: number;
   height?: number;
+  center?: {
+    x: number;
+    y: number;
+  };
 }
-
 export interface KeyWASD {
   w: {
     pressed: boolean;

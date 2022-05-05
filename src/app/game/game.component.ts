@@ -20,6 +20,10 @@ export class GameComponent implements OnInit {
       x: 0,
       y: 0,
     },
+    center: {
+      x: 0,
+      y: 0,
+    },
   };
   map = new Image();
   foregroundMap = new Image();
@@ -35,22 +39,39 @@ export class GameComponent implements OnInit {
     height: 64,
   };
   boundaries: any = [];
+  farmableArea: any = [];
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
   spriteSheetWalkRight = new Image();
   spriteSheetWalkLeft = new Image();
+  spriteSheetDigRight = new Image();
+  spriteSheetDigLeft = new Image();
+  spriteSheetSoil = new Image();
   movables: Array<any> = [];
   animate: any;
   frameIndex = 0;
+  actionFrameIndex = 0;
   framesDrawn = 0;
   mousePos = {
     x: 0,
     y: 0,
   };
+  queuedCultivate = false;
+  mayFarm = false;
+  hoveredFarmableArea = {
+    position: {
+      x: -1,
+      y: -1,
+    },
+    width: -1,
+    height: -1,
+    state: 'none',
+  };
 
   constructor() {
     this.animate = () => {
       if (this.ctx && this.canvas) {
+        this.ctx.save();
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         requestAnimationFrame(this.animate);
 
@@ -64,13 +85,23 @@ export class GameComponent implements OnInit {
             this.drawBoundary(boundary);
           }
         });
+        this.farmableArea.forEach((farmableArea) => {
+          if (this.ctx) {
+            this.drawFarmable(farmableArea);
+          }
+        });
         // MOVEMENT
-        this.movement();
+        if (this.queuedCultivate) {
+          this.cultivate();
+        } else {
+          this.movement();
+        }
         this.ctx.drawImage(
           this.foregroundMap,
           this.mapImage.position.x,
           this.mapImage.position.y
         );
+        this.ctx.restore();
       }
     };
   }
@@ -79,6 +110,8 @@ export class GameComponent implements OnInit {
   ngOnChanges(): void {}
   ngAfterViewInit(): void {
     this.createCollisionsAndMovables();
+    this.createFarmableArea();
+    this.createMovables();
     this.loadCanvas();
   }
   loadCanvas() {
@@ -86,6 +119,7 @@ export class GameComponent implements OnInit {
       this.canvas = document.getElementById(this.canvasId) as HTMLCanvasElement;
       this.canvas.width = 1024;
       this.canvas.height = 576;
+      this.canvas;
       this.loadMap();
     }
   }
@@ -120,8 +154,19 @@ export class GameComponent implements OnInit {
       this.gameData.spriteAnimations['playerWalkRight'].src;
     this.spriteSheetWalkLeft.src =
       this.gameData.spriteAnimations['playerWalkLeft'].src;
-    this.gameData.spriteAnimations['playerIdleRight'].src;
+    this.spriteSheetDigRight.src =
+      this.gameData.spriteAnimations['spriteSheetDigRight'].src;
+    this.spriteSheetDigLeft.src =
+      this.gameData.spriteAnimations['spriteSheetDigLeft'].src;
     this.spriteSheetIdleRight.onload = () => {
+      this.loadCrops();
+    };
+  }
+
+  loadCrops() {
+    this.spriteSheetSoil.src =
+      this.gameData.spriteAnimations['spriteSheetSoil'].src;
+    this.spriteSheetSoil.onload = () => {
       this.animate();
     };
   }
@@ -144,6 +189,10 @@ export class GameComponent implements OnInit {
         x: this.canvas.width / 2 - this.player.width,
         y: this.canvas.height / 2 - this.player.height,
       };
+      this.player.center = {
+        x: this.player.position.x + this.player.width * 2,
+        y: this.player.position.y + this.player.height * 2,
+      };
       this.ctx.drawImage(
         spriteSheet,
         this.player.width * this.frameIndex,
@@ -155,20 +204,100 @@ export class GameComponent implements OnInit {
         52,
         spriteSheet.height * 4
       );
-      this.ctx.beginPath();
-      this.ctx.rect(
-        this.player.position.x,
-        this.player.position.y,
-        this.player.width * 4,
-        this.player.height * 4
+      // ***** SHOWING HIT BOX *****
+      // this.ctx.beginPath();
+      // this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
+      // this.ctx.stroke();
+      // ***** SHOWING HIT BOX *****
+    }
+  }
+
+  drawCultivateAnimation(spriteSheet: HTMLImageElement, frames: number) {
+    let width = 128;
+    let height = 65;
+
+    if (this.framesDrawn > 15) {
+      if (this.actionFrameIndex < frames - 1) {
+        if (this.actionFrameIndex === 5) {
+          this.changeStateOfHoveredFarmable();
+        }
+        this.actionFrameIndex++;
+      } else {
+        if (this.ctx) {
+          this.ctx.drawImage(
+            spriteSheet,
+            width * 12,
+            0,
+            width,
+            spriteSheet.height,
+            this.player.position.x - 224,
+            this.player.position.y - 84,
+            width * 4,
+            height * 4
+          );
+        }
+        this.actionFrameIndex = 0;
+        this.queuedCultivate = false;
+      }
+      this.framesDrawn = 0;
+    } else {
+      this.framesDrawn++;
+    }
+
+    if (this.ctx) {
+      this.ctx.drawImage(
+        spriteSheet,
+        width * this.actionFrameIndex,
+        0,
+        width,
+        spriteSheet.height,
+        this.player.position.x - 224,
+        this.player.position.y - 84,
+        width * 4,
+        height * 4
       );
-      this.ctx.stroke();
+    }
+  }
+
+  changeStateOfHoveredFarmable() {
+    if (
+      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+        .state === undefined
+    ) {
+      this.farmableArea.filter(
+        (area) => area === this.hoveredFarmableArea
+      )[0].state = 'soil-0';
+    } else if (
+      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+        .state === 'soil-0'
+    ) {
+      this.farmableArea.filter(
+        (area) => area === this.hoveredFarmableArea
+      )[0].state = 'soil-1';
+    } else if (
+      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+        .state === 'soil-1'
+    ) {
+      this.farmableArea.filter(
+        (area) => area === this.hoveredFarmableArea
+      )[0].state = 'soil-2';
+    } else if (
+      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+        .state === 'soil-2'
+    ) {
+      this.farmableArea.filter(
+        (area) => area === this.hoveredFarmableArea
+      )[0].state = 'soil-3';
+    } else {
+      this.farmableArea.filter(
+        (area) => area === this.hoveredFarmableArea
+      )[0].state = 'soil-3';
     }
   }
 
   drawBoundary(boundary) {
     if (this.ctx) {
-      this.ctx.fillStyle = 'red';
+      this.ctx.fillStyle = 'transparent';
       this.ctx.fillRect(
         boundary.position.x,
         boundary.position.y,
@@ -178,7 +307,75 @@ export class GameComponent implements OnInit {
     }
   }
 
+  drawFarmable(area) {
+    let cropFrameSize = {
+      width: 64,
+      height: 64,
+    };
+    if (this.ctx) {
+      if (area.state === 'soil-0') {
+        this.ctx.drawImage(
+          this.spriteSheetSoil,
+          cropFrameSize.width * 0,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'soil-1') {
+        this.ctx.drawImage(
+          this.spriteSheetSoil,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'soil-2') {
+        this.ctx.drawImage(
+          this.spriteSheetSoil,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'soil-3') {
+        this.ctx.drawImage(
+          this.spriteSheetSoil,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else {
+        this.ctx.fillStyle = 'transparent';
+        this.ctx.fillRect(
+          area.position.x,
+          area.position.y,
+          area.width,
+          area.height
+        );
+      }
+    }
+    this.targetNearestSquare(area);
+  }
+
   retangularCollision({ rectangle1, rectangle2 }) {
+    // *4 is for width scale.
     return (
       rectangle1.position.x + rectangle1.width * 4 >= rectangle2.position.x &&
       rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
@@ -203,7 +400,28 @@ export class GameComponent implements OnInit {
         }
       });
     });
-    this.movables = [this.mapImage, ...this.boundaries];
+  }
+
+  createFarmableArea() {
+    this.gameData.farmableAreaMap.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol !== 0 && this.mapImage) {
+          const newFarmableArea = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+          };
+          this.farmableArea.push(newFarmableArea);
+        }
+      });
+    });
+  }
+
+  createMovables() {
+    this.movables = [this.mapImage, ...this.boundaries, ...this.farmableArea];
   }
 
   keyDownEvent(e: KeyboardEvent) {
@@ -287,6 +505,21 @@ export class GameComponent implements OnInit {
     return;
   }
 
+  cultivate() {
+    let useRightAnims;
+    if (this.mousePos.x > this.player.position.x) {
+      useRightAnims = true;
+    } else {
+      useRightAnims = false;
+    }
+    //this.gameData.velocity = 0
+    this.drawCultivateAnimation(
+      useRightAnims ? this.spriteSheetDigRight : this.spriteSheetDigLeft,
+      useRightAnims
+        ? this.gameData.spriteAnimations['spriteSheetDigRight'].frames
+        : this.gameData.spriteAnimations['spriteSheetDigLeft'].frames
+    );
+  }
   movement() {
     let useRightAnims;
     if (this.mousePos.x > this.player.position.x) {
@@ -410,6 +643,70 @@ export class GameComponent implements OnInit {
           ? this.gameData.spriteAnimations['playerWalkRight'].frames
           : this.gameData.spriteAnimations['playerWalkLeft'].frames
       );
+    }
+  }
+
+  targetNearestSquare(area) {
+    if (
+      this.ctx &&
+      this.player.width &&
+      this.player.height &&
+      this.player.center
+    ) {
+      if (
+        this.mousePos.x >= area.position.x &&
+        this.mousePos.y >= area.position.y &&
+        this.mousePos.x < area.position.x + area.width &&
+        this.mousePos.y < area.position.y + area.height
+      ) {
+        this.ctx.beginPath();
+        this.ctx.lineWidth = 6;
+        if (this.isMouseCloseToPlayer()) {
+          this.mayFarm = true;
+          this.hoveredFarmableArea = area;
+          this.ctx.strokeStyle = 'blue';
+          this.ctx.rect(
+            area.position.x,
+            area.position.y,
+            area.width,
+            area.height
+          );
+        } else {
+          this.mayFarm = false;
+          this.ctx.strokeStyle = 'red';
+          this.ctx.rect(
+            area.position.x,
+            area.position.y,
+            area.width,
+            area.height
+          );
+        }
+
+        this.ctx.stroke();
+      }
+    }
+  }
+
+  isMouseCloseToPlayer() {
+    if (this.player.center) {
+      return (
+        ((this.mousePos.x > this.player.center.x &&
+          this.mousePos.x - this.player.center.x < 100) ||
+          (this.player.center.x > this.mousePos.x &&
+            this.player.center.x - this.mousePos.x < 100)) &&
+        ((this.mousePos.y > this.player.center.y &&
+          this.mousePos.y - this.player.center.y < 100) ||
+          (this.player.center.y > this.mousePos.y &&
+            this.player.center.y - this.mousePos.y < 100))
+      );
+    }
+    return false;
+  }
+
+  doActionOnMouse(evt) {
+    if (this.mayFarm && this.ctx) {
+      this.queuedCultivate = true;
+      this.spriteSheetSoil.onload = () => {};
     }
   }
 }

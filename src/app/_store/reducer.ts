@@ -7,7 +7,9 @@ export const intializeState = (): GameState => {
     loaded: false,
     loading: false,
     collisions: [],
+    farmableAreas: [],
     collisionMap: [],
+    farmableAreaMap: [],
     spriteAnimations: {
       playerIdleLeftSrc: {
         src: 'assets/characters/sprite-idle-left.png',
@@ -52,20 +54,27 @@ export const gameReducer = createReducer(
   }),
   on(GameActions.SuccessGetGameDataAction, (state: GameState, { payload }) => {
     const newCollisionMap: Array<any> = [];
+    const newFarmableArea: Array<any> = [];
     for (let i = 0; i < payload.collisions.length; i += 36) {
       newCollisionMap.push(payload.collisions.slice(i, 36 + i));
     }
 
+    for (let i = 0; i < payload.farmableAreas.length; i += 36) {
+      newFarmableArea.push(payload.farmableAreas.slice(i, 36 + i));
+    }
+    console.log(newFarmableArea);
     return {
       ...state,
       loading: false,
       loaded: true,
       collisions: payload.collisions,
+      farmableAreas: payload.farmableAreas,
       keys: payload.keys,
       mapImage: payload.mapImage,
       spriteAnimations: payload.spriteAnimations,
       velocity: payload.velocity,
       collisionMap: newCollisionMap,
+      farmableAreaMap: newFarmableArea,
       player: payload.player,
     };
   }),
