@@ -1,4 +1,14 @@
 canvas {
+  display: block;
+  background-color: #5fc14c;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 0;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
   cursor: crosshair;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;

@@ -1,5 +1,11 @@
 import { GameState, SpriteMetrics, KeyWASD } from './../_store/models';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { intializeState } from '../_store/reducer';
 
 @Component({
@@ -7,7 +13,7 @@ import { intializeState } from '../_store/reducer';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() keyChange = new EventEmitter();
   canvasId: string = 'game-canvas';
@@ -63,10 +69,41 @@ export class GameComponent implements OnInit {
       x: -1,
       y: -1,
     },
+    center: {
+      x: -1,
+      y: -1,
+    },
     width: -1,
     height: -1,
     state: 'none',
   };
+  clickedFarmableArea = {
+    position: {
+      x: -1,
+      y: -1,
+    },
+    center: {
+      x: -1,
+      y: -1,
+    },
+    width: -1,
+    height: -1,
+    state: 'none',
+  };
+  defaultFarmState = {
+    position: {
+      x: -1,
+      y: -1,
+    },
+    center: {
+      x: -1,
+      y: -1,
+    },
+    width: -1,
+    height: -1,
+    state: 'none',
+  };
+  canClick = true;
 
   constructor() {
     this.animate = () => {
@@ -106,8 +143,6 @@ export class GameComponent implements OnInit {
     };
   }
 
-  ngOnInit() {}
-  ngOnChanges(): void {}
   ngAfterViewInit(): void {
     this.createCollisionsAndMovables();
     this.createFarmableArea();
@@ -216,7 +251,7 @@ export class GameComponent implements OnInit {
     let width = 128;
     let height = 65;
 
-    if (this.framesDrawn > 15) {
+    if (this.framesDrawn > 10) {
       if (this.actionFrameIndex < frames - 1) {
         if (this.actionFrameIndex === 5) {
           this.changeStateOfHoveredFarmable();
@@ -238,6 +273,7 @@ export class GameComponent implements OnInit {
         }
         this.actionFrameIndex = 0;
         this.queuedCultivate = false;
+        this.canClick = true;
       }
       this.framesDrawn = 0;
     } else {
@@ -261,36 +297,36 @@ export class GameComponent implements OnInit {
 
   changeStateOfHoveredFarmable() {
     if (
-      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
         .state === undefined
     ) {
       this.farmableArea.filter(
-        (area) => area === this.hoveredFarmableArea
+        (area) => area === this.clickedFarmableArea
       )[0].state = 'soil-0';
     } else if (
-      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
         .state === 'soil-0'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.hoveredFarmableArea
+        (area) => area === this.clickedFarmableArea
       )[0].state = 'soil-1';
     } else if (
-      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
         .state === 'soil-1'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.hoveredFarmableArea
+        (area) => area === this.clickedFarmableArea
       )[0].state = 'soil-2';
     } else if (
-      this.farmableArea.filter((area) => area === this.hoveredFarmableArea)[0]
+      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
         .state === 'soil-2'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.hoveredFarmableArea
+        (area) => area === this.clickedFarmableArea
       )[0].state = 'soil-3';
     } else {
       this.farmableArea.filter(
-        (area) => area === this.hoveredFarmableArea
+        (area) => area === this.clickedFarmableArea
       )[0].state = 'soil-3';
     }
   }
@@ -377,10 +413,11 @@ export class GameComponent implements OnInit {
   retangularCollision({ rectangle1, rectangle2 }) {
     // *4 is for width scale.
     return (
-      rectangle1.position.x + rectangle1.width * 4 >= rectangle2.position.x &&
-      rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
-      rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
-      rectangle1.position.y + rectangle1.height >= rectangle2.position.y
+      rectangle1.position.x - 1 + rectangle1.width * 4 >=
+        rectangle2.position.x &&
+      rectangle1.position.x + 1 <= rectangle2.position.x + rectangle2.width &&
+      rectangle1.position.y + 15 <= rectangle2.position.y + rectangle2.height &&
+      rectangle1.position.y + 15 + rectangle1.height >= rectangle2.position.y
     );
   }
 
@@ -512,7 +549,6 @@ export class GameComponent implements OnInit {
     } else {
       useRightAnims = false;
     }
-    //this.gameData.velocity = 0
     this.drawCultivateAnimation(
       useRightAnims ? this.spriteSheetDigRight : this.spriteSheetDigLeft,
       useRightAnims
@@ -664,6 +700,11 @@ export class GameComponent implements OnInit {
         if (this.isMouseCloseToPlayer()) {
           this.mayFarm = true;
           this.hoveredFarmableArea = area;
+          this.hoveredFarmableArea.center = {
+            x: area.position.x + 32,
+            y: area.position.y + 32,
+          };
+
           this.ctx.strokeStyle = 'blue';
           this.ctx.rect(
             area.position.x,
@@ -673,6 +714,7 @@ export class GameComponent implements OnInit {
           );
         } else {
           this.mayFarm = false;
+          this.hoveredFarmableArea = this.defaultFarmState;
           this.ctx.strokeStyle = 'red';
           this.ctx.rect(
             area.position.x,
@@ -690,23 +732,32 @@ export class GameComponent implements OnInit {
   isMouseCloseToPlayer() {
     if (this.player.center) {
       return (
-        ((this.mousePos.x > this.player.center.x &&
+        ((this.mousePos.x >= this.player.center.x &&
           this.mousePos.x - this.player.center.x < 100) ||
-          (this.player.center.x > this.mousePos.x &&
+          (this.player.center.x >= this.mousePos.x &&
             this.player.center.x - this.mousePos.x < 100)) &&
-        ((this.mousePos.y > this.player.center.y &&
+        ((this.mousePos.y >= this.player.center.y &&
           this.mousePos.y - this.player.center.y < 100) ||
-          (this.player.center.y > this.mousePos.y &&
+          (this.player.center.y >= this.mousePos.y &&
             this.player.center.y - this.mousePos.y < 100))
       );
     }
     return false;
   }
 
+  removeMouseProperties() {
+    this.mayFarm = false;
+    this.hoveredFarmableArea = this.defaultFarmState;
+    this.clickedFarmableArea = this.defaultFarmState;
+  }
   doActionOnMouse(evt) {
-    if (this.mayFarm && this.ctx) {
+    evt.preventDefault();
+    if (this.player.center && this.mayFarm && this.ctx && this.canClick) {
+      this.canClick = false;
       this.queuedCultivate = true;
-      this.spriteSheetSoil.onload = () => {};
+      this.clickedFarmableArea = this.hoveredFarmableArea;
+    } else {
+      evt.stopImmediatePropagation();
     }
   }
 }
