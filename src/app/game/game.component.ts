@@ -16,6 +16,7 @@ import { intializeState } from '../_store/reducer';
 export class GameComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() keyChange = new EventEmitter();
+  @Output() changeTool = new EventEmitter();
   canvasId: string = 'game-canvas';
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
@@ -152,8 +153,8 @@ export class GameComponent implements AfterViewInit {
   loadCanvas() {
     if (document.getElementById(this.canvasId)) {
       this.canvas = document.getElementById(this.canvasId) as HTMLCanvasElement;
-      this.canvas.width = 1024;
-      this.canvas.height = 576;
+      this.canvas.width = this.gameData.resolution.x;
+      this.canvas.height = this.gameData.resolution.y;
       this.canvas;
       this.loadMap();
     }
@@ -463,6 +464,22 @@ export class GameComponent implements AfterViewInit {
 
   keyDownEvent(e: KeyboardEvent) {
     switch (e.key.toLowerCase()) {
+      case '1':
+        this.changeTool.emit('shovel');
+        break;
+      case '2':
+        this.changeTool.emit('water');
+        break;
+      case '3':
+        this.changeTool.emit('hammer');
+        break;
+      case '4':
+        this.changeTool.emit('pickaxe');
+        break;
+      case '5':
+        this.changeTool.emit('rod');
+        break;
+
       case 'w':
         this.moveUp(true);
         break;
@@ -751,13 +768,49 @@ export class GameComponent implements AfterViewInit {
     this.clickedFarmableArea = this.defaultFarmState;
   }
   doActionOnMouse(evt) {
-    evt.preventDefault();
     if (this.player.center && this.mayFarm && this.ctx && this.canClick) {
       this.canClick = false;
       this.queuedCultivate = true;
       this.clickedFarmableArea = this.hoveredFarmableArea;
-    } else {
-      evt.stopImmediatePropagation();
+    }
+  }
+  doScrollOnMouse(evt) {
+    if (this.player.center && this.mayFarm && this.ctx && this.canClick) {
+      if (evt.wheelDelta < 0) {
+        switch (this.gameData.equippedTool) {
+          case 'rod':
+            break;
+          case 'shovel':
+            this.changeTool.emit('water');
+            break;
+          case 'water':
+            this.changeTool.emit('hammer');
+            break;
+          case 'hammer':
+            this.changeTool.emit('pickaxe');
+            break;
+          case 'pickaxe':
+            this.changeTool.emit('rod');
+            break;
+        }
+      } else if (evt.wheelDelta > 0) {
+        switch (this.gameData.equippedTool) {
+          case 'shovel':
+            break;
+          case 'water':
+            this.changeTool.emit('shovel');
+            break;
+          case 'hammer':
+            this.changeTool.emit('water');
+            break;
+          case 'pickaxe':
+            this.changeTool.emit('hammer');
+            break;
+          case 'rod':
+            this.changeTool.emit('pickaxe');
+            break;
+        }
+      }
     }
   }
 }

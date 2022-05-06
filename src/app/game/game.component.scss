@@ -9,8 +9,8 @@ canvas {
   padding: 0;
   outline: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
-  cursor: crosshair;
-  image-rendering: -moz-crisp-edges;
+  cursor: url("../../assets/ui/cursor_big.png"),
+    url("../../assets/ui/cursor_03.cur"), default;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;

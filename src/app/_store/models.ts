@@ -1,6 +1,10 @@
 export interface GameState {
   loaded: boolean;
   loading: boolean;
+  resolution: {
+    x: number;
+    y: number;
+  };
   collisions: Array<number> | [];
   farmableAreas: Array<number> | [];
   collisionMap: any | [];
@@ -10,6 +14,7 @@ export interface GameState {
   player: SpriteMetrics;
   velocity: number;
   keys: KeyWASD;
+  equippedTool: string;
 }
 
 export interface SpriteAnimation {

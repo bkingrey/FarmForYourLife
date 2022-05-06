@@ -6,10 +6,15 @@ export const intializeState = (): GameState => {
   return {
     loaded: false,
     loading: false,
+    resolution: {
+      x: 1024,
+      y: 576,
+    },
     collisions: [],
     farmableAreas: [],
     collisionMap: [],
     farmableAreaMap: [],
+    equippedTool: 'shovel',
     spriteAnimations: {
       playerIdleLeftSrc: {
         src: 'assets/characters/sprite-idle-left.png',
@@ -67,6 +72,7 @@ export const gameReducer = createReducer(
       ...state,
       loading: false,
       loaded: true,
+      resolution: payload.resolution,
       collisions: payload.collisions,
       farmableAreas: payload.farmableAreas,
       keys: payload.keys,
@@ -89,6 +95,12 @@ export const gameReducer = createReducer(
         s: payload.s ? payload.s : state.keys.s,
         d: payload.d ? payload.d : state.keys.d,
       },
+    };
+  }),
+  on(GameActions.ChangeTool, (state, { payload }) => {
+    return {
+      ...state,
+      equippedTool: payload,
     };
   })
 );

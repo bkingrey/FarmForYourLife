@@ -1,0 +1,24 @@
+<div id="game-ui" [ngClass]="{ R1024x576: gameData.resolution.x === 1024 }">
+  <div class="tool-ui">
+    <div [ngClass]="{ active: gameData.equippedTool === 'shovel' }">
+      <span class="floating-number">1</span
+      ><img src="../../assets/ui/shovel-big.png" />
+    </div>
+    <div [ngClass]="{ active: gameData.equippedTool === 'water' }">
+      <span class="floating-number">2</span
+      ><img src="../../assets/ui/water-big.png" />
+    </div>
+    <div [ngClass]="{ active: gameData.equippedTool === 'hammer' }">
+      <span class="floating-number">3</span
+      ><img src="../../assets/ui/hammer-big.png" />
+    </div>
+    <div [ngClass]="{ active: gameData.equippedTool === 'pickaxe' }">
+      <span class="floating-number">4</span
+      ><img src="../../assets/ui/pickaxe-big.png" />
+    </div>
+    <div [ngClass]="{ active: gameData.equippedTool === 'rod' }">
+      <span class="floating-number">5</span
+      ><img src="../../assets/ui/rod-big.png" />
+    </div>
+  </div>
+</div>

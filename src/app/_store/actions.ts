@@ -18,3 +18,8 @@ export const ChangeKeyEvent = createAction(
   '[GameData] Change Key Event',
   props<{ payload: KeyWASD }>()
 );
+
+export const ChangeTool = createAction(
+  '[GameData] Change Tool Event',
+  props<{ payload: string }>()
+);

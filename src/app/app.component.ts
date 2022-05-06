@@ -1,4 +1,4 @@
-import { ChangeKeyEvent, getGameData } from './_store/actions';
+import { ChangeKeyEvent, ChangeTool, getGameData } from './_store/actions';
 import { Component, OnInit } from '@angular/core';
 import { AppFacade } from './app.facade';
 
@@ -16,6 +16,12 @@ export class AppComponent implements OnInit {
   }
 
   keyChange(event) {
+    console.log('key change');
     this.facade.dispatch(ChangeKeyEvent({ payload: event }));
+  }
+
+  changeTool(event) {
+    console.log('tool change');
+    this.facade.dispatch(ChangeTool({ payload: event }));
   }
 }

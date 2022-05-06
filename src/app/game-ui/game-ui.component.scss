@@ -1,0 +1,47 @@
+#game-ui {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 10px solid black;
+  pointer-events: none;
+}
+
+.R1024x576 {
+  width: 1024px;
+  height: 576px;
+}
+
+.tool-ui {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  div {
+    background-color: rgba(255, 255, 255, 0.4);
+    position: relative;
+    width: 61px;
+    height: 61px;
+    border-radius: 10px;
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    img {
+      width: 35px;
+      height: 35px;
+    }
+  }
+}
+
+.active {
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px, rgb(51, 51, 51) 0px 0px 0px 3px !important;
+  transform: scale(0.92);
+  transition-duration: 100ms;
+  transform-origin: center;
+}
+.floating-number {
+  position: absolute;
+  top: 5px;
+  left: 6px;
+  font-size: 10px;
+}

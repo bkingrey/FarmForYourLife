@@ -1,3 +1,8 @@
 <ng-container *ngIf="facade.gameData$ | async as gameData">
-  <app-game [gameData]="gameData" (keyChange)="keyChange($event)"></app-game>
+  <app-game
+    [gameData]="gameData"
+    (keyChange)="keyChange($event)"
+    (changeTool)="changeTool($event)"
+  ></app-game>
+  <app-game-ui [gameData]="gameData"></app-game-ui>
 </ng-container>
