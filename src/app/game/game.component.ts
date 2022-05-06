@@ -87,6 +87,7 @@ export class GameComponent implements AfterViewInit {
     width: -1,
     height: -1,
     state: 'none',
+    watered: false,
   };
   clickedFarmableArea = {
     position: {
@@ -113,6 +114,7 @@ export class GameComponent implements AfterViewInit {
     width: -1,
     height: -1,
     state: 'none',
+    watered: false,
   };
   canClick = true;
 
@@ -284,7 +286,7 @@ export class GameComponent implements AfterViewInit {
 
     if (this.framesDrawn > 10) {
       if (this.actionFrameIndex < frames - 1) {
-        if (this.actionFrameIndex === 5) {
+        if (this.actionFrameIndex === 3) {
           this.changeStateOfHoveredFarmable();
         }
         this.actionFrameIndex++;
@@ -329,6 +331,19 @@ export class GameComponent implements AfterViewInit {
   changeStateOfHoveredFarmable() {
     if (this.gameData.equippedTool === 'shovel') {
       this.farmAction('soil-0', 'soil-1', 'soil-2', 'soil-3');
+    }
+    if (this.gameData.equippedTool === 'water') {
+      if (
+        this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
+      ) {
+        this.farmableArea.filter(
+          (area) => area === this.clickedFarmableArea
+        )[0].watered = true;
+        this.farmableArea.filter(
+          (area) => area === this.clickedFarmableArea
+        )[0];
+        2;
+      }
     }
   }
 
@@ -436,6 +451,15 @@ export class GameComponent implements AfterViewInit {
         );
       } else {
         this.ctx.fillStyle = 'transparent';
+        this.ctx.fillRect(
+          area.position.x,
+          area.position.y,
+          area.width,
+          area.height
+        );
+      }
+      if (area.watered) {
+        this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
         this.ctx.fillRect(
           area.position.x,
           area.position.y,
