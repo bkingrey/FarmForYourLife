@@ -53,6 +53,16 @@ export class GameComponent implements AfterViewInit {
   spriteSheetWalkLeft = new Image();
   spriteSheetDigRight = new Image();
   spriteSheetDigLeft = new Image();
+  spriteSheetWaterRight = new Image();
+  spriteSheetWaterLeft = new Image();
+  spriteSheetHammerRight = new Image();
+  spriteSheetHammerLeft = new Image();
+  spriteSheetPickaxeRight = new Image();
+  spriteSheetPickaxeLeft = new Image();
+  spriteSheetMineRight = new Image();
+  spriteSheetMineLeft = new Image();
+  spriteSheetFishRight = new Image();
+  spriteSheetFishLeft = new Image();
   spriteSheetSoil = new Image();
   movables: Array<any> = [];
   animate: any;
@@ -194,7 +204,27 @@ export class GameComponent implements AfterViewInit {
       this.gameData.spriteAnimations['spriteSheetDigRight'].src;
     this.spriteSheetDigLeft.src =
       this.gameData.spriteAnimations['spriteSheetDigLeft'].src;
-    this.spriteSheetIdleRight.onload = () => {
+    this.spriteSheetWaterRight.src =
+      this.gameData.spriteAnimations['spriteSheetWaterRight'].src;
+    this.spriteSheetWaterLeft.src =
+      this.gameData.spriteAnimations['spriteSheetWaterLeft'].src;
+    this.spriteSheetHammerRight.src =
+      this.gameData.spriteAnimations['spriteSheetHammerRight'].src;
+    this.spriteSheetHammerLeft.src =
+      this.gameData.spriteAnimations['spriteSheetHammerLeft'].src;
+    this.spriteSheetPickaxeRight.src =
+      this.gameData.spriteAnimations['spriteSheetPickaxeRight'].src;
+    this.spriteSheetPickaxeLeft.src =
+      this.gameData.spriteAnimations['spriteSheetPickaxeLeft'].src;
+    this.spriteSheetMineRight.src =
+      this.gameData.spriteAnimations['spriteSheetMineRight'].src;
+    this.spriteSheetMineLeft.src =
+      this.gameData.spriteAnimations['spriteSheetMineLeft'].src;
+    this.spriteSheetFishRight.src =
+      this.gameData.spriteAnimations['spriteSheetFishRight'].src;
+    this.spriteSheetFishLeft.src =
+      this.gameData.spriteAnimations['spriteSheetFishLeft'].src;
+    this.spriteSheetFishRight.onload = () => {
       this.loadCrops();
     };
   }
@@ -297,38 +327,44 @@ export class GameComponent implements AfterViewInit {
   }
 
   changeStateOfHoveredFarmable() {
+    if (this.gameData.equippedTool === 'shovel') {
+      this.farmAction('soil-0', 'soil-1', 'soil-2', 'soil-3');
+    }
+  }
+
+  farmAction(state0, state1, state2, state3) {
     if (
       this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
         .state === undefined
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
-      )[0].state = 'soil-0';
+      )[0].state = state0;
     } else if (
       this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-0'
+        .state === state0
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
-      )[0].state = 'soil-1';
+      )[0].state = state1;
     } else if (
       this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-1'
+        .state === state1
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
-      )[0].state = 'soil-2';
+      )[0].state = state2;
     } else if (
       this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-2'
+        .state === state2
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
-      )[0].state = 'soil-3';
+      )[0].state = state3;
     } else {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
-      )[0].state = 'soil-3';
+      )[0].state = state3;
     }
   }
 
@@ -566,12 +602,56 @@ export class GameComponent implements AfterViewInit {
     } else {
       useRightAnims = false;
     }
-    this.drawCultivateAnimation(
-      useRightAnims ? this.spriteSheetDigRight : this.spriteSheetDigLeft,
-      useRightAnims
-        ? this.gameData.spriteAnimations['spriteSheetDigRight'].frames
-        : this.gameData.spriteAnimations['spriteSheetDigLeft'].frames
-    );
+    const spriteSheet = this.getCultivateSpriteSheet();
+
+    if (spriteSheet)
+      this.drawCultivateAnimation(
+        useRightAnims ? spriteSheet.right : spriteSheet.left,
+        useRightAnims
+          ? this.gameData.spriteAnimations[spriteSheet.rightKey].frames
+          : this.gameData.spriteAnimations[spriteSheet.leftKey].frames
+      );
+  }
+
+  getCultivateSpriteSheet() {
+    switch (this.gameData.equippedTool) {
+      case 'shovel':
+        return {
+          right: this.spriteSheetDigRight,
+          left: this.spriteSheetDigLeft,
+          rightKey: 'spriteSheetDigRight',
+          leftKey: 'spriteSheetDigLeft',
+        };
+      case 'water':
+        return {
+          right: this.spriteSheetWaterRight,
+          left: this.spriteSheetWaterLeft,
+          rightKey: 'spriteSheetWaterRight',
+          leftKey: 'spriteSheetWaterLeft',
+        };
+      case 'hammer':
+        return {
+          right: this.spriteSheetHammerRight,
+          left: this.spriteSheetHammerLeft,
+          rightKey: 'spriteSheetHammerRight',
+          leftKey: 'spriteSheetHammerLeft',
+        };
+      case 'pickaxe':
+        return {
+          right: this.spriteSheetPickaxeRight,
+          left: this.spriteSheetPickaxeLeft,
+          rightKey: 'spriteSheetMineRight',
+          leftKey: 'spriteSheetMineLeft',
+        };
+      case 'rod':
+        return {
+          right: this.spriteSheetFishRight,
+          left: this.spriteSheetFishLeft,
+          rightKey: 'spriteSheetFishRight',
+          leftKey: 'spriteSheetFishLeft',
+        };
+    }
+    return null;
   }
   movement() {
     let useRightAnims;

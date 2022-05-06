@@ -207,6 +207,46 @@ export const jsonData = {
       src: "assets/characters/sprite-sheet-dig-left.png",
       frames: 13,
     },
+    spriteSheetWaterRight: {
+      src: "assets/characters/sprite-water-right.png",
+      frames: 5,
+    },
+    spriteSheetWaterLeft: {
+      src: "assets/characters/sprite-water-left.png",
+      frames: 5,
+    },
+    spriteSheetHammerRight: {
+      src: "assets/characters/sprite-sheet-hammer-right.png",
+      frames: 23,
+    },
+    spriteSheetHammerLeft: {
+      src: "assets/characters/sprite-sheet-hammer-left.png",
+      frames: 23,
+    },
+    spriteSheetMineRight: {
+      src: "assets/characters/sprite-mine-right.png",
+      frames: 10,
+    },
+    spriteSheetMineLeft: {
+      src: "assets/characters/sprite-mine-left.png",
+      frames: 10,
+    },
+    spriteSheetFishRight: {
+      src: "assets/characters/sprite-fish-right.png",
+      frames: 41,
+    },
+    spriteSheetFishLeft: {
+      src: "assets/characters/sprite-fish-left.png",
+      frames: 41,
+    },
+    spriteSheetPickaxeRight: {
+      src: "assets/characters/sprite-mine-right.png",
+      frames: 5,
+    },
+    spriteSheetPickaxeLeft: {
+      src: "assets/characters/sprite-mine-left.png",
+      frames: 5,
+    },
     map: {
       src: "assets/maps/SunnyMap.png",
       frames: 1,
