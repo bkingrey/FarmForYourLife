@@ -1,24 +1,134 @@
 <div id="game-ui" [ngClass]="{ R1024x576: gameData.resolution.x === 1024 }">
   <div class="tool-ui">
     <div [ngClass]="{ active: gameData.equippedTool === 'shovel' }">
-      <span class="floating-number">1</span
+      <span class="floating-number">Q</span
       ><img src="../../assets/ui/shovel-big.png" />
     </div>
     <div [ngClass]="{ active: gameData.equippedTool === 'water' }">
-      <span class="floating-number">2</span
+      <span class="floating-number">E</span
       ><img src="../../assets/ui/water-big.png" />
     </div>
     <div [ngClass]="{ active: gameData.equippedTool === 'hammer' }">
-      <span class="floating-number">3</span
+      <span class="floating-number">R</span
       ><img src="../../assets/ui/hammer-big.png" />
     </div>
     <div [ngClass]="{ active: gameData.equippedTool === 'pickaxe' }">
-      <span class="floating-number">4</span
+      <span class="floating-number">T</span
       ><img src="../../assets/ui/pickaxe-big.png" />
     </div>
     <div [ngClass]="{ active: gameData.equippedTool === 'rod' }">
-      <span class="floating-number">5</span
+      <span class="floating-number">F</span
       ><img src="../../assets/ui/rod-big.png" />
+    </div>
+  </div>
+  <div class="seed-ui">
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'potato-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">1</span
+      ><img src="../../assets/ui/potato-ui.png" />
+    </div>
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'carrot-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">2</span
+      ><img src="../../assets/ui/carrot-ui.png" />
+    </div>
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'wheat-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">3</span
+      ><img src="../../assets/ui/wheat-ui.png" />
+    </div>
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'cabbage-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">4</span
+      ><img src="../../assets/ui/cabbage-ui.png" />
+    </div>
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'cauliflower-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">5</span
+      ><img src="../../assets/ui/cauliflower-ui.png" />
+    </div>
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'beet-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">6</span
+      ><img src="../../assets/ui/beets-ui.png" />
+    </div>
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'radish-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">7</span
+      ><img src="../../assets/ui/raddish-ui.png" />
+    </div>
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'kale-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">8</span
+      ><img src="../../assets/ui/kale-ui.png" />
+    </div>
+
+    <div
+      class="seed"
+      [ngClass]="{
+        active: gameData.equippedTool === 'sunflower-seeds',
+        opened: allSeeds(),
+        closed: !allSeeds()
+      }"
+    >
+      <span class="floating-number">9</span
+      ><img src="../../assets/ui/sunflower-ui.png" />
+    </div>
+
+    <div
+      class="basket"
+      [ngClass]="{ active: gameData.equippedTool === 'basket' }"
+    >
+      <span class="floating-number">B</span>
+      <img src="../../assets/ui/seed-basket.png" />
     </div>
   </div>
 </div>

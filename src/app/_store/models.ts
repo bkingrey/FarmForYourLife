@@ -37,6 +37,15 @@ export interface SpriteMetrics {
     y: number;
   };
 }
+export interface Pickupable {
+  position: {
+    x: number;
+    y: number;
+  };
+  width?: number;
+  height?: number;
+  plant: string;
+}
 export interface KeyWASD {
   w: {
     pressed: boolean;

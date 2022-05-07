@@ -247,6 +247,14 @@ export const jsonData = {
       src: "assets/characters/sprite-mine-left.png",
       frames: 5,
     },
+    spriteSheetPlantRight: {
+      src: "assets/characters/sprite-plant-right.png",
+      frames: 8,
+    },
+    spriteSheetPlantLeft: {
+      src: "assets/characters/sprite-plant-left.png",
+      frames: 8,
+    },
     map: {
       src: "assets/maps/SunnyMap.png",
       frames: 1,
@@ -257,7 +265,70 @@ export const jsonData = {
     },
     spriteSheetSoil: {
       src: "assets/crops/soilsheet.png",
-      framse: 4,
+      frames: 4,
+    },
+    spriteSheetBeets: {
+      src: "assets/crops/beetsheet.png",
+      frames: 5,
+    },
+    spriteSheetCabbage: {
+      src: "assets/crops/cabbagesheet.png",
+      frames: 5,
+    },
+    spriteSheetCarrot: {
+      src: "assets/crops/carrotsheet.png",
+      frames: 5,
+    },
+    spriteSheetCauliflower: {
+      src: "assets/crops/cauliflowersheet.png",
+      frames: 5,
+    },
+    spriteSheetKale: {
+      src: "assets/crops/kalesheet.png",
+      frames: 5,
+    },
+    spriteSheetPotato: {
+      src: "assets/crops/potatosheet.png",
+      frames: 5,
+    },
+    spriteSheetRadish: {
+      src: "assets/crops/radishsheet.png",
+      frames: 5,
+    },
+    spriteSheetSunflower: {
+      src: "assets/crops/sunflowersheet.png",
+      frames: 5,
+    },
+    spriteSheetWheat: {
+      src: "assets/crops/wheatsheet.png",
+      frames: 5,
+    },
+    spriteReadyBeets: {
+      src: "assets/pickable/beets-ready-sheet.png",
+    },
+    spriteReadyCabbage: {
+      src: "assets/pickable/cabbage-ready-sheet.png",
+    },
+    spriteReadyCarrot: {
+      src: "assets/pickable/carrot-ready-sheet.png",
+    },
+    spriteReadyCauliflower: {
+      src: "assets/pickable/cauliflower-ready-sheet.png",
+    },
+    spriteReadyKale: {
+      src: "assets/pickable/kale-ready-sheet.png",
+    },
+    spriteReadyPotato: {
+      src: "assets/pickable/potato-ready-sheet.png",
+    },
+    spriteReadyRadish: {
+      src: "assets/pickable/radish-ready-sheet.png",
+    },
+    spriteReadySunflower: {
+      src: "assets/pickable/sunflower-ready-sheet.png",
+    },
+    spriteReadyWheat: {
+      src: "assets/pickable/wheat-ready-sheet.png",
     },
   },
   player: {
