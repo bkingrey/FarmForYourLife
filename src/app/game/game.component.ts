@@ -215,11 +215,11 @@ export class GameComponent implements AfterViewInit {
             (pickupable) => pickupable !== removableItem
           );
         }
-        if (this.droppables.length) {
-          this.droppables.forEach((droppable, i) => {
-            this.drawDroppable(droppable, i);
-          });
-        }
+        // if (this.droppables.length) {
+        //   this.droppables.forEach((droppable, i) => {
+        //     this.drawDroppable(droppable, i);
+        //   });
+        // }
         this.ctx.drawImage(
           this.foregroundMap,
           this.mapImage.position.x,
@@ -234,7 +234,12 @@ export class GameComponent implements AfterViewInit {
     if (this.gameData.isCarrying) {
       return false;
     }
-    if (this.player.center && item.width && item.height) {
+    if (
+      this.player.center &&
+      item.width &&
+      item.height &&
+      !this.gameData.isCarrying
+    ) {
       if (
         this.player.center.x > item.position.x &&
         this.player.center.x < item.position.x + item.width &&
@@ -242,6 +247,7 @@ export class GameComponent implements AfterViewInit {
         this.player.center.y < item.position.y + item.height
       ) {
         this.changeTool.emit(item.plant);
+        console.log('emitting');
         return true;
       }
     }
@@ -441,31 +447,31 @@ export class GameComponent implements AfterViewInit {
     }
   }
 
-  drawDroppableAnimation(item, frames: number, index: number) {
-    if (this.droppableFramesDrawn[index] > 8) {
-      if (this.droppableFrameIndex[index] < frames - 1) {
-        this.droppableFrameIndex[index]++;
-      } else {
-        this.droppableFrameIndex[index] = 0;
-      }
-      this.droppableFramesDrawn[index] = 0;
-    } else {
-      this.droppableFramesDrawn[index]++;
-    }
-    if (this.canvas && this.ctx) {
-      this.ctx.drawImage(
-        this.spriteReadyPotato,
-        item.width * this.droppableFrameIndex[index],
-        0,
-        item.width,
-        item.height,
-        item.position.x + 7,
-        item.position.y + 7,
-        50,
-        50
-      );
-    }
-  }
+  // drawDroppableAnimation(item, frames: number, index: number) {
+  //   if (this.droppableFramesDrawn[index] > 8) {
+  //     if (this.droppableFrameIndex[index] < frames - 1) {
+  //       this.droppableFrameIndex[index]++;
+  //     } else {
+  //       this.droppableFrameIndex[index] = 0;
+  //     }
+  //     this.droppableFramesDrawn[index] = 0;
+  //   } else {
+  //     this.droppableFramesDrawn[index]++;
+  //   }
+  //   if (this.canvas && this.ctx) {
+  //     this.ctx.drawImage(
+  //       this.spriteReadyPotato,
+  //       item.width * this.droppableFrameIndex[index],
+  //       0,
+  //       item.width,
+  //       item.height,
+  //       item.position.x + 7,
+  //       item.position.y + 7,
+  //       50,
+  //       50
+  //     );
+  //   }
+  // }
 
   drawSpriteAnimation(spriteSheet: HTMLImageElement, frames: number) {
     if (this.framesDrawn > 15) {
@@ -620,18 +626,19 @@ export class GameComponent implements AfterViewInit {
         area.state = 'potato-4';
       } else if (area.state === 'potato-4') {
         area.state = 'soil-1';
-        this.createPickupablePlantAtArea('potato', area.position);
+        this.createPickupablePlantAtArea('potato', area.position, false);
       }
     }, 1000);
   }
 
-  createPickupablePlantAtArea(plant, position) {
+  createPickupablePlantAtArea(plant, position, droppedFromPlayer) {
     this.pickupables.push({
       plant: plant,
       position: position,
+      dropped: droppedFromPlayer,
     });
-    this.pickupableFramesDrawn[this.droppables.length - 1] = 0;
-    this.pickupableFrameIndex[this.droppables.length - 1] = 0;
+    this.pickupableFramesDrawn[this.pickupables.length - 1] = 0;
+    this.pickupableFrameIndex[this.pickupables.length - 1] = 0;
   }
   isAPlantSeed() {
     return (
@@ -818,9 +825,9 @@ export class GameComponent implements AfterViewInit {
     }
   }
 
-  drawDroppable(item, index) {
-    this.drawDroppableAnimation(item, 16, index);
-  }
+  // drawDroppable(item, index) {
+  //   this.drawDroppableAnimation(item, 16, index);
+  // }
 
   drawFarmable(area) {
     let cropFrameSize = {
@@ -1730,8 +1737,10 @@ export class GameComponent implements AfterViewInit {
         this.movables.forEach((element) => {
           element.position.y += this.gameData.velocity;
         });
-        this.droppables.forEach((element) => {
-          element.position.y += this.gameData.velocity;
+        this.pickupables.forEach((element) => {
+          if (element.dropped) {
+            element.position.y += this.gameData.velocity;
+          }
         });
       }
     }
@@ -1757,8 +1766,10 @@ export class GameComponent implements AfterViewInit {
         this.movables.forEach((element) => {
           element.position.y -= this.gameData.velocity;
         });
-        this.droppables.forEach((element) => {
-          element.position.y -= this.gameData.velocity;
+        this.pickupables.forEach((element) => {
+          if (element.dropped) {
+            element.position.y -= this.gameData.velocity;
+          }
         });
       }
     }
@@ -1784,8 +1795,10 @@ export class GameComponent implements AfterViewInit {
         this.movables.forEach((element) => {
           element.position.x -= this.gameData.velocity;
         });
-        this.droppables.forEach((element) => {
-          element.position.x -= this.gameData.velocity;
+        this.pickupables.forEach((element) => {
+          if (element.dropped) {
+            element.position.x -= this.gameData.velocity;
+          }
         });
       }
     }
@@ -1811,8 +1824,10 @@ export class GameComponent implements AfterViewInit {
         this.movables.forEach((element) => {
           element.position.x += this.gameData.velocity;
         });
-        this.droppables.forEach((element) => {
-          element.position.x += this.gameData.velocity;
+        this.pickupables.forEach((element) => {
+          if (element.dropped) {
+            element.position.x += this.gameData.velocity;
+          }
         });
       }
     }
@@ -2075,7 +2090,6 @@ export class GameComponent implements AfterViewInit {
   }
   doActionOnMouse(evt) {
     if (this.gameData.isCarrying) {
-      //DROP CARRIED ITEM
       this.dropCarriedItem();
     } else if (
       this.player.center &&
@@ -2142,9 +2156,13 @@ export class GameComponent implements AfterViewInit {
         plant: this.gameData.equippedTool,
       };
       if (this.gameData.equippedTool === 'potato') {
-        this.droppables.push(carriedItem);
-        this.droppableFramesDrawn[this.droppables.length - 1] = 0;
-        this.droppableFrameIndex[this.droppables.length - 1] = 0;
+        console.log('DROPPING THE POTATO');
+        this.createPickupablePlantAtArea(
+          carriedItem.plant,
+          carriedItem.position,
+          true
+        );
+        this.changeTool.emit('shovel');
       }
     }
   }

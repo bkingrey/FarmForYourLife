@@ -151,6 +151,7 @@ export const gameReducer = createReducer(
       carrying = true;
     }
 
+    console.log(carrying);
     return {
       ...state,
       equippedTool: payload,

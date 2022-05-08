@@ -58,6 +58,7 @@ export interface Pickupable {
   height?: number;
   center?: number;
   plant: string;
+  dropped?: boolean;
 }
 export interface KeyWASD {
   w: {
