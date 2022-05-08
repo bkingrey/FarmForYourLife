@@ -12,6 +12,27 @@
   height: 576px;
 }
 
+.carrying-ui {
+  position: absolute;
+  bottom: 0;
+  margin: 10px;
+  div {
+    display: flex;
+    align-items: center;
+    img {
+      max-width: 32px;
+    }
+    span {
+      margin-left: 5px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      text-shadow: 2px 2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
+        -2px -2px 0 #000, 2px 0px 0 #000, 0px 2px 0 #000, -2px 0px 0 #000,
+        0px -2px 0 #000;
+    }
+  }
+}
+
 .tool-ui {
   position: absolute;
   bottom: 0;
