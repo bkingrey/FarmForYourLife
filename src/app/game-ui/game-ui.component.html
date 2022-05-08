@@ -32,88 +32,120 @@
       [ngClass]="{
         active: gameData.equippedTool === 'potato-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['potato'].count === 0
       }"
     >
       <span class="floating-number">1</span
       ><img src="../../assets/ui/potato-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["potato"].count }}
+      </div>
     </div>
     <div
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'carrot-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['carrot'].count === 0
       }"
     >
       <span class="floating-number">2</span
       ><img src="../../assets/ui/carrot-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["carrot"].count }}
+      </div>
     </div>
     <div
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'wheat-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['wheat'].count === 0
       }"
     >
       <span class="floating-number">3</span
       ><img src="../../assets/ui/wheat-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["wheat"].count }}
+      </div>
     </div>
     <div
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'cabbage-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['cabbage'].count === 0
       }"
     >
       <span class="floating-number">4</span
       ><img src="../../assets/ui/cabbage-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["cabbage"].count }}
+      </div>
     </div>
     <div
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'cauliflower-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['cauliflower'].count === 0
       }"
     >
       <span class="floating-number">5</span
       ><img src="../../assets/ui/cauliflower-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["cauliflower"].count }}
+      </div>
     </div>
     <div
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'beet-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['beets'].count === 0
       }"
     >
       <span class="floating-number">6</span
       ><img src="../../assets/ui/beets-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["beets"].count }}
+      </div>
     </div>
     <div
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'radish-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['radish'].count === 0
       }"
     >
       <span class="floating-number">7</span
       ><img src="../../assets/ui/raddish-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["radish"].count }}
+      </div>
     </div>
     <div
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'kale-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['kale'].count === 0
       }"
     >
       <span class="floating-number">8</span
       ><img src="../../assets/ui/kale-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["kale"].count }}
+      </div>
     </div>
 
     <div
@@ -121,11 +153,15 @@
       [ngClass]="{
         active: gameData.equippedTool === 'sunflower-seeds',
         opened: allSeeds(),
-        closed: !allSeeds()
+        closed: !allSeeds(),
+        grayout: gameData.seedsOwned['sunflower'].count === 0
       }"
     >
       <span class="floating-number">9</span
       ><img src="../../assets/ui/sunflower-ui.png" />
+      <div class="seed-count">
+        {{ gameData.seedsOwned["sunflower"].count }}
+      </div>
     </div>
 
     <div
@@ -134,6 +170,19 @@
     >
       <span class="floating-number">B</span>
       <img src="../../assets/ui/seed-basket.png" />
+      <div class="total-seed-count">
+        {{
+          gameData.seedsOwned["sunflower"].count +
+            gameData.seedsOwned["kale"].count +
+            gameData.seedsOwned["radish"].count +
+            gameData.seedsOwned["beets"].count +
+            gameData.seedsOwned["cauliflower"].count +
+            gameData.seedsOwned["cabbage"].count +
+            gameData.seedsOwned["wheat"].count +
+            gameData.seedsOwned["carrot"].count +
+            gameData.seedsOwned["potato"].count
+        }}
+      </div>
     </div>
   </div>
 </div>

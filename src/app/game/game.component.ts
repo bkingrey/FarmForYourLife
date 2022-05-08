@@ -22,6 +22,7 @@ export class GameComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() keyChange = new EventEmitter();
   @Output() changeTool = new EventEmitter();
+  @Output() reduceSeedCount = new EventEmitter();
   canvasId: string = 'game-canvas';
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
@@ -545,21 +546,28 @@ export class GameComponent implements AfterViewInit {
       if (
         this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
       ) {
-        this.farmableArea.filter(
-          (area) => area === this.clickedFarmableArea
-        )[0].watered = true;
-        this.startWaterTimer(
+        if (
+          !this.farmableArea.filter(
+            (area) => area === this.clickedFarmableArea
+          )[0].watered
+        ) {
           this.farmableArea.filter(
             (area) => area === this.clickedFarmableArea
-          )[0]
-        );
+          )[0].watered = true;
+          this.startWaterTimer(
+            this.farmableArea.filter(
+              (area) => area === this.clickedFarmableArea
+            )[0]
+          );
+        }
+
         this.farmableArea.filter(
           (area) => area === this.clickedFarmableArea
         )[0];
       }
     }
     if (this.isAPlantSeed()) {
-      this.plantSeed('beet-seed');
+      this.plantSeed();
     }
   }
 
@@ -601,116 +609,155 @@ export class GameComponent implements AfterViewInit {
     );
   }
 
-  plantSeed(seed) {
+  plantSeed() {
+    const clickedFarm = this.farmableArea.filter(
+      (area) => area === this.clickedFarmableArea
+    )[0];
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'potato-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'potato-0';
+      const payload = {
+        name: this.gameData.seedsOwned['potato'].name,
+        count: this.gameData.seedsOwned['potato'].count,
+        keyname: 'potato',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'carrot-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'carrot-0';
+      const payload = {
+        name: this.gameData.seedsOwned['carrot'].name,
+        count: this.gameData.seedsOwned['carrot'].count,
+        keyname: 'carrot',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'wheat-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'wheat-0';
+      const payload = {
+        name: this.gameData.seedsOwned['wheat'].name,
+        count: this.gameData.seedsOwned['wheat'].count,
+        keyname: 'wheat',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'cabbage-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'cabbage-0';
+      const payload = {
+        name: this.gameData.seedsOwned['cabbage'].name,
+        count: this.gameData.seedsOwned['cabbage'].count,
+        keyname: 'wheat',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'cauliflower-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'cauliflower-0';
+      const payload = {
+        name: this.gameData.seedsOwned['cauliflower'].name,
+        count: this.gameData.seedsOwned['cauliflower'].count,
+        keyname: 'wheat',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'beet-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'beets-0';
+      const payload = {
+        name: this.gameData.seedsOwned['beets'].name,
+        count: this.gameData.seedsOwned['beets'].count,
+        keyname: 'beets',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'radish-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'radish-0';
+      const payload = {
+        name: this.gameData.seedsOwned['radish'].name,
+        count: this.gameData.seedsOwned['radish'].count,
+        keyname: 'radish',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'kale-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'kale-0';
+      const payload = {
+        name: this.gameData.seedsOwned['kale'].name,
+        count: this.gameData.seedsOwned['kale'].count,
+        keyname: 'kale',
+      };
+      this.reduceSeedCount.emit(payload);
     }
     if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === 'soil-3' &&
+      clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'sunflower-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'sunflower-0';
+      const payload = {
+        name: this.gameData.seedsOwned['sunflower'].name,
+        count: this.gameData.seedsOwned['sunflower'].count,
+        keyname: 'sunflower',
+      };
+      this.reduceSeedCount.emit(payload);
     }
   }
 
   farmAction(state0, state1, state2, state3) {
-    if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === undefined
-    ) {
+    const clickedFarm = this.farmableArea.filter(
+      (area) => area === this.clickedFarmableArea
+    )[0];
+    if (clickedFarm.state === undefined) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = state0;
-    } else if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === state0
-    ) {
+    } else if (clickedFarm.state === state0) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = state1;
-    } else if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === state1
-    ) {
+    } else if (clickedFarm.state === state1) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = state2;
-    } else if (
-      this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
-        .state === state2
-    ) {
+    } else if (clickedFarm.state === state2) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = state3;
@@ -799,10 +846,106 @@ export class GameComponent implements AfterViewInit {
           64,
           64
         );
+      } else if (area.state === 'beets-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'beets-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'beets-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'beets-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
       } else if (area.state === 'cabbage-0') {
         this.ctx.drawImage(
           this.spriteSheetCabbage,
           cropFrameSize.width * 0,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'cabbage-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'cabbage-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'cabbage-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'cabbage-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
           cropFrameSize.height,
@@ -823,6 +966,54 @@ export class GameComponent implements AfterViewInit {
           64,
           64
         );
+      } else if (area.state === 'carrot-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'carrot-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'carrot-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'carrot-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
       } else if (area.state === 'cauliflower-0') {
         this.ctx.drawImage(
           this.spriteSheetCauliflower,
@@ -835,10 +1026,106 @@ export class GameComponent implements AfterViewInit {
           64,
           64
         );
+      } else if (area.state === 'cauliflower-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'cauliflower-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'cauliflower-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'cauliflower-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
       } else if (area.state === 'kale-0') {
         this.ctx.drawImage(
           this.spriteSheetKale,
           cropFrameSize.width * 0,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'kale-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'kale-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'kale-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'kale-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
           cropFrameSize.height,
@@ -919,6 +1206,54 @@ export class GameComponent implements AfterViewInit {
           64,
           64
         );
+      } else if (area.state === 'radish-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'radish-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'radish-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'radish-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
       } else if (area.state === 'sunflower-0') {
         this.ctx.drawImage(
           this.spriteSheetSunflower,
@@ -931,10 +1266,106 @@ export class GameComponent implements AfterViewInit {
           64,
           64
         );
+      } else if (area.state === 'sunflower-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'sunflower-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'sunflower-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'sunflower-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
       } else if (area.state === 'wheat-0') {
         this.ctx.drawImage(
           this.spriteSheetWheat,
           cropFrameSize.width * 0,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'wheat-1') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 1,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'wheat-2') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 2,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'wheat-3') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 3,
+          0,
+          cropFrameSize.width,
+          cropFrameSize.height,
+          area.position.x,
+          area.position.y,
+          64,
+          64
+        );
+      } else if (area.state === 'wheat-4') {
+        this.ctx.drawImage(
+          this.spriteSheetPotato,
+          cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
           cropFrameSize.height,
@@ -1017,66 +1448,77 @@ export class GameComponent implements AfterViewInit {
   }
 
   keyDownEvent(e: KeyboardEvent) {
-    switch (e.key.toLowerCase()) {
-      case 'q':
-        this.changeTool.emit('shovel');
-        break;
-      case 'e':
-        this.changeTool.emit('water');
-        break;
-      case 'r':
-        this.changeTool.emit('potato');
-        break;
-      case 't':
-        this.changeTool.emit('pickaxe');
-        break;
-      case 'f':
-        this.changeTool.emit('rod');
-        break;
-      case 'b':
-        this.changeTool.emit('basket');
-        break;
-      case 'w':
-        this.moveUp(true);
-        break;
-      case 'a':
-        this.moveLeft(true);
-        break;
-      case 's':
-        this.moveDown(true);
-        break;
-      case 'd':
-        this.moveRight(true);
-        break;
-      case '1':
-        this.changeTool.emit('potato-seeds');
-        break;
-      case '2':
-        this.changeTool.emit('carrot-seeds');
-        break;
-      case '3':
-        this.changeTool.emit('wheat-seeds');
-        break;
-      case '4':
-        this.changeTool.emit('cabbage-seeds');
-        break;
-      case '5':
-        this.changeTool.emit('cauliflower-seeds');
-        break;
-      case '6':
-        this.changeTool.emit('beet-seeds');
-        break;
-      case '7':
-        this.changeTool.emit('radish-seeds');
-        break;
-      case '8':
-        this.changeTool.emit('kale-seeds');
-        break;
-      case '9':
-        this.changeTool.emit('sunflower-seeds');
-        break;
-      default:
-        break;
+    if (this.canClick) {
+      switch (e.key.toLowerCase()) {
+        case 'q':
+          this.changeTool.emit('shovel');
+          break;
+        case 'e':
+          this.changeTool.emit('water');
+          break;
+        case 'r':
+          this.changeTool.emit('potato');
+          break;
+        case 't':
+          this.changeTool.emit('pickaxe');
+          break;
+        case 'f':
+          this.changeTool.emit('rod');
+          break;
+        case 'b':
+          this.changeTool.emit('basket');
+          break;
+        case 'w':
+          this.moveUp(true);
+          break;
+        case 'a':
+          this.moveLeft(true);
+          break;
+        case 's':
+          this.moveDown(true);
+          break;
+        case 'd':
+          this.moveRight(true);
+          break;
+        case '1':
+          if (this.gameData.seedsOwned['potato'].count > 0)
+            this.changeTool.emit('potato-seeds');
+          break;
+        case '2':
+          if (this.gameData.seedsOwned['carrot'].count > 0)
+            this.changeTool.emit('carrot-seeds');
+          break;
+        case '3':
+          if (this.gameData.seedsOwned['wheat'].count > 0)
+            this.changeTool.emit('wheat-seeds');
+          break;
+        case '4':
+          if (this.gameData.seedsOwned['cabbage'].count > 0)
+            this.changeTool.emit('cabbage-seeds');
+          break;
+        case '5':
+          if (this.gameData.seedsOwned['cauliflower'].count > 0)
+            this.changeTool.emit('cauliflower-seeds');
+          break;
+        case '6':
+          if (this.gameData.seedsOwned['beets'].count > 0)
+            this.changeTool.emit('beet-seeds');
+          break;
+        case '7':
+          if (this.gameData.seedsOwned['radish'].count > 0)
+            this.changeTool.emit('radish-seeds');
+          break;
+        case '8':
+          if (this.gameData.seedsOwned['kale'].count > 0)
+            this.changeTool.emit('kale-seeds');
+          break;
+        case '9':
+          if (this.gameData.seedsOwned['sunflower'].count > 0)
+            this.changeTool.emit('sunflower-seeds');
+          break;
+        default:
+          break;
+      }
     }
   }
   keyUpEvent(e: KeyboardEvent) {
@@ -1579,7 +2021,7 @@ export class GameComponent implements AfterViewInit {
   }
   doActionOnMouse(evt) {
     if (this.gameData.isCarrying) {
-      //DROP CARRIED ITM
+      //DROP CARRIED ITEM
     } else if (
       this.player.center &&
       this.mayFarm &&

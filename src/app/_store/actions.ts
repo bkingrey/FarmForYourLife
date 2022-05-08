@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { GameState, KeyWASD, SpriteMetrics } from './models';
+import { GameState, KeyWASD, SpriteMetrics, SeedsOwned } from './models';
 
 // CONFIG ACTIONS
 export const getGameData = createAction('[GameData] Get Game Data');
@@ -22,4 +22,8 @@ export const ChangeKeyEvent = createAction(
 export const ChangeTool = createAction(
   '[GameData] Change Tool Event',
   props<{ payload: string }>()
+);
+export const ReduceSeedCount = createAction(
+  '[GameData] Reduce Seed Count',
+  props<{ payload: SeedsOwned }>()
 );

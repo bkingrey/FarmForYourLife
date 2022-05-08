@@ -1,4 +1,9 @@
-import { ChangeKeyEvent, ChangeTool, getGameData } from './_store/actions';
+import {
+  ChangeKeyEvent,
+  ChangeTool,
+  getGameData,
+  ReduceSeedCount,
+} from './_store/actions';
 import { Component, OnInit } from '@angular/core';
 import { AppFacade } from './app.facade';
 
@@ -21,5 +26,9 @@ export class AppComponent implements OnInit {
 
   changeTool(event) {
     this.facade.dispatch(ChangeTool({ payload: event }));
+  }
+
+  reduceSeedCount(event) {
+    this.facade.dispatch(ReduceSeedCount({ payload: event }));
   }
 }

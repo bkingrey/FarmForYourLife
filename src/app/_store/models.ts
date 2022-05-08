@@ -16,6 +16,16 @@ export interface GameState {
   velocity: number;
   keys: KeyWASD;
   equippedTool: string;
+  seedsOwned: SeedKey;
+}
+export interface SeedKey {
+  [key: string]: SeedsOwned;
+}
+
+export interface SeedsOwned {
+  name: string;
+  count: number;
+  keyname?: string;
 }
 
 export interface SpriteAnimation {

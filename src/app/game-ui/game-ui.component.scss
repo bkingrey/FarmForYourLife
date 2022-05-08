@@ -38,7 +38,7 @@
   bottom: 0;
   display: flex;
   div {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.7);
     position: relative;
     width: 61px;
     height: 61px;
@@ -60,7 +60,7 @@
   right: 0;
   display: block;
   div {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.7);
     position: relative;
     width: 38px;
     height: 38px;
@@ -152,6 +152,26 @@
       height: 35px;
     }
   }
+  .seed-count {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    font-size: 7px;
+    top: 15px;
+    left: 19px;
+    background-color: green;
+    color: white;
+  }
+  .total-seed-count {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    top: 38px;
+    left: 38px;
+    background-color: green;
+    color: white;
+  }
 }
 
 .active {
@@ -165,4 +185,11 @@
   top: 5px;
   left: 6px;
   font-size: 10px;
+}
+
+.grayout {
+  -webkit-filter: grayscale(1);
+  -moz-filter: grayscale(1);
+  -ms-filter: grayscale(1);
+  -o-filter: grayscale(1);
 }

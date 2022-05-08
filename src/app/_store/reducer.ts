@@ -1,6 +1,6 @@
 import * as GameActions from './actions';
 import { createReducer, on } from '@ngrx/store';
-import { GameState, KeyWASD } from './models';
+import { GameState, KeyWASD, SeedKey } from './models';
 
 export const intializeState = (): GameState => {
   return {
@@ -9,6 +9,44 @@ export const intializeState = (): GameState => {
     resolution: {
       x: 1024,
       y: 576,
+    },
+    seedsOwned: {
+      beets: {
+        name: 'beets-seeds',
+        count: 0,
+      },
+      cabbage: {
+        name: 'cabbage-seeds',
+        count: 0,
+      },
+      carrot: {
+        name: 'carrot-seeds',
+        count: 0,
+      },
+      cauliflower: {
+        name: 'cauliflower-seeds',
+        count: 0,
+      },
+      kale: {
+        name: 'kale-seeds',
+        count: 0,
+      },
+      potato: {
+        name: 'potato-seeds',
+        count: 4,
+      },
+      radish: {
+        name: 'radish-seeds',
+        count: 0,
+      },
+      sunflower: {
+        name: 'sunflower-seeds',
+        count: 0,
+      },
+      wheat: {
+        name: 'wheat-seeds',
+        count: 0,
+      },
     },
     collisions: [],
     farmableAreas: [],
@@ -118,5 +156,23 @@ export const gameReducer = createReducer(
       equippedTool: payload,
       isCarrying: carrying,
     };
+  }),
+  on(GameActions.ReduceSeedCount, (state, { payload }) => {
+    if (payload.keyname) {
+      return {
+        ...state,
+        seedsOwned: {
+          ...state.seedsOwned,
+          potato: {
+            ...state.seedsOwned[payload.keyname],
+            count: state.seedsOwned[payload.keyname].count - 1,
+          },
+        },
+      };
+    } else {
+      return {
+        ...state,
+      };
+    }
   })
 );
