@@ -12,6 +12,7 @@ export interface GameState {
   spriteAnimations: SpriteAnimation;
   mapImage: SpriteMetrics;
   player: SpriteMetrics;
+  isCarrying: boolean;
   velocity: number;
   keys: KeyWASD;
   equippedTool: string;
@@ -36,6 +37,7 @@ export interface SpriteMetrics {
     x: number;
     y: number;
   };
+  holding?: string;
 }
 export interface Pickupable {
   position: {
@@ -44,6 +46,7 @@ export interface Pickupable {
   };
   width?: number;
   height?: number;
+  center?: number;
   plant: string;
 }
 export interface KeyWASD {

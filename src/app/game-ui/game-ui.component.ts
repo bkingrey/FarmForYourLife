@@ -22,7 +22,6 @@ export class GameUiComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     if (this.gameUI) {
-      console.log(this.gameUI);
       this.gameUI.nativeElement.clientWidth = this.gameData.resolution.x;
       this.gameUI.nativeElement.clientHeight = this.gameData.resolution.y;
     }

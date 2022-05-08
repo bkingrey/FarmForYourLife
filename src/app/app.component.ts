@@ -16,12 +16,10 @@ export class AppComponent implements OnInit {
   }
 
   keyChange(event) {
-    console.log('key change');
     this.facade.dispatch(ChangeKeyEvent({ payload: event }));
   }
 
   changeTool(event) {
-    console.log('tool change');
     this.facade.dispatch(ChangeTool({ payload: event }));
   }
 }

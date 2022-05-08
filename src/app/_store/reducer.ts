@@ -14,6 +14,7 @@ export const intializeState = (): GameState => {
     farmableAreas: [],
     collisionMap: [],
     farmableAreaMap: [],
+    isCarrying: false,
     equippedTool: 'shovel',
     spriteAnimations: {
       playerIdleLeftSrc: {
@@ -67,7 +68,6 @@ export const gameReducer = createReducer(
     for (let i = 0; i < payload.farmableAreas.length; i += 36) {
       newFarmableArea.push(payload.farmableAreas.slice(i, 36 + i));
     }
-    console.log(newFarmableArea);
     return {
       ...state,
       loading: false,
@@ -98,9 +98,25 @@ export const gameReducer = createReducer(
     };
   }),
   on(GameActions.ChangeTool, (state, { payload }) => {
+    let carrying = false;
+    if (
+      payload === 'beets' ||
+      payload === 'cabbage' ||
+      payload === 'carrot' ||
+      payload === 'cauliflower' ||
+      payload === 'kale' ||
+      payload === 'potato' ||
+      payload === 'radish' ||
+      payload === 'sunflower' ||
+      payload === 'wheat'
+    ) {
+      carrying = true;
+    }
+
     return {
       ...state,
       equippedTool: payload,
+      isCarrying: carrying,
     };
   })
 );

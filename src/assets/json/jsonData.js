@@ -305,30 +305,111 @@ export const jsonData = {
     },
     spriteReadyBeets: {
       src: "assets/pickable/beets-ready-sheet.png",
+      frames: 16,
     },
     spriteReadyCabbage: {
       src: "assets/pickable/cabbage-ready-sheet.png",
+      frames: 16,
     },
     spriteReadyCarrot: {
       src: "assets/pickable/carrot-ready-sheet.png",
+      frames: 16,
     },
     spriteReadyCauliflower: {
       src: "assets/pickable/cauliflower-ready-sheet.png",
+      frames: 16,
     },
     spriteReadyKale: {
       src: "assets/pickable/kale-ready-sheet.png",
+      frames: 16,
     },
     spriteReadyPotato: {
       src: "assets/pickable/potato-ready-sheet.png",
+      frames: 16,
     },
     spriteReadyRadish: {
       src: "assets/pickable/radish-ready-sheet.png",
+      frames: 16,
     },
     spriteReadySunflower: {
       src: "assets/pickable/sunflower-ready-sheet.png",
+      frames: 16,
     },
     spriteReadyWheat: {
       src: "assets/pickable/wheat-ready-sheet.png",
+      frames: 16,
+    },
+    spriteCarryBeetsLeft: {
+      src: "assets/carrying/carry-beets-left.png",
+      frames: 8,
+    },
+    spriteCarryBeetsRight: {
+      src: "assets/carrying/carry-beets-right.png",
+      frames: 8,
+    },
+    spriteCarryCabbageLeft: {
+      src: "assets/carrying/carry-cabbage-left.png",
+      frames: 8,
+    },
+    spriteCarryCabbageRight: {
+      src: "assets/carrying/carry-cabbage-right.png",
+      frames: 8,
+    },
+    spriteCarryCarrotLeft: {
+      src: "assets/carrying/carry-carrot-left.png",
+      frames: 8,
+    },
+    spriteCarryCarrotRight: {
+      src: "assets/carrying/carry-carrot-right.png",
+      frames: 8,
+    },
+    spriteCarryCauliflowerLeft: {
+      src: "assets/carrying/carry-cauliflower-left.png",
+      frames: 8,
+    },
+    spriteCarryCauliflowerRight: {
+      src: "assets/carrying/carry-cauliflower-right.png",
+      frames: 8,
+    },
+    spriteCarryKaleLeft: {
+      src: "assets/carrying/carry-kale-left.png",
+      frames: 8,
+    },
+    spriteCarryKaleRight: {
+      src: "assets/carrying/carry-kale-right.png",
+      frames: 8,
+    },
+    spriteCarryPotatoLeft: {
+      src: "assets/carrying/carry-potato-left.png",
+      frames: 8,
+    },
+    spriteCarryPotatoRight: {
+      src: "assets/carrying/carry-potato-right.png",
+      frames: 8,
+    },
+    spriteCarryRadishLeft: {
+      src: "assets/carrying/carry-radish-left.png",
+      frames: 8,
+    },
+    spriteCarryRadishRight: {
+      src: "assets/carrying/carry-radish-right.png",
+      frames: 8,
+    },
+    spriteCarrySunflowerLeft: {
+      src: "assets/carrying/carry-sunflower-left.png",
+      frames: 8,
+    },
+    spriteCarrySunflowerRight: {
+      src: "assets/carrying/carry-sunflower-right.png",
+      frames: 8,
+    },
+    spriteCarryWheatLeft: {
+      src: "assets/carrying/carry-wheat-left.png",
+      frames: 8,
+    },
+    spriteCarryWheatRight: {
+      src: "assets/carrying/carry-wheat-right.png",
+      frames: 8,
     },
   },
   player: {

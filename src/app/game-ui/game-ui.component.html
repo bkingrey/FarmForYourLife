@@ -1,5 +1,10 @@
 <div id="game-ui" [ngClass]="{ R1024x576: gameData.resolution.x === 1024 }">
-  <div class="tool-ui">
+  <div class="carrying-ui" *ngIf="gameData.isCarrying">
+    <div>
+      <img src="../../assets/ui/mouse-drop.png" /> <span>Drop/Give</span>
+    </div>
+  </div>
+  <div class="tool-ui" *ngIf="!gameData.isCarrying">
     <div [ngClass]="{ active: gameData.equippedTool === 'shovel' }">
       <span class="floating-number">Q</span
       ><img src="../../assets/ui/shovel-big.png" />
@@ -21,7 +26,7 @@
       ><img src="../../assets/ui/rod-big.png" />
     </div>
   </div>
-  <div class="seed-ui">
+  <div class="seed-ui" *ngIf="!gameData.isCarrying">
     <div
       class="seed"
       [ngClass]="{

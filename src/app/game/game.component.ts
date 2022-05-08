@@ -89,12 +89,31 @@ export class GameComponent implements AfterViewInit {
   spriteReadyRadish = new Image();
   spriteReadySunflower = new Image();
   spriteReadyWheat = new Image();
+  spriteCarryBeetsLeft = new Image();
+  spriteCarryBeetsRight = new Image();
+  spriteCarryCabbageLeft = new Image();
+  spriteCarryCabbageRight = new Image();
+  spriteCarryCarrotLeft = new Image();
+  spriteCarryCarrotRight = new Image();
+  spriteCarryCauliflowerLeft = new Image();
+  spriteCarryCauliflowerRight = new Image();
+  spriteCarryKaleLeft = new Image();
+  spriteCarryKaleRight = new Image();
+  spriteCarryPotatoLeft = new Image();
+  spriteCarryPotatoRight = new Image();
+  spriteCarryRadishLeft = new Image();
+  spriteCarryRadishRight = new Image();
+  spriteCarrySunflowerLeft = new Image();
+  spriteCarrySunflowerRight = new Image();
+  spriteCarryWheatLeft = new Image();
+  spriteCarryWheatRight = new Image();
   movables: Array<any> = [];
   animate: any;
   frameIndex = 0;
   actionFrameIndex = 0;
   farmFrameIndex = 0;
   framesDrawn = 0;
+  farmFramesDrawn = 0;
   mousePos = {
     x: 0,
     y: 0,
@@ -173,6 +192,26 @@ export class GameComponent implements AfterViewInit {
         } else {
           this.movement();
         }
+
+        if (this.pickupables.length) {
+          let removableItem;
+          this.pickupables.forEach((item: Pickupable) => {
+            if (item) {
+              item.width = 64;
+              item.height = 64;
+              if (this.playerIsPickingUpItem(item)) {
+                removableItem = item;
+              }
+              if (this.ctx) {
+                this.drawPickupableAnimation(item, 16);
+              }
+            }
+          });
+          this.pickupables = this.pickupables.filter(
+            (pickupable) => pickupable !== removableItem
+          );
+        }
+
         this.ctx.drawImage(
           this.foregroundMap,
           this.mapImage.position.x,
@@ -181,6 +220,21 @@ export class GameComponent implements AfterViewInit {
         this.ctx.restore();
       }
     };
+  }
+
+  playerIsPickingUpItem(item: Pickupable) {
+    if (this.player.center && item.width && item.height) {
+      if (
+        this.player.center.x > item.position.x &&
+        this.player.center.x < item.position.x + item.width &&
+        this.player.center.y > item.position.y &&
+        this.player.center.y < item.position.y + item.height
+      ) {
+        this.changeTool.emit(item.plant);
+        return true;
+      }
+    }
+    return false;
   }
 
   ngAfterViewInit(): void {
@@ -257,6 +311,40 @@ export class GameComponent implements AfterViewInit {
       this.gameData.spriteAnimations['spriteSheetPlantRight'].src;
     this.spriteSheetPlantLeft.src =
       this.gameData.spriteAnimations['spriteSheetPlantLeft'].src;
+    this.spriteCarryBeetsRight.src =
+      this.gameData.spriteAnimations['spriteCarryBeetsRight'].src;
+    this.spriteCarryBeetsLeft.src =
+      this.gameData.spriteAnimations['spriteCarryBeetsLeft'].src;
+    this.spriteCarryCabbageLeft.src =
+      this.gameData.spriteAnimations['spriteCarryCabbageLeft'].src;
+    this.spriteCarryCabbageRight.src =
+      this.gameData.spriteAnimations['spriteCarryCabbageRight'].src;
+    this.spriteCarryCarrotLeft.src =
+      this.gameData.spriteAnimations['spriteCarryCarrotLeft'].src;
+    this.spriteCarryCarrotRight.src =
+      this.gameData.spriteAnimations['spriteCarryCarrotRight'].src;
+    this.spriteCarryCauliflowerLeft.src =
+      this.gameData.spriteAnimations['spriteCarryCauliflowerLeft'].src;
+    this.spriteCarryCauliflowerRight.src =
+      this.gameData.spriteAnimations['spriteCarryCauliflowerRight'].src;
+    this.spriteCarryKaleLeft.src =
+      this.gameData.spriteAnimations['spriteCarryKaleLeft'].src;
+    this.spriteCarryKaleRight.src =
+      this.gameData.spriteAnimations['spriteCarryKaleRight'].src;
+    this.spriteCarryPotatoLeft.src =
+      this.gameData.spriteAnimations['spriteCarryPotatoLeft'].src;
+    this.spriteCarryPotatoRight.src =
+      this.gameData.spriteAnimations['spriteCarryPotatoRight'].src;
+    this.spriteCarryRadishLeft.src =
+      this.gameData.spriteAnimations['spriteCarryRadishLeft'].src;
+    this.spriteCarryRadishRight.src =
+      this.gameData.spriteAnimations['spriteCarryRadishRight'].src;
+    this.spriteCarrySunflowerLeft.src =
+      this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].src;
+    this.spriteCarrySunflowerRight.src =
+      this.gameData.spriteAnimations['spriteCarrySunflowerRight'].src;
+    this.spriteCarryWheatLeft.src =
+      this.gameData.spriteAnimations['spriteCarryWheatLeft'].src;
     this.spriteSheetFishRight.onload = () => {
       this.loadCrops();
     };
@@ -316,6 +404,32 @@ export class GameComponent implements AfterViewInit {
     };
   }
 
+  drawPickupableAnimation(item, frames: number) {
+    if (this.farmFramesDrawn > 8) {
+      if (this.farmFrameIndex < frames - 1) {
+        this.farmFrameIndex++;
+      } else {
+        this.farmFrameIndex = 0;
+      }
+      this.farmFramesDrawn = 0;
+    } else {
+      this.farmFramesDrawn++;
+    }
+    if (this.canvas && this.ctx) {
+      this.ctx.drawImage(
+        this.spriteReadyPotato,
+        item.width * this.farmFrameIndex,
+        0,
+        item.width,
+        item.height,
+        item.position.x + 7,
+        item.position.y + 7,
+        50,
+        50
+      );
+    }
+  }
+
   drawSpriteAnimation(spriteSheet: HTMLImageElement, frames: number) {
     if (this.framesDrawn > 15) {
       if (this.frameIndex < frames - 1) {
@@ -329,7 +443,17 @@ export class GameComponent implements AfterViewInit {
     }
     if (this.canvas && this.ctx) {
       this.player.width = 13;
-      this.player.height = spriteSheet.height;
+      this.player.height = 18;
+      const spriteWidth = this.gameData.isCarrying ? 128 : 13;
+      const spriteHeight = this.gameData.isCarrying ? 64 : this.player.height;
+      const positionX = this.gameData.isCarrying
+        ? this.player.position.x - 228
+        : this.player.position.x;
+      const positionY = this.gameData.isCarrying
+        ? this.player.position.y - 84
+        : this.player.position.y;
+      const dx = this.gameData.isCarrying ? 128 * 4 : 52;
+      const dy = spriteSheet.height * 4;
       this.player.position = {
         x: this.canvas.width / 2 - this.player.width,
         y: this.canvas.height / 2 - this.player.height,
@@ -340,18 +464,26 @@ export class GameComponent implements AfterViewInit {
       };
       this.ctx.drawImage(
         spriteSheet,
-        this.player.width * this.frameIndex,
+        spriteWidth * this.frameIndex,
         0,
-        this.player.width,
-        spriteSheet.height,
-        this.player.position.x,
-        this.player.position.y,
-        52,
-        spriteSheet.height * 4
+        spriteWidth,
+        spriteHeight,
+        positionX,
+        positionY,
+        dx,
+        dy
       );
       // ***** SHOWING HIT BOX *****
       // this.ctx.beginPath();
       // this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
+      // this.ctx.stroke();
+      // this.ctx.beginPath();
+      // this.ctx.rect(
+      //   this.player.position.x,
+      //   this.player.position.y,
+      //   this.player.width * 4,
+      //   this.player.height * 4
+      // );
       // this.ctx.stroke();
       // ***** SHOWING HIT BOX *****
     }
@@ -433,7 +565,6 @@ export class GameComponent implements AfterViewInit {
 
   startWaterTimer(area) {
     setTimeout(() => {
-      console.log('MAKE NEXT STAGE');
       area.watered = false;
       if (area.state === 'potato-0') {
         area.state = 'potato-1';
@@ -830,23 +961,6 @@ export class GameComponent implements AfterViewInit {
           area.height
         );
       }
-      if (this.pickupables.length) {
-        this.pickupables.forEach((item: Pickupable) => {
-          if (this.ctx && item) {
-            this.ctx.drawImage(
-              this.spriteReadyPotato,
-              cropFrameSize.width * 0,
-              0,
-              cropFrameSize.width,
-              cropFrameSize.height,
-              item.position.x,
-              item.position.y,
-              64,
-              64
-            );
-          }
-        });
-      }
     }
     this.targetNearestSquare(area);
   }
@@ -911,7 +1025,7 @@ export class GameComponent implements AfterViewInit {
         this.changeTool.emit('water');
         break;
       case 'r':
-        this.changeTool.emit('hammer');
+        this.changeTool.emit('potato');
         break;
       case 't':
         this.changeTool.emit('pickaxe');
@@ -1206,25 +1320,192 @@ export class GameComponent implements AfterViewInit {
         });
       }
     }
+
     if (
       !this.gameData.keys.w.pressed &&
       !this.gameData.keys.a.pressed &&
       !this.gameData.keys.s.pressed &&
       !this.gameData.keys.d.pressed
     ) {
-      this.drawSpriteAnimation(
-        useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
-        useRightAnims
-          ? this.gameData.spriteAnimations['playerIdleRight'].frames
-          : this.gameData.spriteAnimations['playerIdleLeft'].frames
-      );
+      if (this.gameData.equippedTool === 'beets') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryBeetsRight
+            : this.spriteCarryBeetsLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'cabbage') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryCabbageRight
+            : this.spriteCarryCabbageLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'carrot') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryCarrotRight
+            : this.spriteCarryCarrotLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'cauliflower') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryCauliflowerRight
+            : this.spriteCarryCauliflowerLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
+                .frames
+        );
+      } else if (this.gameData.equippedTool === 'kale') {
+        this.drawSpriteAnimation(
+          useRightAnims ? this.spriteCarryKaleRight : this.spriteCarryKaleLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'potato') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryPotatoRight
+            : this.spriteCarryPotatoLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'radish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryRadishRight
+            : this.spriteCarryRadishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'sunflower') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarrySunflowerRight
+            : this.spriteCarrySunflowerLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'wheat') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryWheatRight
+            : this.spriteCarryWheatLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
+        );
+      } else {
+        this.drawSpriteAnimation(
+          useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['playerIdleRight'].frames
+            : this.gameData.spriteAnimations['playerIdleLeft'].frames
+        );
+      }
     } else {
-      this.drawSpriteAnimation(
-        useRightAnims ? this.spriteSheetWalkRight : this.spriteSheetWalkLeft,
-        useRightAnims
-          ? this.gameData.spriteAnimations['playerWalkRight'].frames
-          : this.gameData.spriteAnimations['playerWalkLeft'].frames
-      );
+      if (this.gameData.equippedTool === 'beets') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryBeetsRight
+            : this.spriteCarryBeetsLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'cabbage') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryCabbageRight
+            : this.spriteCarryCabbageLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'carrot') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryCarrotRight
+            : this.spriteCarryCarrotLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'cauliflower') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryCauliflowerRight
+            : this.spriteCarryCauliflowerLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
+                .frames
+        );
+      } else if (this.gameData.equippedTool === 'kale') {
+        this.drawSpriteAnimation(
+          useRightAnims ? this.spriteCarryKaleRight : this.spriteCarryKaleLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'potato') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryPotatoRight
+            : this.spriteCarryPotatoLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'radish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryRadishRight
+            : this.spriteCarryRadishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'sunflower') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarrySunflowerRight
+            : this.spriteCarrySunflowerLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'wheat') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryWheatRight
+            : this.spriteCarryWheatLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
+        );
+      } else {
+        this.drawSpriteAnimation(
+          useRightAnims ? this.spriteSheetWalkRight : this.spriteSheetWalkLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['playerWalkRight'].frames
+            : this.gameData.spriteAnimations['playerWalkLeft'].frames
+        );
+      }
     }
   }
 
@@ -1297,7 +1578,14 @@ export class GameComponent implements AfterViewInit {
     this.clickedFarmableArea = this.defaultFarmState;
   }
   doActionOnMouse(evt) {
-    if (this.player.center && this.mayFarm && this.ctx && this.canClick) {
+    if (this.gameData.isCarrying) {
+      //DROP CARRIED ITM
+    } else if (
+      this.player.center &&
+      this.mayFarm &&
+      this.ctx &&
+      this.canClick
+    ) {
       this.canClick = false;
       this.queuedCultivate = true;
       this.clickedFarmableArea = this.hoveredFarmableArea;
