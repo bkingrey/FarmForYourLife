@@ -1,4 +1,11 @@
 <div id="game-ui" [ngClass]="{ R1024x576: gameData.resolution.x === 1024 }">
+  <div class="energy-bar">
+    <div
+      class="bar"
+      [style.width.%]="(gameData.energy.current / gameData.energy.max) * 100"
+    ></div>
+    <span>{{ gameData.energy.current }}/{{ gameData.energy.max }}</span>
+  </div>
   <div class="carrying-ui" *ngIf="gameData.isCarrying">
     <div>
       <img src="../../assets/ui/mouse-drop.png" /> <span>Drop/Give</span>

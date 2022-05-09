@@ -1,6 +1,7 @@
 import * as GameActions from './actions';
 import { createReducer, on } from '@ngrx/store';
 import { GameState, KeyWASD, SeedKey } from './models';
+import { state } from '@angular/animations';
 
 export const intializeState = (): GameState => {
   return {
@@ -50,8 +51,12 @@ export const intializeState = (): GameState => {
     },
     collisions: [],
     farmableAreas: [],
+    fishableAreas: [],
+    minableAreas: [],
     collisionMap: [],
     farmableAreaMap: [],
+    fishableAreaMap: [],
+    minableAreaMap: [],
     isCarrying: false,
     equippedTool: 'shovel',
     spriteAnimations: {
@@ -81,6 +86,10 @@ export const intializeState = (): GameState => {
         pressed: false,
       },
     },
+    energy: {
+      current: 100,
+      max: 100,
+    },
     player: {
       width: 0,
       height: 0,
@@ -99,12 +108,20 @@ export const gameReducer = createReducer(
   on(GameActions.SuccessGetGameDataAction, (state: GameState, { payload }) => {
     const newCollisionMap: Array<any> = [];
     const newFarmableArea: Array<any> = [];
+    const newFishableArea: Array<any> = [];
+    const newMinableArea: Array<any> = [];
     for (let i = 0; i < payload.collisions.length; i += 36) {
       newCollisionMap.push(payload.collisions.slice(i, 36 + i));
     }
 
     for (let i = 0; i < payload.farmableAreas.length; i += 36) {
       newFarmableArea.push(payload.farmableAreas.slice(i, 36 + i));
+    }
+    for (let i = 0; i < payload.fishableAreas.length; i += 36) {
+      newFishableArea.push(payload.fishableAreas.slice(i, 36 + i));
+    }
+    for (let i = 0; i < payload.minableAreas.length; i += 36) {
+      newMinableArea.push(payload.minableAreas.slice(i, 36 + i));
     }
     return {
       ...state,
@@ -119,6 +136,8 @@ export const gameReducer = createReducer(
       velocity: payload.velocity,
       collisionMap: newCollisionMap,
       farmableAreaMap: newFarmableArea,
+      fishableAreaMap: newFishableArea,
+      minableAreaMap: newMinableArea,
       player: payload.player,
     };
   }),
@@ -146,7 +165,11 @@ export const gameReducer = createReducer(
       payload === 'potato' ||
       payload === 'radish' ||
       payload === 'sunflower' ||
-      payload === 'wheat'
+      payload === 'wheat' ||
+      payload === 'nugget' ||
+      payload === 'smallfish' ||
+      payload === 'mediumfish' ||
+      payload === 'hugefish'
     ) {
       carrying = true;
     }
@@ -173,5 +196,20 @@ export const gameReducer = createReducer(
         ...state,
       };
     }
+  }),
+  on(GameActions.ChangeEnergy, (state, { payload }) => {
+    let total = state.energy.current + payload;
+    if (state.energy.current > state.energy.max) {
+      total = state.energy.max;
+    } else if (state.energy.current < 0) {
+      total = 0;
+    }
+    return {
+      ...state,
+      energy: {
+        ...state.energy,
+        current: total,
+      },
+    };
   })
 );

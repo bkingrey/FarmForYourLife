@@ -7,11 +7,19 @@ export interface GameState {
   };
   collisions: Array<number> | [];
   farmableAreas: Array<number> | [];
+  fishableAreas: Array<number> | [];
+  minableAreas: Array<number> | [];
   collisionMap: any | [];
   farmableAreaMap: any | [];
+  fishableAreaMap: any | [];
+  minableAreaMap: any | [];
   spriteAnimations: SpriteAnimation;
   mapImage: SpriteMetrics;
   player: SpriteMetrics;
+  energy: {
+    current: number;
+    max: number;
+  };
   isCarrying: boolean;
   velocity: number;
   keys: KeyWASD;

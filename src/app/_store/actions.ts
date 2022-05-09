@@ -27,3 +27,8 @@ export const ReduceSeedCount = createAction(
   '[GameData] Reduce Seed Count',
   props<{ payload: SeedsOwned }>()
 );
+
+export const ChangeEnergy = createAction(
+  '[GameData] Change Energy',
+  props<{ payload: number }>()
+);

@@ -23,6 +23,7 @@ export class GameComponent implements AfterViewInit {
   @Output() keyChange = new EventEmitter();
   @Output() changeTool = new EventEmitter();
   @Output() reduceSeedCount = new EventEmitter();
+  @Output() changeEnergy = new EventEmitter();
   canvasId: string = 'game-canvas';
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
@@ -53,6 +54,8 @@ export class GameComponent implements AfterViewInit {
   };
   boundaries: any = [];
   farmableArea: any = [];
+  fishableArea: any = [];
+  minableArea: any = [];
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
   spriteSheetWalkRight = new Image();
@@ -108,6 +111,19 @@ export class GameComponent implements AfterViewInit {
   spriteCarrySunflowerRight = new Image();
   spriteCarryWheatLeft = new Image();
   spriteCarryWheatRight = new Image();
+
+  spriteCarrySmallFishLeft = new Image();
+  spriteCarrySmallFishRight = new Image();
+
+  spriteCarryMediumFishLeft = new Image();
+  spriteCarryMediumFishRight = new Image();
+
+  spriteCarryHugeFishLeft = new Image();
+  spriteCarryHugeFishRight = new Image();
+
+  spriteCarryNuggetLeft = new Image();
+  spriteCarryNuggetRight = new Image();
+
   movables: Array<any> = [];
   animate: any;
   frameIndex = 0;
@@ -190,8 +206,19 @@ export class GameComponent implements AfterViewInit {
             this.drawFarmable(farmableArea);
           }
         });
+        this.fishableArea.forEach((fishableArea) => {
+          if (this.ctx) {
+            this.drawFarmable(fishableArea);
+          }
+        });
+        this.minableArea.forEach((minableArea) => {
+          if (this.ctx) {
+            this.drawFarmable(minableArea);
+          }
+        });
         // MOVEMENT
-        if (this.queuedCultivate) {
+        if (this.cultivatable()) {
+          console.log(this.cultivatable());
           this.cultivate();
         } else {
           this.movement();
@@ -215,11 +242,6 @@ export class GameComponent implements AfterViewInit {
             (pickupable) => pickupable !== removableItem
           );
         }
-        // if (this.droppables.length) {
-        //   this.droppables.forEach((droppable, i) => {
-        //     this.drawDroppable(droppable, i);
-        //   });
-        // }
         this.ctx.drawImage(
           this.foregroundMap,
           this.mapImage.position.x,
@@ -247,16 +269,54 @@ export class GameComponent implements AfterViewInit {
         this.player.center.y < item.position.y + item.height
       ) {
         this.changeTool.emit(item.plant);
-        console.log('emitting');
         return true;
       }
     }
     return false;
   }
 
+  cultivatable() {
+    if (this.queuedCultivate) {
+      if (
+        this.clickedFarmableArea.state === 'minable' &&
+        this.gameData.equippedTool === 'pickaxe'
+      ) {
+        return true;
+      }
+      if (
+        this.clickedFarmableArea.state === 'fishable' &&
+        this.gameData.equippedTool === 'rod'
+      ) {
+        return true;
+      }
+      if (
+        this.clickedFarmableArea.state !== 'minable' &&
+        this.clickedFarmableArea.state !== 'fishable' &&
+        this.gameData.equippedTool === 'shovel'
+      ) {
+        return true;
+      }
+      if (
+        this.clickedFarmableArea.state !== 'minable' &&
+        this.clickedFarmableArea.state !== 'fishable' &&
+        this.gameData.equippedTool === 'water'
+      ) {
+        return true;
+      }
+      this.queuedCultivate = false;
+      this.canClick = true;
+      return false;
+    }
+    this.queuedCultivate = false;
+    this.canClick = true;
+    return false;
+  }
+
   ngAfterViewInit(): void {
     this.createCollisionsAndMovables();
-    this.createFarmableArea();
+    this.createFarmableArea(this.gameData.farmableAreaMap);
+    this.createFishableArea(this.gameData.fishableAreaMap);
+    this.createMinableArea(this.gameData.minableAreaMap);
     this.createMovables();
     this.loadCanvas();
   }
@@ -362,6 +422,24 @@ export class GameComponent implements AfterViewInit {
       this.gameData.spriteAnimations['spriteCarrySunflowerRight'].src;
     this.spriteCarryWheatLeft.src =
       this.gameData.spriteAnimations['spriteCarryWheatLeft'].src;
+    this.spriteCarryWheatRight.src =
+      this.gameData.spriteAnimations['spriteCarryWheatRight'].src;
+    this.spriteCarryNuggetRight.src =
+      this.gameData.spriteAnimations['spriteCarryNuggetRight'].src;
+    this.spriteCarryNuggetLeft.src =
+      this.gameData.spriteAnimations['spriteCarryNuggetLeft'].src;
+    this.spriteCarrySmallFishRight.src =
+      this.gameData.spriteAnimations['spriteCarrySmallFishRight'].src;
+    this.spriteCarrySmallFishLeft.src =
+      this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].src;
+    this.spriteCarryMediumFishRight.src =
+      this.gameData.spriteAnimations['spriteCarryMediumFishRight'].src;
+    this.spriteCarryMediumFishLeft.src =
+      this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].src;
+    this.spriteCarryHugeFishRight.src =
+      this.gameData.spriteAnimations['spriteCarryHugeFishRight'].src;
+    this.spriteCarryHugeFishLeft.src =
+      this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].src;
     this.spriteSheetFishRight.onload = () => {
       this.loadCrops();
     };
@@ -581,6 +659,18 @@ export class GameComponent implements AfterViewInit {
   }
 
   changeStateOfHoveredFarmable() {
+    if (this.hoveredFarmableArea.state === 'fishable') {
+      const getRandom = Math.random() * 100;
+      if (getRandom < 75) {
+        this.changeTool.emit('smallfish');
+      } else if (getRandom < 95) {
+        this.changeTool.emit('mediumfish');
+      } else {
+        this.changeTool.emit('hugefish');
+      }
+    } else if (this.hoveredFarmableArea.state === 'minable') {
+      this.changeTool.emit('nugget');
+    }
     if (this.gameData.equippedTool === 'shovel') {
       this.farmAction('soil-0', 'soil-1', 'soil-2', 'soil-3');
     }
@@ -611,6 +701,7 @@ export class GameComponent implements AfterViewInit {
     if (this.isAPlantSeed()) {
       this.plantSeed();
     }
+    this.changeEnergy.emit(-3);
   }
 
   startWaterTimer(area) {
@@ -790,26 +881,28 @@ export class GameComponent implements AfterViewInit {
     const clickedFarm = this.farmableArea.filter(
       (area) => area === this.clickedFarmableArea
     )[0];
-    if (clickedFarm.state === undefined) {
-      this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
-      )[0].state = state0;
-    } else if (clickedFarm.state === state0) {
-      this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
-      )[0].state = state1;
-    } else if (clickedFarm.state === state1) {
-      this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
-      )[0].state = state2;
-    } else if (clickedFarm.state === state2) {
-      this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
-      )[0].state = state3;
-    } else {
-      this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
-      )[0].state = state3;
+    if (clickedFarm) {
+      if (clickedFarm.state === 'none') {
+        this.farmableArea.filter(
+          (area) => area === this.clickedFarmableArea
+        )[0].state = state0;
+      } else if (clickedFarm.state === state0) {
+        this.farmableArea.filter(
+          (area) => area === this.clickedFarmableArea
+        )[0].state = state1;
+      } else if (clickedFarm.state === state1) {
+        this.farmableArea.filter(
+          (area) => area === this.clickedFarmableArea
+        )[0].state = state2;
+      } else if (clickedFarm.state === state2) {
+        this.farmableArea.filter(
+          (area) => area === this.clickedFarmableArea
+        )[0].state = state3;
+      } else {
+        this.farmableArea.filter(
+          (area) => area === this.clickedFarmableArea
+        )[0].state = state3;
+      }
     }
   }
 
@@ -1467,6 +1560,7 @@ export class GameComponent implements AfterViewInit {
             },
             width: this.boundary.width,
             height: this.boundary.height,
+            state: 'boundary',
           };
           this.boundaries.push(newBoundary);
         }
@@ -1474,8 +1568,8 @@ export class GameComponent implements AfterViewInit {
     });
   }
 
-  createFarmableArea() {
-    this.gameData.farmableAreaMap.forEach((row, i) => {
+  createFarmableArea(map) {
+    map.forEach((row, i) => {
       row.forEach((symbol, j) => {
         if (symbol !== 0 && this.mapImage) {
           const newFarmableArea = {
@@ -1485,6 +1579,7 @@ export class GameComponent implements AfterViewInit {
             },
             width: this.boundary.width,
             height: this.boundary.height,
+            state: 'none',
           };
           this.farmableArea.push(newFarmableArea);
         }
@@ -1492,8 +1587,52 @@ export class GameComponent implements AfterViewInit {
     });
   }
 
+  createFishableArea(map) {
+    map.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol !== 0 && this.mapImage) {
+          const newFishableArea = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+            state: 'fishable',
+          };
+          this.fishableArea.push(newFishableArea);
+        }
+      });
+    });
+  }
+
+  createMinableArea(map) {
+    map.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol !== 0 && this.mapImage) {
+          const newMinableArea = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+            state: 'minable',
+          };
+          this.minableArea.push(newMinableArea);
+        }
+      });
+    });
+  }
+
   createMovables() {
-    this.movables = [this.mapImage, ...this.boundaries, ...this.farmableArea];
+    this.movables = [
+      this.mapImage,
+      ...this.boundaries,
+      ...this.farmableArea,
+      ...this.minableArea,
+      ...this.fishableArea,
+    ];
   }
 
   keyDownEvent(e: KeyboardEvent) {
@@ -1633,19 +1772,21 @@ export class GameComponent implements AfterViewInit {
     return;
   }
 
-  cultivate() {
-    let useRightAnims;
+  useRightAnims() {
     if (this.mousePos.x > this.player.position.x) {
-      useRightAnims = true;
+      return true;
     } else {
-      useRightAnims = false;
+      return false;
     }
+  }
+
+  cultivate() {
     const spriteSheet = this.getCultivateSpriteSheet();
 
     if (spriteSheet)
       this.drawCultivateAnimation(
-        useRightAnims ? spriteSheet.right : spriteSheet.left,
-        useRightAnims
+        this.useRightAnims() ? spriteSheet.right : spriteSheet.left,
+        this.useRightAnims()
           ? this.gameData.spriteAnimations[spriteSheet.rightKey].frames
           : this.gameData.spriteAnimations[spriteSheet.leftKey].frames
       );
@@ -1919,6 +2060,43 @@ export class GameComponent implements AfterViewInit {
             ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
             : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
         );
+      } else if (this.gameData.equippedTool === 'smallfish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarrySmallFishRight
+            : this.spriteCarrySmallFishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'mediumfish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryMediumFishRight
+            : this.spriteCarryMediumFishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'hugefish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryHugeFishRight
+            : this.spriteCarryHugeFishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'nugget') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryNuggetRight
+            : this.spriteCarryNuggetLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
+        );
       } else {
         this.drawSpriteAnimation(
           useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
@@ -2009,6 +2187,43 @@ export class GameComponent implements AfterViewInit {
             ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
             : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
         );
+      } else if (this.gameData.equippedTool === 'smallfish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarrySmallFishRight
+            : this.spriteCarrySmallFishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'mediumfish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryMediumFishRight
+            : this.spriteCarryMediumFishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'hugefish') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryHugeFishRight
+            : this.spriteCarryHugeFishLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
+        );
+      } else if (this.gameData.equippedTool === 'nugget') {
+        this.drawSpriteAnimation(
+          useRightAnims
+            ? this.spriteCarryNuggetRight
+            : this.spriteCarryNuggetLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
+        );
       } else {
         this.drawSpriteAnimation(
           useRightAnims ? this.spriteSheetWalkRight : this.spriteSheetWalkLeft,
@@ -2095,11 +2310,12 @@ export class GameComponent implements AfterViewInit {
       this.player.center &&
       this.mayFarm &&
       this.ctx &&
-      this.canClick
+      this.canClick &&
+      this.gameData.energy.current >= 3
     ) {
+      this.clickedFarmableArea = this.hoveredFarmableArea;
       this.canClick = false;
       this.queuedCultivate = true;
-      this.clickedFarmableArea = this.hoveredFarmableArea;
     }
   }
   doScrollOnMouse(evt) {
@@ -2144,8 +2360,10 @@ export class GameComponent implements AfterViewInit {
 
   dropCarriedItem() {
     if (this.player.center) {
-      const positionX = this.mousePos.x;
-      const positionY = this.mousePos.y;
+      const positionX = this.useRightAnims()
+        ? this.player.center.x
+        : this.player.center.x - 64;
+      const positionY = this.player.center.y - 12;
       const carriedItem = {
         position: {
           x: positionX,
@@ -2156,7 +2374,6 @@ export class GameComponent implements AfterViewInit {
         plant: this.gameData.equippedTool,
       };
       if (this.gameData.equippedTool === 'potato') {
-        console.log('DROPPING THE POTATO');
         this.createPickupablePlantAtArea(
           carriedItem.plant,
           carriedItem.position,

@@ -1,4 +1,5 @@
 import {
+  ChangeEnergy,
   ChangeKeyEvent,
   ChangeTool,
   getGameData,
@@ -30,5 +31,9 @@ export class AppComponent implements OnInit {
 
   reduceSeedCount(event) {
     this.facade.dispatch(ReduceSeedCount({ payload: event }));
+  }
+
+  changeEnergy(event) {
+    this.facade.dispatch(ChangeEnergy({ payload: event }));
   }
 }
