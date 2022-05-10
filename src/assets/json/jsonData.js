@@ -339,11 +339,11 @@ export const jsonData = {
     },
     spriteSheetFishRight: {
       src: "assets/characters/sprite-fish-right.png",
-      frames: 41,
+      frames: 42,
     },
     spriteSheetFishLeft: {
       src: "assets/characters/sprite-fish-left.png",
-      frames: 41,
+      frames: 42,
     },
     spriteSheetPickaxeRight: {
       src: "assets/characters/sprite-mine-right.png",
@@ -542,11 +542,11 @@ export const jsonData = {
       frames: 8,
     },
     spriteCarryNuggetRight: {
-      src: "assets/carrying/carry-small-fish-right.png",
+      src: "assets/carrying/carry-nugget-right.png",
       frames: 8,
     },
     spriteCarryNuggetLeft: {
-      src: "assets/carrying/carry-small-fish-left.png",
+      src: "assets/carrying/carry-nugget-left.png",
       frames: 8,
     },
   },

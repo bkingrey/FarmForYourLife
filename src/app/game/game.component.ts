@@ -218,7 +218,6 @@ export class GameComponent implements AfterViewInit {
         });
         // MOVEMENT
         if (this.cultivatable()) {
-          console.log(this.cultivatable());
           this.cultivate();
         } else {
           this.movement();
@@ -525,32 +524,6 @@ export class GameComponent implements AfterViewInit {
     }
   }
 
-  // drawDroppableAnimation(item, frames: number, index: number) {
-  //   if (this.droppableFramesDrawn[index] > 8) {
-  //     if (this.droppableFrameIndex[index] < frames - 1) {
-  //       this.droppableFrameIndex[index]++;
-  //     } else {
-  //       this.droppableFrameIndex[index] = 0;
-  //     }
-  //     this.droppableFramesDrawn[index] = 0;
-  //   } else {
-  //     this.droppableFramesDrawn[index]++;
-  //   }
-  //   if (this.canvas && this.ctx) {
-  //     this.ctx.drawImage(
-  //       this.spriteReadyPotato,
-  //       item.width * this.droppableFrameIndex[index],
-  //       0,
-  //       item.width,
-  //       item.height,
-  //       item.position.x + 7,
-  //       item.position.y + 7,
-  //       50,
-  //       50
-  //     );
-  //   }
-  // }
-
   drawSpriteAnimation(spriteSheet: HTMLImageElement, frames: number) {
     if (this.framesDrawn > 15) {
       if (this.frameIndex < frames - 1) {
@@ -616,7 +589,21 @@ export class GameComponent implements AfterViewInit {
 
     if (this.framesDrawn > 10) {
       if (this.actionFrameIndex < frames - 1) {
-        if (this.actionFrameIndex === 3) {
+        if (
+          this.actionFrameIndex === 3 &&
+          this.gameData.equippedTool !== 'rod' &&
+          this.gameData.equippedTool !== 'pickaxe'
+        ) {
+          this.changeStateOfHoveredFarmable();
+        } else if (
+          this.actionFrameIndex > 7 &&
+          this.gameData.equippedTool === 'pickaxe'
+        ) {
+          this.changeStateOfHoveredFarmable();
+        } else if (
+          this.actionFrameIndex > 39 &&
+          this.gameData.equippedTool === 'rod'
+        ) {
           this.changeStateOfHoveredFarmable();
         }
         this.actionFrameIndex++;
@@ -669,7 +656,9 @@ export class GameComponent implements AfterViewInit {
         this.changeTool.emit('hugefish');
       }
     } else if (this.hoveredFarmableArea.state === 'minable') {
-      this.changeTool.emit('nugget');
+      const getRandom = Math.random() * 100;
+      console.log(getRandom);
+      if (getRandom > 99) this.changeTool.emit('nugget');
     }
     if (this.gameData.equippedTool === 'shovel') {
       this.farmAction('soil-0', 'soil-1', 'soil-2', 'soil-3');
