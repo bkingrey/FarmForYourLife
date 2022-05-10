@@ -53,10 +53,12 @@ export const intializeState = (): GameState => {
     farmableAreas: [],
     fishableAreas: [],
     minableAreas: [],
+    houseAreas: [],
     collisionMap: [],
     farmableAreaMap: [],
     fishableAreaMap: [],
     minableAreaMap: [],
+    houseAreaMap: [],
     isCarrying: false,
     equippedTool: 'shovel',
     spriteAnimations: {
@@ -110,6 +112,7 @@ export const gameReducer = createReducer(
     const newFarmableArea: Array<any> = [];
     const newFishableArea: Array<any> = [];
     const newMinableArea: Array<any> = [];
+    const newHouseArea: Array<any> = [];
     for (let i = 0; i < payload.collisions.length; i += 36) {
       newCollisionMap.push(payload.collisions.slice(i, 36 + i));
     }
@@ -122,6 +125,9 @@ export const gameReducer = createReducer(
     }
     for (let i = 0; i < payload.minableAreas.length; i += 36) {
       newMinableArea.push(payload.minableAreas.slice(i, 36 + i));
+    }
+    for (let i = 0; i < payload.houseAreas.length; i += 36) {
+      newHouseArea.push(payload.houseAreas.slice(i, 36 + i));
     }
     return {
       ...state,
@@ -138,6 +144,7 @@ export const gameReducer = createReducer(
       farmableAreaMap: newFarmableArea,
       fishableAreaMap: newFishableArea,
       minableAreaMap: newMinableArea,
+      houseAreaMap: newHouseArea,
       player: payload.player,
     };
   }),

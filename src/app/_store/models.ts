@@ -9,10 +9,12 @@ export interface GameState {
   farmableAreas: Array<number> | [];
   fishableAreas: Array<number> | [];
   minableAreas: Array<number> | [];
+  houseAreas: Array<number> | [];
   collisionMap: any | [];
   farmableAreaMap: any | [];
   fishableAreaMap: any | [];
   minableAreaMap: any | [];
+  houseAreaMap: any | [];
   spriteAnimations: SpriteAnimation;
   mapImage: SpriteMetrics;
   player: SpriteMetrics;

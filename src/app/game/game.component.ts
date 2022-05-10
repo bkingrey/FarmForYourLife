@@ -58,6 +58,7 @@ export class GameComponent implements AfterViewInit {
   farmableArea: any = [];
   fishableArea: any = [];
   minableArea: any = [];
+  houseArea: any = [];
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
   spriteSheetWalkRight = new Image();
@@ -185,6 +186,7 @@ export class GameComponent implements AfterViewInit {
   droppables: Array<Pickupable> = [];
   droppableFramesDrawn: Array<number> = [];
   droppableFrameIndex: Array<number> = [];
+  isSleeping: boolean = false;
 
   constructor() {
     this.animate = () => {
@@ -218,6 +220,23 @@ export class GameComponent implements AfterViewInit {
           if (this.ctx) {
             this.drawFarmable(minableArea);
           }
+        });
+        this.houseArea.forEach((houseTile) => {
+          if (this.ctx) {
+            this.drawFarmable(houseTile);
+          }
+          // if (this.player.center) {
+          //   if (
+          //     this.player.center.x > houseTile.position.x &&
+          //     this.player.center.y > houseTile.position.y &&
+          //     this.player.center.x < houseTile.position.x + houseTile.width &&
+          //     this.player.center.y < houseTile.position.y + houseTile.height
+          //   ) {
+          //     this.isSleeping = true;
+          //   } else {
+          //     this.isSleeping = false;
+          //   }
+          // }
         });
         // MOVEMENT
         if (this.cultivatable()) {
@@ -322,6 +341,7 @@ export class GameComponent implements AfterViewInit {
     this.createFarmableArea(this.gameData.farmableAreaMap);
     this.createFishableArea(this.gameData.fishableAreaMap);
     this.createMinableArea(this.gameData.minableAreaMap);
+    this.createHouseArea(this.gameData.houseAreaMap);
     this.createMovables();
     this.loadCanvas();
   }
@@ -575,20 +595,21 @@ export class GameComponent implements AfterViewInit {
         dx,
         dy
       );
-      // ***** SHOWING HIT BOX *****
-      // this.ctx.beginPath();
-      // this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
-      // this.ctx.stroke();
-      // this.ctx.beginPath();
-      // this.ctx.rect(
-      //   this.player.position.x,
-      //   this.player.position.y,
-      //   this.player.width * 4,
-      //   this.player.height * 4
-      // );
-      // this.ctx.stroke();
-      // ***** SHOWING HIT BOX *****
     }
+
+    // ***** SHOWING HIT BOX *****
+    // this.ctx.beginPath();
+    // this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
+    // this.ctx.stroke();
+    // this.ctx.beginPath();
+    // this.ctx.rect(
+    //   this.player.position.x,
+    //   this.player.position.y,
+    //   this.player.width * 4,
+    //   this.player.height * 4
+    // );
+    // this.ctx.stroke();
+    // ***** SHOWING HIT BOX *****
   }
 
   drawCultivateAnimation(spriteSheet: HTMLImageElement, frames: number) {
@@ -742,7 +763,6 @@ export class GameComponent implements AfterViewInit {
   }
 
   plantSeed() {
-    console.log('plantingSeed');
     const clickedFarm = this.farmableArea.filter(
       (area) => area === this.clickedFarmableArea
     )[0];
@@ -1622,6 +1642,25 @@ export class GameComponent implements AfterViewInit {
     });
   }
 
+  createHouseArea(map) {
+    map.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol !== 0 && this.mapImage) {
+          const newHouseArea = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+            state: 'house',
+          };
+          this.houseArea.push(newHouseArea);
+        }
+      });
+    });
+  }
+
   createMovables() {
     this.movables = [
       this.mapImage,
@@ -1629,6 +1668,7 @@ export class GameComponent implements AfterViewInit {
       ...this.farmableArea,
       ...this.minableArea,
       ...this.fishableArea,
+      ...this.houseArea,
     ];
   }
 
@@ -1971,12 +2011,12 @@ export class GameComponent implements AfterViewInit {
         });
       }
     }
-
     if (
       !this.gameData.keys.w.pressed &&
       !this.gameData.keys.a.pressed &&
       !this.gameData.keys.s.pressed &&
-      !this.gameData.keys.d.pressed
+      !this.gameData.keys.d.pressed &&
+      !this.isSleeping
     ) {
       if (this.gameData.equippedTool === 'beets') {
         this.drawSpriteAnimation(
