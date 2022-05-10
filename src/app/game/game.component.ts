@@ -2258,16 +2258,52 @@ export class GameComponent implements AfterViewInit {
           };
 
           this.ctx.strokeStyle = 'blue';
-          this.ctx.rect(
+          this.ctx.moveTo(area.position.x, area.position.y);
+          this.ctx.lineTo(area.position.x + area.width / 4, area.position.y);
+          this.ctx.moveTo(area.position.x, area.position.y);
+          this.ctx.lineTo(area.position.x, area.position.y + area.height / 4);
+
+          this.ctx.moveTo(area.position.x, area.position.y + area.height);
+          this.ctx.lineTo(
             area.position.x,
-            area.position.y,
-            area.width,
-            area.height
+            area.position.y + area.height - area.height / 4
+          );
+          this.ctx.moveTo(area.position.x, area.position.y + area.height);
+          this.ctx.lineTo(
+            area.position.x + area.width / 4,
+            area.position.y + area.height
+          );
+
+          this.ctx.moveTo(
+            area.position.x + area.width,
+            area.position.y + area.height
+          );
+          this.ctx.lineTo(
+            area.position.x + area.width - area.width / 4,
+            area.position.y + area.height
+          );
+          this.ctx.moveTo(
+            area.position.x + area.width,
+            area.position.y + area.height
+          );
+          this.ctx.lineTo(
+            area.position.x + area.width,
+            area.position.y + area.height - area.height / 4
+          );
+          this.ctx.moveTo(area.position.x + area.width, area.position.y);
+          this.ctx.lineTo(
+            area.position.x + area.width - area.width / 4,
+            area.position.y
+          );
+          this.ctx.moveTo(area.position.x + area.width, area.position.y);
+          this.ctx.lineTo(
+            area.position.x + area.width,
+            area.position.y + area.height / 4
           );
         } else {
           this.mayFarm = false;
           this.hoveredFarmableArea = this.defaultFarmState;
-          this.ctx.strokeStyle = 'red';
+          this.ctx.strokeStyle = 'transparent';
           this.ctx.rect(
             area.position.x,
             area.position.y,
