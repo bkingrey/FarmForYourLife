@@ -55,12 +55,14 @@ export const intializeState = (): GameState => {
     minableAreas: [],
     houseAreas: [],
     wellAreas: [],
+    untargetableAreas: [],
     collisionMap: [],
     farmableAreaMap: [],
     fishableAreaMap: [],
     minableAreaMap: [],
     houseAreaMap: [],
     wellAreaMap: [],
+    untargetableAreaMap: [],
     isCarrying: false,
     equippedTool: 'shovel',
     spriteAnimations: {
@@ -106,6 +108,7 @@ export const intializeState = (): GameState => {
         y: 0,
       },
     },
+    isHoveringMerchant: false,
   };
 };
 export const gameReducer = createReducer(
@@ -120,10 +123,11 @@ export const gameReducer = createReducer(
     const newMinableArea: Array<any> = [];
     const newHouseArea: Array<any> = [];
     const newWellArea: Array<any> = [];
+    const newUntargetableArea: Array<any> = [];
+
     for (let i = 0; i < payload.collisions.length; i += 36) {
       newCollisionMap.push(payload.collisions.slice(i, 36 + i));
     }
-
     for (let i = 0; i < payload.farmableAreas.length; i += 36) {
       newFarmableArea.push(payload.farmableAreas.slice(i, 36 + i));
     }
@@ -138,6 +142,9 @@ export const gameReducer = createReducer(
     }
     for (let i = 0; i < payload.wellAreas.length; i += 36) {
       newWellArea.push(payload.wellAreas.slice(i, 36 + i));
+    }
+    for (let i = 0; i < payload.untargetableAreas.length; i += 36) {
+      newUntargetableArea.push(payload.untargetableAreas.slice(i, 36 + i));
     }
     return {
       ...state,
@@ -156,6 +163,7 @@ export const gameReducer = createReducer(
       minableAreaMap: newMinableArea,
       houseAreaMap: newHouseArea,
       wellAreaMap: newWellArea,
+      untargetableAreaMap: newUntargetableArea,
       player: payload.player,
     };
   }),
@@ -233,6 +241,12 @@ export const gameReducer = createReducer(
     return {
       ...state,
       velocity: payload,
+    };
+  }),
+  on(GameActions.ChangeIsHoveringMerchant, (state, { payload }) => {
+    return {
+      ...state,
+      isHoveringMerchant: payload,
     };
   }),
   on(GameActions.ChangeWaterMeter, (state, { payload }) => {

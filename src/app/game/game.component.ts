@@ -27,6 +27,7 @@ export class GameComponent implements AfterViewInit {
   @Output() changeEnergy = new EventEmitter();
   @Output() changeVelocity = new EventEmitter();
   @Output() changeWaterMeter = new EventEmitter();
+  @Output() changeIsHoveringMerchant = new EventEmitter();
   scale: number = 0.5;
   squareSize: number = 64;
   canvasId: string = 'game-canvas';
@@ -63,6 +64,8 @@ export class GameComponent implements AfterViewInit {
   minableArea: any = [];
   houseArea: any = [];
   wellArea: any = [];
+  untargetableArea: any = [];
+  traders: any = [];
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
   spriteSheetWalkRight = new Image();
@@ -127,6 +130,10 @@ export class GameComponent implements AfterViewInit {
   spriteCarryNuggetLeft = new Image();
   spriteCarryNuggetRight = new Image();
   spriteSleepBubbles = new Image();
+  goblinMerchantRight = new Image();
+  goblinMerchantLeft = new Image();
+  goblinFramesDrawn = 0;
+  goblinFrameIndex = 0;
 
   movables: Array<any> = [];
   animate: any;
@@ -237,6 +244,11 @@ export class GameComponent implements AfterViewInit {
             this.drawBoundary(boundary);
           }
         });
+        this.untargetableArea.forEach((untargetableArea) => {
+          if (this.ctx) {
+            this.drawFarmable(untargetableArea);
+          }
+        });
         this.farmableArea.forEach((farmableArea) => {
           if (this.ctx) {
             this.drawFarmable(farmableArea);
@@ -261,6 +273,9 @@ export class GameComponent implements AfterViewInit {
           if (this.ctx) {
             this.drawFarmable(wellTile);
           }
+        });
+        this.traders.forEach((trader) => {
+          this.drawMerchant(trader);
         });
 
         // SLEEP
@@ -424,11 +439,13 @@ export class GameComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.createCollisionsAndMovables();
+    this.createUntargetableArea(this.gameData.untargetableAreaMap);
     this.createFarmableArea(this.gameData.farmableAreaMap);
     this.createFishableArea(this.gameData.fishableAreaMap);
     this.createMinableArea(this.gameData.minableAreaMap);
     this.createHouseArea(this.gameData.houseAreaMap);
     this.createWellArea(this.gameData.wellAreaMap);
+    this.createTraders();
     this.createMovables();
     this.loadCanvas();
   }
@@ -554,6 +571,10 @@ export class GameComponent implements AfterViewInit {
       this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].src;
     this.spriteSleepBubbles.src =
       this.gameData.spriteAnimations['spriteSleepBubbles'].src;
+    this.goblinMerchantRight.src =
+      this.gameData.spriteAnimations['goblinMerchantRight'].src;
+    this.goblinMerchantLeft.src =
+      this.gameData.spriteAnimations['goblinMerchantLeft'].src;
     this.spriteSheetFishRight.onload = () => {
       this.loadCrops();
     };
@@ -636,6 +657,77 @@ export class GameComponent implements AfterViewInit {
         50,
         50
       );
+    }
+  }
+
+  createTraders() {
+    const newTrader1 = {
+      position: {
+        x: 1099,
+        y: 930,
+      },
+      width: 96,
+      height: 64,
+      state: 'merchant-left',
+    };
+    this.traders.push(newTrader1);
+    const newTrader2 = {
+      position: {
+        x: 1295,
+        y: 930,
+      },
+      width: 96,
+      height: 64,
+      state: 'merchant-right',
+    };
+    this.traders.push(newTrader2);
+  }
+
+  drawMerchant(trader) {
+    const traderHitbox = {
+      position: {
+        x: trader.position.x + 160,
+        y: trader.position.y + 50,
+      },
+      width: trader.height,
+      height: trader.height + 66,
+      state: 'merchant',
+    };
+    const spriteSheet =
+      trader.state === 'merchant-left'
+        ? this.goblinMerchantLeft
+        : this.goblinMerchantRight;
+    if (this.goblinFramesDrawn > 20) {
+      if (this.goblinFrameIndex < 7) {
+        this.goblinFrameIndex++;
+      } else {
+        this.goblinFrameIndex = 0;
+      }
+      this.goblinFramesDrawn = 0;
+    } else {
+      this.goblinFramesDrawn++;
+    }
+    if (this.canvas && this.ctx) {
+      this.ctx.drawImage(
+        spriteSheet,
+        trader.width * this.goblinFrameIndex,
+        0,
+        trader.width,
+        trader.height,
+        trader.position.x,
+        trader.position.y,
+        trader.width * 4,
+        225
+      );
+      this.ctx.beginPath();
+      this.ctx.rect(
+        traderHitbox.position.x,
+        traderHitbox.position.y,
+        traderHitbox.width,
+        traderHitbox.height
+      );
+      this.ctx.stroke();
+      this.targetNearestSquare(traderHitbox);
     }
   }
 
@@ -1022,8 +1114,10 @@ export class GameComponent implements AfterViewInit {
     const clickedFarm = this.farmableArea.filter(
       (area) => area === this.clickedFarmableArea
     )[0];
+    console.log(clickedFarm);
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
+        console.log('insed none state');
         this.farmableArea.filter(
           (area) => area === this.clickedFarmableArea
         )[0].state = state0;
@@ -1705,6 +1799,25 @@ export class GameComponent implements AfterViewInit {
     });
   }
 
+  createUntargetableArea(map) {
+    map.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol !== 0 && this.mapImage) {
+          const newUntargetableArea = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+            state: 'untargetable',
+          };
+          this.untargetableArea.push(newUntargetableArea);
+        }
+      });
+    });
+  }
+
   createFarmableArea(map) {
     map.forEach((row, i) => {
       row.forEach((symbol, j) => {
@@ -1804,11 +1917,13 @@ export class GameComponent implements AfterViewInit {
     this.movables = [
       this.mapImage,
       ...this.boundaries,
+      ...this.untargetableArea,
       ...this.farmableArea,
       ...this.minableArea,
       ...this.fishableArea,
       ...this.houseArea,
       ...this.wellArea,
+      ...this.traders,
     ];
   }
 
@@ -2441,15 +2556,25 @@ export class GameComponent implements AfterViewInit {
         if (this.isMouseCloseToPlayer()) {
           this.mayFarm = true;
           this.hoveredFarmableArea = area;
+          //console.log(area.state);
           this.hoveredFarmableArea.center = {
             x: area.position.x + 32,
             y: area.position.y + 32,
           };
+          if (this.hoveredFarmableArea.state === 'merchant') {
+            if (this.gameData.isHoveringMerchant === false)
+              this.changeIsHoveringMerchant.emit(true);
+          } else {
+            if (this.gameData.isHoveringMerchant === true)
+              this.changeIsHoveringMerchant.emit(false);
+          }
 
           this.ctx.strokeStyle = 'blue';
           if (
             this.hoveredFarmableArea.state !== 'house' &&
-            this.hoveredFarmableArea.state !== 'well'
+            this.hoveredFarmableArea.state !== 'well' &&
+            this.hoveredFarmableArea.state !== 'merchant' &&
+            this.hoveredFarmableArea.state !== 'untargetable'
           )
             this.drawBrokenSquare(area);
         } else {

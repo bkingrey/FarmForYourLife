@@ -1,5 +1,6 @@
 import {
   ChangeEnergy,
+  ChangeIsHoveringMerchant,
   ChangeKeyEvent,
   ChangeTool,
   ChangeVelocity,
@@ -46,5 +47,9 @@ export class AppComponent implements OnInit {
 
   changeWaterMeter(event) {
     this.facade.dispatch(ChangeWaterMeter({ payload: event }));
+  }
+
+  changeIsHoveringMerchant(event) {
+    this.facade.dispatch(ChangeIsHoveringMerchant({ payload: event }));
   }
 }

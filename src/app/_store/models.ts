@@ -11,12 +11,14 @@ export interface GameState {
   minableAreas: Array<number> | [];
   houseAreas: Array<number> | [];
   wellAreas: Array<number> | [];
+  untargetableAreas: Array<number> | [];
   collisionMap: any | [];
   farmableAreaMap: any | [];
   fishableAreaMap: any | [];
   minableAreaMap: any | [];
   houseAreaMap: any | [];
   wellAreaMap: any | [];
+  untargetableAreaMap: any | [];
   spriteAnimations: SpriteAnimation;
   mapImage: SpriteMetrics;
   player: SpriteMetrics;
@@ -33,6 +35,7 @@ export interface GameState {
   keys: KeyWASD;
   equippedTool: string;
   seedsOwned: SeedKey;
+  isHoveringMerchant: boolean;
 }
 export interface SeedKey {
   [key: string]: SeedsOwned;

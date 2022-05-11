@@ -47,3 +47,8 @@ export const ChangeWaterMeter = createAction(
   '[GameData] Fill Water Meter',
   props<{ payload: number | string }>()
 );
+
+export const ChangeIsHoveringMerchant = createAction(
+  '[GameData] Is Hovering Merchant',
+  props<{ payload: boolean }>()
+);
