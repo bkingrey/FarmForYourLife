@@ -211,6 +211,7 @@ export class GameComponent implements AfterViewInit {
   bubblesFramesDrawn: number = 0;
   bubblesFrameIndex: number = 0;
   isSleeping: boolean = false;
+  canBeBounced: boolean = true;
   memoryKeys: KeyWASD = {
     w: {
       pressed: false,
@@ -1771,6 +1772,7 @@ export class GameComponent implements AfterViewInit {
 
   retangularCollision({ rectangle1, rectangle2 }) {
     // *4 is for width scale.
+
     return (
       rectangle1.position.x - 1 + rectangle1.width * 4 >=
         rectangle2.position.x &&
@@ -2146,6 +2148,9 @@ export class GameComponent implements AfterViewInit {
     }
     return null;
   }
+
+  bouncePlayer(direction) {}
+
   movement() {
     let useRightAnims;
     if (this.mousePos.x > this.player.position.x) {
@@ -2154,6 +2159,7 @@ export class GameComponent implements AfterViewInit {
       useRightAnims = false;
     }
     let moving = true;
+    let canMoveHorizontal = true;
     if (this.gameData.keys.w.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
@@ -2170,6 +2176,7 @@ export class GameComponent implements AfterViewInit {
           })
         ) {
           moving = false;
+          canMoveHorizontal = true;
         }
       }
       if (moving) {
@@ -2199,6 +2206,7 @@ export class GameComponent implements AfterViewInit {
           })
         ) {
           moving = false;
+          canMoveHorizontal = true;
         }
       }
       if (moving) {
@@ -2227,10 +2235,11 @@ export class GameComponent implements AfterViewInit {
             },
           })
         ) {
+          canMoveHorizontal = false;
           moving = false;
         }
       }
-      if (moving) {
+      if (moving || canMoveHorizontal) {
         this.movables.forEach((element) => {
           element.position.x -= this.gameData.velocity;
         });
@@ -2256,10 +2265,11 @@ export class GameComponent implements AfterViewInit {
             },
           })
         ) {
+          canMoveHorizontal = false;
           moving = false;
         }
       }
-      if (moving) {
+      if (moving || canMoveHorizontal) {
         this.movables.forEach((element) => {
           element.position.x += this.gameData.velocity;
         });
@@ -2271,6 +2281,7 @@ export class GameComponent implements AfterViewInit {
       }
     }
     if (this.isSleeping) {
+      canMoveHorizontal = false;
       moving = false;
       this.drawSleepAnimation();
     }
