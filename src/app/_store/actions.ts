@@ -32,3 +32,8 @@ export const ChangeEnergy = createAction(
   '[GameData] Change Energy',
   props<{ payload: number }>()
 );
+
+export const ChangeVelocity = createAction(
+  '[GameData] Change Velocity',
+  props<{ payload: number }>()
+);

@@ -6,5 +6,6 @@
   (mousewheel)="doScrollOnMouse($event)"
   (mousemove)="getMousePos($event)"
   (mouseleave)="removeMouseProperties()"
-  (click)="doActionOnMouse($event)"
+  (contextmenu)="doRightClickOnMouse($event)"
+  (click)="doLeftClickOnMouse($event)"
 ></canvas>

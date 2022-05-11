@@ -24,6 +24,7 @@ export class GameComponent implements AfterViewInit {
   @Output() changeTool = new EventEmitter();
   @Output() reduceSeedCount = new EventEmitter();
   @Output() changeEnergy = new EventEmitter();
+  @Output() changeVelocity = new EventEmitter();
   scale: number = 0.5;
   squareSize: number = 64;
   canvasId: string = 'game-canvas';
@@ -114,18 +115,15 @@ export class GameComponent implements AfterViewInit {
   spriteCarrySunflowerRight = new Image();
   spriteCarryWheatLeft = new Image();
   spriteCarryWheatRight = new Image();
-
   spriteCarrySmallFishLeft = new Image();
   spriteCarrySmallFishRight = new Image();
-
   spriteCarryMediumFishLeft = new Image();
   spriteCarryMediumFishRight = new Image();
-
   spriteCarryHugeFishLeft = new Image();
   spriteCarryHugeFishRight = new Image();
-
   spriteCarryNuggetLeft = new Image();
   spriteCarryNuggetRight = new Image();
+  spriteSleepBubbles = new Image();
 
   movables: Array<any> = [];
   animate: any;
@@ -139,6 +137,7 @@ export class GameComponent implements AfterViewInit {
     y: 0,
   };
   queuedCultivate = false;
+  queuedActivation = false;
   mayFarm = false;
   hoveredFarmableArea = {
     position: {
@@ -155,6 +154,19 @@ export class GameComponent implements AfterViewInit {
     watered: false,
   };
   clickedFarmableArea = {
+    position: {
+      x: -1,
+      y: -1,
+    },
+    center: {
+      x: -1,
+      y: -1,
+    },
+    width: -1,
+    height: -1,
+    state: 'none',
+  };
+  activatedArea = {
     position: {
       x: -1,
       y: -1,
@@ -186,6 +198,8 @@ export class GameComponent implements AfterViewInit {
   droppables: Array<Pickupable> = [];
   droppableFramesDrawn: Array<number> = [];
   droppableFrameIndex: Array<number> = [];
+  bubblesFramesDrawn: number = 0;
+  bubblesFrameIndex: number = 0;
   isSleeping: boolean = false;
 
   constructor() {
@@ -225,19 +239,12 @@ export class GameComponent implements AfterViewInit {
           if (this.ctx) {
             this.drawFarmable(houseTile);
           }
-          // if (this.player.center) {
-          //   if (
-          //     this.player.center.x > houseTile.position.x &&
-          //     this.player.center.y > houseTile.position.y &&
-          //     this.player.center.x < houseTile.position.x + houseTile.width &&
-          //     this.player.center.y < houseTile.position.y + houseTile.height
-          //   ) {
-          //     this.isSleeping = true;
-          //   } else {
-          //     this.isSleeping = false;
-          //   }
-          // }
         });
+
+        // SLEEP
+        if (this.queuedActivation) {
+          this.activatable();
+        }
         // MOVEMENT
         if (this.cultivatable()) {
           this.cultivate();
@@ -334,6 +341,56 @@ export class GameComponent implements AfterViewInit {
     this.queuedCultivate = false;
     this.canClick = true;
     return false;
+  }
+
+  activatable() {
+    if (this.activatedArea.state === 'house' && !this.isSleeping) {
+      this.isSleeping = true;
+      this.changeVelocity.emit(0);
+      this.goIntoHouse();
+    } else {
+      this.isSleeping = false;
+      this.changeVelocity.emit(3);
+      this.canClick = true;
+    }
+
+    this.queuedActivation = false;
+    this.activatedArea = this.defaultFarmState;
+  }
+
+  goIntoHouse() {
+    const map = this.mapImage.position;
+    const house = {
+      x: 735,
+      y: 287,
+    };
+    const difference = {
+      x: house.x - map.x,
+      y: house.y - map.y,
+    };
+
+    this.moveAllMovables(difference);
+  }
+
+  moveAllMovables(difference) {
+    console.log('difference');
+    console.log(difference.x, difference.y);
+    this.movables.forEach((element) => {
+      element.position.y += difference.y;
+    });
+    this.pickupables.forEach((element) => {
+      if (element.dropped) {
+        element.position.y += difference.y;
+      }
+    });
+    this.movables.forEach((element) => {
+      element.position.x += difference.x;
+    });
+    this.pickupables.forEach((element) => {
+      if (element.dropped) {
+        element.position.x += difference.x;
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -465,6 +522,8 @@ export class GameComponent implements AfterViewInit {
       this.gameData.spriteAnimations['spriteCarryHugeFishRight'].src;
     this.spriteCarryHugeFishLeft.src =
       this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].src;
+    this.spriteSleepBubbles.src =
+      this.gameData.spriteAnimations['spriteSleepBubbles'].src;
     this.spriteSheetFishRight.onload = () => {
       this.loadCrops();
     };
@@ -550,7 +609,41 @@ export class GameComponent implements AfterViewInit {
     }
   }
 
+  drawSleepAnimation() {
+    if (this.bubblesFramesDrawn > 13) {
+      if (this.bubblesFrameIndex < 15) {
+        if (this.gameData.energy.current < this.gameData.energy.max) {
+          this.changeEnergy.emit(1);
+        }
+        this.bubblesFrameIndex++;
+      } else {
+        this.bubblesFrameIndex = 0;
+      }
+      this.bubblesFramesDrawn = 0;
+    } else {
+      this.bubblesFramesDrawn++;
+    }
+    if (this.canvas && this.ctx) {
+      this.ctx.drawImage(
+        this.spriteSleepBubbles,
+        128 * this.bubblesFrameIndex,
+        0,
+        128,
+        128,
+        1035,
+        190,
+        128,
+        128
+      );
+    }
+  }
+
   drawSpriteAnimation(spriteSheet: HTMLImageElement, frames: number) {
+    if (this.isSleeping && this.ctx) {
+      this.ctx.globalAlpha = 0;
+    } else {
+      if (this.ctx) this.ctx.globalAlpha = 1;
+    }
     if (this.framesDrawn > 15) {
       if (this.frameIndex < frames - 1) {
         this.frameIndex++;
@@ -2011,6 +2104,11 @@ export class GameComponent implements AfterViewInit {
         });
       }
     }
+    if (this.isSleeping) {
+      moving = false;
+      this.drawSleepAnimation();
+    }
+
     if (
       !this.gameData.keys.w.pressed &&
       !this.gameData.keys.a.pressed &&
@@ -2377,8 +2475,13 @@ export class GameComponent implements AfterViewInit {
     this.mayFarm = false;
     this.hoveredFarmableArea = this.defaultFarmState;
     this.clickedFarmableArea = this.defaultFarmState;
+    this.activatedArea = this.defaultFarmState;
   }
-  doActionOnMouse(evt) {
+
+  doLeftClickOnMouse(evt) {
+    if (this.isSleeping) {
+      return;
+    }
     if (this.gameData.isCarrying) {
       this.dropCarriedItem();
     } else if (
@@ -2393,6 +2496,19 @@ export class GameComponent implements AfterViewInit {
       this.queuedCultivate = true;
     }
   }
+
+  doRightClickOnMouse(evt) {
+    evt.preventDefault();
+    if (this.isSleeping) {
+      this.queuedActivation = false;
+      this.activatable();
+      return;
+    }
+    this.canClick = true;
+    this.queuedActivation = true;
+    this.activatedArea = this.hoveredFarmableArea;
+  }
+
   doScrollOnMouse(evt) {
     if (this.player.center && this.mayFarm && this.ctx && this.canClick) {
       if (evt.wheelDelta < 0) {

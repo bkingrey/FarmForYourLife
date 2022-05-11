@@ -2,6 +2,7 @@ import {
   ChangeEnergy,
   ChangeKeyEvent,
   ChangeTool,
+  ChangeVelocity,
   getGameData,
   ReduceSeedCount,
 } from './_store/actions';
@@ -35,5 +36,9 @@ export class AppComponent implements OnInit {
 
   changeEnergy(event) {
     this.facade.dispatch(ChangeEnergy({ payload: event }));
+  }
+
+  changeVelocity(event) {
+    this.facade.dispatch(ChangeVelocity({ payload: event }));
   }
 }

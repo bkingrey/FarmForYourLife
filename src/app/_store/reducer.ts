@@ -218,5 +218,11 @@ export const gameReducer = createReducer(
         current: total,
       },
     };
+  }),
+  on(GameActions.ChangeVelocity, (state, { payload }) => {
+    return {
+      ...state,
+      velocity: payload,
+    };
   })
 );

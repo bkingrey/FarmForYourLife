@@ -603,6 +603,10 @@ export const jsonData = {
       src: "assets/carrying/carry-nugget-left.png",
       frames: 8,
     },
+    spriteSleepBubbles: {
+      src: "assets/ui/sleep-bubbles-sheet.png",
+      frames: 16,
+    },
   },
   player: {
     width: 0,
