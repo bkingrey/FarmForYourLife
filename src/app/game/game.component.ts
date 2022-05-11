@@ -298,6 +298,9 @@ export class GameComponent implements AfterViewInit {
           this.mapImage.position.y
         );
         this.ctx.restore();
+        if (!this.isMouseCloseToPlayer()) {
+          this.hoveredFarmableArea = this.defaultFarmState;
+        }
       }
     };
   }

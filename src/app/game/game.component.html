@@ -2,7 +2,9 @@
   id="game-canvas"
   [ngClass]="{
     water: hoveredFarmableArea.state === 'well',
-    house: hoveredFarmableArea.state === 'house'
+    house: hoveredFarmableArea.state === 'house',
+    mine: hoveredFarmableArea.state === 'minable',
+    fish: hoveredFarmableArea.state === 'fishable'
   }"
   tabindex="0"
   (keydown)="keyDownEvent($event)"
