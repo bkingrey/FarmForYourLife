@@ -3,8 +3,10 @@ import {
   ChangeKeyEvent,
   ChangeTool,
   ChangeVelocity,
+  ChangeWaterMeter,
   getGameData,
   ReduceSeedCount,
+  RemoveKeyDown,
 } from './_store/actions';
 import { Component, OnInit } from '@angular/core';
 import { AppFacade } from './app.facade';
@@ -40,5 +42,9 @@ export class AppComponent implements OnInit {
 
   changeVelocity(event) {
     this.facade.dispatch(ChangeVelocity({ payload: event }));
+  }
+
+  changeWaterMeter(event) {
+    this.facade.dispatch(ChangeWaterMeter({ payload: event }));
   }
 }

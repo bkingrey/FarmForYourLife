@@ -10,15 +10,21 @@ export interface GameState {
   fishableAreas: Array<number> | [];
   minableAreas: Array<number> | [];
   houseAreas: Array<number> | [];
+  wellAreas: Array<number> | [];
   collisionMap: any | [];
   farmableAreaMap: any | [];
   fishableAreaMap: any | [];
   minableAreaMap: any | [];
   houseAreaMap: any | [];
+  wellAreaMap: any | [];
   spriteAnimations: SpriteAnimation;
   mapImage: SpriteMetrics;
   player: SpriteMetrics;
   energy: {
+    current: number;
+    max: number;
+  };
+  water: {
     current: number;
     max: number;
   };

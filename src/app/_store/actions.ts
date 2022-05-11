@@ -19,6 +19,11 @@ export const ChangeKeyEvent = createAction(
   props<{ payload: KeyWASD }>()
 );
 
+export const RemoveKeyDown = createAction(
+  '[GameData] Key Up Event',
+  props<{ payload: string }>()
+);
+
 export const ChangeTool = createAction(
   '[GameData] Change Tool Event',
   props<{ payload: string }>()
@@ -36,4 +41,9 @@ export const ChangeEnergy = createAction(
 export const ChangeVelocity = createAction(
   '[GameData] Change Velocity',
   props<{ payload: number }>()
+);
+
+export const ChangeWaterMeter = createAction(
+  '[GameData] Fill Water Meter',
+  props<{ payload: number | string }>()
 );

@@ -219,3 +219,18 @@
     top: 3px;
   }
 }
+
+.water-bar {
+  width: 50px !important;
+  height: 6px !important;
+  position: absolute !important;
+  bottom: -6px;
+  background: #c9c9c9 !important;
+  .bar {
+    background: rgb(50, 50, 247);
+    transition: width 0.5s linear;
+    position: absolute;
+    height: 5px;
+    display: block;
+  }
+}

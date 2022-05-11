@@ -54,11 +54,13 @@ export const intializeState = (): GameState => {
     fishableAreas: [],
     minableAreas: [],
     houseAreas: [],
+    wellAreas: [],
     collisionMap: [],
     farmableAreaMap: [],
     fishableAreaMap: [],
     minableAreaMap: [],
     houseAreaMap: [],
+    wellAreaMap: [],
     isCarrying: false,
     equippedTool: 'shovel',
     spriteAnimations: {
@@ -92,6 +94,10 @@ export const intializeState = (): GameState => {
       current: 100,
       max: 100,
     },
+    water: {
+      current: 100,
+      max: 100,
+    },
     player: {
       width: 0,
       height: 0,
@@ -113,6 +119,7 @@ export const gameReducer = createReducer(
     const newFishableArea: Array<any> = [];
     const newMinableArea: Array<any> = [];
     const newHouseArea: Array<any> = [];
+    const newWellArea: Array<any> = [];
     for (let i = 0; i < payload.collisions.length; i += 36) {
       newCollisionMap.push(payload.collisions.slice(i, 36 + i));
     }
@@ -128,6 +135,9 @@ export const gameReducer = createReducer(
     }
     for (let i = 0; i < payload.houseAreas.length; i += 36) {
       newHouseArea.push(payload.houseAreas.slice(i, 36 + i));
+    }
+    for (let i = 0; i < payload.wellAreas.length; i += 36) {
+      newWellArea.push(payload.wellAreas.slice(i, 36 + i));
     }
     return {
       ...state,
@@ -145,11 +155,11 @@ export const gameReducer = createReducer(
       fishableAreaMap: newFishableArea,
       minableAreaMap: newMinableArea,
       houseAreaMap: newHouseArea,
+      wellAreaMap: newWellArea,
       player: payload.player,
     };
   }),
   on(GameActions.ChangeKeyEvent, (state, { payload }) => {
-    payload;
     return {
       ...state,
       keys: {
@@ -223,6 +233,18 @@ export const gameReducer = createReducer(
     return {
       ...state,
       velocity: payload,
+    };
+  }),
+  on(GameActions.ChangeWaterMeter, (state, { payload }) => {
+    return {
+      ...state,
+      water: {
+        ...state.water,
+        current:
+          payload === 'max'
+            ? state.water.max
+            : state.water.current + Number(payload),
+      },
     };
   })
 );

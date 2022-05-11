@@ -19,6 +19,12 @@
     <div [ngClass]="{ active: gameData.equippedTool === 'water' }">
       <span class="floating-number">E</span
       ><img src="../../assets/ui/water-big.png" />
+      <div class="water-bar">
+        <div
+          class="bar"
+          [style.width.%]="(gameData.water.current / gameData.water.max) * 100"
+        ></div>
+      </div>
     </div>
     <div [ngClass]="{ active: gameData.equippedTool === 'hammer' }">
       <span class="floating-number">R</span

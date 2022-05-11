@@ -21,10 +21,12 @@ import { intializeState } from '../_store/reducer';
 export class GameComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() keyChange = new EventEmitter();
+  @Output() removeKeyDown = new EventEmitter();
   @Output() changeTool = new EventEmitter();
   @Output() reduceSeedCount = new EventEmitter();
   @Output() changeEnergy = new EventEmitter();
   @Output() changeVelocity = new EventEmitter();
+  @Output() changeWaterMeter = new EventEmitter();
   scale: number = 0.5;
   squareSize: number = 64;
   canvasId: string = 'game-canvas';
@@ -60,6 +62,7 @@ export class GameComponent implements AfterViewInit {
   fishableArea: any = [];
   minableArea: any = [];
   houseArea: any = [];
+  wellArea: any = [];
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
   spriteSheetWalkRight = new Image();
@@ -201,6 +204,20 @@ export class GameComponent implements AfterViewInit {
   bubblesFramesDrawn: number = 0;
   bubblesFrameIndex: number = 0;
   isSleeping: boolean = false;
+  memoryKeys: KeyWASD = {
+    w: {
+      pressed: false,
+    },
+    a: {
+      pressed: false,
+    },
+    s: {
+      pressed: false,
+    },
+    d: {
+      pressed: false,
+    },
+  };
 
   constructor() {
     this.animate = () => {
@@ -238,6 +255,11 @@ export class GameComponent implements AfterViewInit {
         this.houseArea.forEach((houseTile) => {
           if (this.ctx) {
             this.drawFarmable(houseTile);
+          }
+        });
+        this.wellArea.forEach((wellTile) => {
+          if (this.ctx) {
+            this.drawFarmable(wellTile);
           }
         });
 
@@ -321,7 +343,8 @@ export class GameComponent implements AfterViewInit {
         this.clickedFarmableArea.state !== 'minable' &&
         this.clickedFarmableArea.state !== 'fishable' &&
         (this.gameData.equippedTool === 'shovel' ||
-          this.gameData.equippedTool === 'water' ||
+          (this.gameData.equippedTool === 'water' &&
+            this.gameData.water.current > 0) ||
           this.gameData.equippedTool === 'beets-seeds' ||
           this.gameData.equippedTool === 'cabbage-seeds' ||
           this.gameData.equippedTool === 'carrot-seeds' ||
@@ -336,6 +359,7 @@ export class GameComponent implements AfterViewInit {
       }
       this.queuedCultivate = false;
       this.canClick = true;
+      this.actionFrameIndex = 0;
       return false;
     }
     this.queuedCultivate = false;
@@ -344,7 +368,9 @@ export class GameComponent implements AfterViewInit {
   }
 
   activatable() {
-    if (this.activatedArea.state === 'house' && !this.isSleeping) {
+    if (this.activatedArea.state === 'well') {
+      this.changeWaterMeter.emit('max');
+    } else if (this.activatedArea.state === 'house' && !this.isSleeping) {
       this.isSleeping = true;
       this.changeVelocity.emit(0);
       this.goIntoHouse();
@@ -399,6 +425,7 @@ export class GameComponent implements AfterViewInit {
     this.createFishableArea(this.gameData.fishableAreaMap);
     this.createMinableArea(this.gameData.minableAreaMap);
     this.createHouseArea(this.gameData.houseAreaMap);
+    this.createWellArea(this.gameData.wellAreaMap);
     this.createMovables();
     this.loadCanvas();
   }
@@ -796,6 +823,7 @@ export class GameComponent implements AfterViewInit {
           this.farmableArea.filter(
             (area) => area === this.clickedFarmableArea
           )[0].watered = true;
+          this.changeWaterMeter.emit(-8);
           this.startWaterTimer(
             this.farmableArea.filter(
               (area) => area === this.clickedFarmableArea
@@ -1754,6 +1782,25 @@ export class GameComponent implements AfterViewInit {
     });
   }
 
+  createWellArea(map) {
+    map.forEach((row, i) => {
+      row.forEach((symbol, j) => {
+        if (symbol !== 0 && this.mapImage) {
+          const newWellArea = {
+            position: {
+              x: j * this.boundary.width + this.mapImage.position.x,
+              y: i * this.boundary.height + this.mapImage.position.y,
+            },
+            width: this.boundary.width,
+            height: this.boundary.height,
+            state: 'well',
+          };
+          this.wellArea.push(newWellArea);
+        }
+      });
+    });
+  }
+
   createMovables() {
     this.movables = [
       this.mapImage,
@@ -1762,6 +1809,7 @@ export class GameComponent implements AfterViewInit {
       ...this.minableArea,
       ...this.fishableArea,
       ...this.houseArea,
+      ...this.wellArea,
     ];
   }
 
@@ -1787,16 +1835,16 @@ export class GameComponent implements AfterViewInit {
           this.changeTool.emit('basket');
           break;
         case 'w':
-          this.moveUp(true);
+          if (!this.memoryKeys.w.pressed) this.moveUp(true);
           break;
         case 'a':
-          this.moveLeft(true);
+          if (!this.memoryKeys.a.pressed) this.moveLeft(true);
           break;
         case 's':
-          this.moveDown(true);
+          if (!this.memoryKeys.s.pressed) this.moveDown(true);
           break;
         case 'd':
-          this.moveRight(true);
+          if (!this.memoryKeys.d.pressed) this.moveRight(true);
           break;
         case '1':
           if (this.gameData.seedsOwned['potato'].count > 0)
@@ -1842,16 +1890,16 @@ export class GameComponent implements AfterViewInit {
   keyUpEvent(e: KeyboardEvent) {
     switch (e.key.toLowerCase()) {
       case 'w':
-        this.moveUp(false);
+        if (this.memoryKeys.w.pressed) this.moveUp(false);
         break;
       case 'a':
-        this.moveLeft(false);
+        if (this.memoryKeys.a.pressed) this.moveLeft(false);
         break;
       case 's':
-        this.moveDown(false);
+        if (this.memoryKeys.s.pressed) this.moveDown(false);
         break;
       case 'd':
-        this.moveRight(false);
+        if (this.memoryKeys.d.pressed) this.moveRight(false);
         break;
       default:
         break;
@@ -1859,6 +1907,7 @@ export class GameComponent implements AfterViewInit {
   }
 
   moveUp(bool: boolean) {
+    this.memoryKeys.w.pressed = bool;
     this.keyChange.emit({
       w: {
         pressed: bool,
@@ -1866,6 +1915,7 @@ export class GameComponent implements AfterViewInit {
     } as KeyWASD);
   }
   moveLeft(bool: boolean) {
+    this.memoryKeys.a.pressed = bool;
     this.keyChange.emit({
       a: {
         pressed: bool,
@@ -1873,6 +1923,7 @@ export class GameComponent implements AfterViewInit {
     } as KeyWASD);
   }
   moveRight(bool: boolean) {
+    this.memoryKeys.d.pressed = bool;
     this.keyChange.emit({
       d: {
         pressed: bool,
@@ -1880,6 +1931,7 @@ export class GameComponent implements AfterViewInit {
     } as KeyWASD);
   }
   moveDown(bool: boolean) {
+    this.memoryKeys.s.pressed = bool;
     this.keyChange.emit({
       s: {
         pressed: bool,
@@ -2396,48 +2448,7 @@ export class GameComponent implements AfterViewInit {
           };
 
           this.ctx.strokeStyle = 'blue';
-          this.ctx.moveTo(area.position.x, area.position.y);
-          this.ctx.lineTo(area.position.x + area.width / 4, area.position.y);
-          this.ctx.moveTo(area.position.x, area.position.y);
-          this.ctx.lineTo(area.position.x, area.position.y + area.height / 4);
-
-          this.ctx.moveTo(area.position.x, area.position.y + area.height);
-          this.ctx.lineTo(
-            area.position.x,
-            area.position.y + area.height - area.height / 4
-          );
-          this.ctx.moveTo(area.position.x, area.position.y + area.height);
-          this.ctx.lineTo(
-            area.position.x + area.width / 4,
-            area.position.y + area.height
-          );
-
-          this.ctx.moveTo(
-            area.position.x + area.width,
-            area.position.y + area.height
-          );
-          this.ctx.lineTo(
-            area.position.x + area.width - area.width / 4,
-            area.position.y + area.height
-          );
-          this.ctx.moveTo(
-            area.position.x + area.width,
-            area.position.y + area.height
-          );
-          this.ctx.lineTo(
-            area.position.x + area.width,
-            area.position.y + area.height - area.height / 4
-          );
-          this.ctx.moveTo(area.position.x + area.width, area.position.y);
-          this.ctx.lineTo(
-            area.position.x + area.width - area.width / 4,
-            area.position.y
-          );
-          this.ctx.moveTo(area.position.x + area.width, area.position.y);
-          this.ctx.lineTo(
-            area.position.x + area.width,
-            area.position.y + area.height / 4
-          );
+          this.drawBrokenSquare(area);
         } else {
           this.mayFarm = false;
           this.hoveredFarmableArea = this.defaultFarmState;
@@ -2452,6 +2463,53 @@ export class GameComponent implements AfterViewInit {
 
         this.ctx.stroke();
       }
+    }
+  }
+
+  drawBrokenSquare(area) {
+    if (this.ctx) {
+      this.ctx.moveTo(area.position.x, area.position.y);
+      this.ctx.lineTo(area.position.x + area.width / 4, area.position.y);
+      this.ctx.moveTo(area.position.x, area.position.y);
+      this.ctx.lineTo(area.position.x, area.position.y + area.height / 4);
+
+      this.ctx.moveTo(area.position.x, area.position.y + area.height);
+      this.ctx.lineTo(
+        area.position.x,
+        area.position.y + area.height - area.height / 4
+      );
+      this.ctx.moveTo(area.position.x, area.position.y + area.height);
+      this.ctx.lineTo(
+        area.position.x + area.width / 4,
+        area.position.y + area.height
+      );
+
+      this.ctx.moveTo(
+        area.position.x + area.width,
+        area.position.y + area.height
+      );
+      this.ctx.lineTo(
+        area.position.x + area.width - area.width / 4,
+        area.position.y + area.height
+      );
+      this.ctx.moveTo(
+        area.position.x + area.width,
+        area.position.y + area.height
+      );
+      this.ctx.lineTo(
+        area.position.x + area.width,
+        area.position.y + area.height - area.height / 4
+      );
+      this.ctx.moveTo(area.position.x + area.width, area.position.y);
+      this.ctx.lineTo(
+        area.position.x + area.width - area.width / 4,
+        area.position.y
+      );
+      this.ctx.moveTo(area.position.x + area.width, area.position.y);
+      this.ctx.lineTo(
+        area.position.x + area.width,
+        area.position.y + area.height / 4
+      );
     }
   }
 
