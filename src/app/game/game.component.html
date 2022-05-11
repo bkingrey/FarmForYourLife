@@ -1,5 +1,9 @@
 <canvas
   id="game-canvas"
+  [ngClass]="{
+    water: hoveredFarmableArea.state === 'well',
+    house: hoveredFarmableArea.state === 'house'
+  }"
   tabindex="0"
   (keydown)="keyDownEvent($event)"
   (keyup)="keyUpEvent($event)"

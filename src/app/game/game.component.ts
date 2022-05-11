@@ -1056,10 +1056,6 @@ export class GameComponent implements AfterViewInit {
     }
   }
 
-  // drawDroppable(item, index) {
-  //   this.drawDroppableAnimation(item, 16, index);
-  // }
-
   drawFarmable(area) {
     let cropFrameSize = {
       width: this.squareSize,
@@ -2448,7 +2444,11 @@ export class GameComponent implements AfterViewInit {
           };
 
           this.ctx.strokeStyle = 'blue';
-          this.drawBrokenSquare(area);
+          if (
+            this.hoveredFarmableArea.state !== 'house' &&
+            this.hoveredFarmableArea.state !== 'well'
+          )
+            this.drawBrokenSquare(area);
         } else {
           this.mayFarm = false;
           this.hoveredFarmableArea = this.defaultFarmState;

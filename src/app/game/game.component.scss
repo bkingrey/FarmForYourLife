@@ -15,3 +15,13 @@ canvas {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+
+.water {
+  cursor: url("../../assets/ui/water-big.png"),
+    url("../../assets/ui/cursor_03.cur"), default;
+}
+
+.house {
+  cursor: url("../../assets/ui/bed-big.png"),
+    url("../../assets/ui/cursor_03.cur"), default;
+}
