@@ -12,6 +12,7 @@ export interface GameState {
   houseAreas: Array<number> | [];
   wellAreas: Array<number> | [];
   untargetableAreas: Array<number> | [];
+  canHarvest: boolean;
   collisionMap: any | [];
   farmableAreaMap: any | [];
   fishableAreaMap: any | [];

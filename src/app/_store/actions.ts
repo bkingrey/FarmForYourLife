@@ -52,3 +52,8 @@ export const ChangeIsHoveringMerchant = createAction(
   '[GameData] Is Hovering Merchant',
   props<{ payload: boolean }>()
 );
+
+export const ChangeCanHarvest = createAction(
+  '[GameData] Change Can Harvest',
+  props<{ payload: boolean }>()
+);

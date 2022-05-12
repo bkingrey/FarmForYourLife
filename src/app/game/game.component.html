@@ -5,7 +5,8 @@
     house: hoveredFarmableArea.state === 'house',
     mine: hoveredFarmableArea.state === 'minable',
     fish: hoveredFarmableArea.state === 'fishable',
-    merch: hoveredFarmableArea.state === 'merchant'
+    merch: hoveredFarmableArea.state === 'merchant',
+    shovel: isShovelable(hoveredFarmableArea.state, player, mousePos)
   }"
   tabindex="0"
   (keydown)="keyDownEvent($event)"

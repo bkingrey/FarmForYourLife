@@ -2,8 +2,10 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnInit,
+  Output,
   ViewChild,
 } from '@angular/core';
 import { GameState } from '../_store/models';
@@ -16,6 +18,8 @@ import { intializeState } from '../_store/reducer';
 })
 export class GameUiComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
+  @Output() changeTool = new EventEmitter();
+  @Output() openBasket = new EventEmitter();
   @ViewChild('gameUI') gameUI: ElementRef | null = null;
   showSeeds = false;
   constructor() {}
@@ -40,5 +44,11 @@ export class GameUiComponent implements AfterViewInit {
       this.gameData.equippedTool === 'sunflower-seeds' ||
       this.gameData.equippedTool === 'basket'
     );
+  }
+  changeTools(tool) {
+    this.changeTool.emit(tool);
+    setTimeout(() => {
+      document.getElementById('game-canvas')?.focus();
+    });
   }
 }

@@ -8,6 +8,10 @@
     (changeVelocity)="changeVelocity($event)"
     (changeWaterMeter)="changeWaterMeter($event)"
     (changeIsHoveringMerchant)="changeIsHoveringMerchant($event)"
+    (canHarvest)="changeCanHarvest($event)"
   ></app-game>
-  <app-game-ui [gameData]="gameData"></app-game-ui>
+  <app-game-ui
+    [gameData]="gameData"
+    (changeTool)="changeTool($event)"
+  ></app-game-ui>
 </ng-container>

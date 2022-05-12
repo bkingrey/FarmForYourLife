@@ -5,6 +5,9 @@
   transform: translate(-50%, -50%);
   border: 10px solid black;
   pointer-events: none;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .R1024x576 {
@@ -24,7 +27,6 @@
     }
     span {
       margin-left: 5px;
-      color: #ffffff;
       letter-spacing: 0.5px;
       text-shadow: 2px 2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
         -2px -2px 0 #000, 2px 0px 0 #000, 0px 2px 0 #000, -2px 0px 0 #000,
@@ -47,10 +49,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    img {
+    .tool-icon {
       width: 35px;
       height: 35px;
     }
+    .click-image {
+      width: 6px;
+    }
+    cursor: url("../../assets/ui/cursor_big.png"),
+      url("../../assets/ui/cursor_03.cur"), default;
+    pointer-events: auto !important;
   }
 }
 
@@ -73,6 +81,9 @@
       width: 20px;
       height: 20px;
     }
+    cursor: url("../../assets/ui/cursor_big.png"),
+      url("../../assets/ui/cursor_03.cur"), default;
+    pointer-events: auto !important;
   }
   .seed {
     margin: 0 auto;

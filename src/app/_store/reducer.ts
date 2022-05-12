@@ -49,6 +49,7 @@ export const intializeState = (): GameState => {
         count: 0,
       },
     },
+    canHarvest: true,
     collisions: [],
     farmableAreas: [],
     fishableAreas: [],
@@ -241,6 +242,12 @@ export const gameReducer = createReducer(
     return {
       ...state,
       velocity: payload,
+    };
+  }),
+  on(GameActions.ChangeCanHarvest, (state, { payload }) => {
+    return {
+      ...state,
+      canHarvest: payload,
     };
   }),
   on(GameActions.ChangeIsHoveringMerchant, (state, { payload }) => {

@@ -1,3 +1,4 @@
+import { GameUtils } from './game.util';
 import {
   GameState,
   SpriteMetrics,
@@ -18,7 +19,7 @@ import { intializeState } from '../_store/reducer';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent implements AfterViewInit {
+export class GameComponent extends GameUtils implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() keyChange = new EventEmitter();
   @Output() removeKeyDown = new EventEmitter();
@@ -28,6 +29,7 @@ export class GameComponent implements AfterViewInit {
   @Output() changeVelocity = new EventEmitter();
   @Output() changeWaterMeter = new EventEmitter();
   @Output() changeIsHoveringMerchant = new EventEmitter();
+  @Output() canHarvest = new EventEmitter();
   scale: number = 0.5;
   squareSize: number = 64;
   canvasId: string = 'game-canvas';
@@ -205,13 +207,9 @@ export class GameComponent implements AfterViewInit {
   };
   canClick = true;
   pickupables: Array<Pickupable> = [];
-  droppables: Array<Pickupable> = [];
-  droppableFramesDrawn: Array<number> = [];
-  droppableFrameIndex: Array<number> = [];
   bubblesFramesDrawn: number = 0;
   bubblesFrameIndex: number = 0;
   isSleeping: boolean = false;
-  canBeBounced: boolean = true;
   memoryKeys: KeyWASD = {
     w: {
       pressed: false,
@@ -228,6 +226,7 @@ export class GameComponent implements AfterViewInit {
   };
 
   constructor() {
+    super();
     this.animate = () => {
       if (this.ctx && this.canvas) {
         this.ctx.save();
@@ -314,7 +313,7 @@ export class GameComponent implements AfterViewInit {
           this.mapImage.position.y
         );
         this.ctx.restore();
-        if (!this.isMouseCloseToPlayer()) {
+        if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
           this.hoveredFarmableArea = this.defaultFarmState;
         }
       }
@@ -361,6 +360,10 @@ export class GameComponent implements AfterViewInit {
       if (
         this.clickedFarmableArea.state !== 'minable' &&
         this.clickedFarmableArea.state !== 'fishable' &&
+        this.clickedFarmableArea.state !== 'untargetable' &&
+        this.clickedFarmableArea.state !== 'merchant' &&
+        this.clickedFarmableArea.state !== 'merchant-left' &&
+        this.clickedFarmableArea.state !== 'merchant-right' &&
         (this.gameData.equippedTool === 'shovel' ||
           (this.gameData.equippedTool === 'water' &&
             this.gameData.water.current > 0) ||
@@ -577,6 +580,54 @@ export class GameComponent implements AfterViewInit {
     this.goblinMerchantLeft.src =
       this.gameData.spriteAnimations['goblinMerchantLeft'].src;
     this.spriteSheetFishRight.onload = () => {
+      this.loadCursors();
+    };
+  }
+
+  loadCursors() {
+    const bed = new Image();
+    bed.src = 'assets/ui/bed-big.png';
+    const beets = new Image();
+    beets.src = 'assets/ui/beets-ui.png';
+    const cabbage = new Image();
+    cabbage.src = 'assets/ui/cabbage-ui.png';
+    const carrot = new Image();
+    carrot.src = 'assets/ui/carrot-ui.png';
+    const cauliflower = new Image();
+    cauliflower.src = 'assets/ui/cauliflower-ui.png';
+    const coins = new Image();
+    coins.src = 'assets/ui/coins-big.png';
+    const cursor = new Image();
+    const hammer = new Image();
+    hammer.src = 'assets/ui/hammer-big.png';
+    const kale = new Image();
+    kale.src = 'assets/ui/kale-ui.png';
+    const mousedrop = new Image();
+    mousedrop.src = 'assets/ui/mouse-drop.png';
+    const mousedropRight = new Image();
+    mousedropRight.src = 'assets/ui/mouse-drop-right.png';
+    const pickaxe = new Image();
+    pickaxe.src = 'assets/ui/pickaxe-big.png';
+    const potato = new Image();
+    potato.src = 'assets/ui/potato-ui.png';
+    const radish = new Image();
+    radish.src = 'assets/ui/raddish-ui.png';
+    const rod = new Image();
+    rod.src = 'assets/ui/rod-big.png';
+    const seedBasket = new Image();
+    seedBasket.src = 'assets/ui/seed-basket.png';
+    const shovel = new Image();
+    shovel.src = 'assets/ui/shovel-big.png';
+    const shovelx = new Image();
+    shovelx.src = 'assets/ui/shovel-x.png';
+    const sunflower = new Image();
+    sunflower.src = 'assets/ui/sunflower-ui.png';
+    const water = new Image();
+    water.src = 'assets/ui/water-big.png';
+    const wheat = new Image();
+    wheat.src = 'assets/ui/wheat-ui.png';
+    cursor.src = 'assets/ui/cursor_big.png';
+    cursor.onload = () => {
       this.loadCrops();
     };
   }
@@ -685,7 +736,7 @@ export class GameComponent implements AfterViewInit {
   }
 
   drawMerchant(trader) {
-    const traderHitbox = {
+    let traderHitbox = {
       position: {
         x: trader.position.x + 160,
         y: trader.position.y + 50,
@@ -720,14 +771,14 @@ export class GameComponent implements AfterViewInit {
         trader.width * 4,
         225
       );
-      this.ctx.beginPath();
-      this.ctx.rect(
-        traderHitbox.position.x,
-        traderHitbox.position.y,
-        traderHitbox.width,
-        traderHitbox.height
-      );
-      this.ctx.stroke();
+      // this.ctx.beginPath();
+      // this.ctx.rect(
+      //   traderHitbox.position.x,
+      //   traderHitbox.position.y,
+      //   traderHitbox.width,
+      //   traderHitbox.height
+      // );
+      // this.ctx.stroke();
       this.targetNearestSquare(traderHitbox);
     }
   }
@@ -1118,7 +1169,6 @@ export class GameComponent implements AfterViewInit {
     console.log(clickedFarm);
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
-        console.log('insed none state');
         this.farmableArea.filter(
           (area) => area === this.clickedFarmableArea
         )[0].state = state0;
@@ -1767,7 +1817,13 @@ export class GameComponent implements AfterViewInit {
         );
       }
     }
-    this.targetNearestSquare(area);
+    area.center = {
+      x: area.position.x + area.width / 2,
+      y: area.position.y + area.height / 2,
+    };
+    if (area.center !== this.hoveredFarmableArea.center) {
+      this.targetNearestSquare(area);
+    }
   }
 
   retangularCollision({ rectangle1, rectangle2 }) {
@@ -2564,10 +2620,10 @@ export class GameComponent implements AfterViewInit {
       ) {
         this.ctx.beginPath();
         this.ctx.lineWidth = 6;
-        if (this.isMouseCloseToPlayer()) {
+        this.hoveredFarmableArea = area;
+        this.changeEquippedTool(area.state);
+        if (this.isMouseCloseToPlayer(this.player, this.mousePos)) {
           this.mayFarm = true;
-          this.hoveredFarmableArea = area;
-          //console.log(area.state);
           this.hoveredFarmableArea.center = {
             x: area.position.x + 32,
             y: area.position.y + 32,
@@ -2602,6 +2658,35 @@ export class GameComponent implements AfterViewInit {
 
         this.ctx.stroke();
       }
+    }
+  }
+
+  changeEquippedTool(state) {
+    if (state === this.hoveredFarmableArea.state) {
+      return;
+    }
+    if (state === 'fishable') {
+      this.changeTool.emit('rod');
+      this.canHarvest.emit(true);
+    } else if (state === 'minable') {
+      this.changeTool.emit('pickaxe');
+      this.canHarvest.emit(true);
+    } else if (state === 'well') {
+      this.changeTool.emit('water');
+      this.canHarvest.emit(false);
+    } else if (
+      state === 'untargetable' ||
+      state === 'well' ||
+      state === 'house'
+    ) {
+      this.canHarvest.emit(false);
+      this.changeTool.emit('shovel');
+    } else {
+      this.changeTool.emit('shovel');
+      this.canHarvest.emit(true);
+    }
+    if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
+      this.canHarvest.emit(false);
     }
   }
 
@@ -2650,22 +2735,6 @@ export class GameComponent implements AfterViewInit {
         area.position.y + area.height / 4
       );
     }
-  }
-
-  isMouseCloseToPlayer() {
-    if (this.player.center) {
-      return (
-        ((this.mousePos.x >= this.player.center.x &&
-          this.mousePos.x - this.player.center.x < 100) ||
-          (this.player.center.x >= this.mousePos.x &&
-            this.player.center.x - this.mousePos.x < 100)) &&
-        ((this.mousePos.y >= this.player.center.y &&
-          this.mousePos.y - this.player.center.y < 100) ||
-          (this.player.center.y >= this.mousePos.y &&
-            this.player.center.y - this.mousePos.y < 100))
-      );
-    }
-    return false;
   }
 
   removeMouseProperties() {

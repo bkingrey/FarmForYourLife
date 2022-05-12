@@ -6,37 +6,59 @@
     ></div>
     <span>{{ gameData.energy.current }}/{{ gameData.energy.max }}</span>
   </div>
+  <div class="gold-container"></div>
   <div class="carrying-ui" *ngIf="gameData.isCarrying">
     <div>
       <img src="../../assets/ui/mouse-drop.png" /> <span>Drop/Give</span>
     </div>
   </div>
   <div class="tool-ui" *ngIf="!gameData.isCarrying">
-    <div [ngClass]="{ active: gameData.equippedTool === 'shovel' }">
-      <span class="floating-number">Q</span
-      ><img src="../../assets/ui/shovel-big.png" />
+    <div
+      *ngIf="gameData.equippedTool === 'shovel' && gameData.canHarvest"
+      [ngClass]="{ active: gameData.equippedTool === 'shovel' }"
+      (click)="changeTools('shovel')"
+      (mousedown)="$event.preventDefault()"
+    >
+      <span class="floating-number"></span
+      ><img class="tool-icon" src="../../assets/ui/shovel-big.png" />
     </div>
-    <div [ngClass]="{ active: gameData.equippedTool === 'water' }">
+    <div *ngIf="!gameData.canHarvest" (mousedown)="$event.preventDefault()">
+      <span class="floating-number">R</span
+      ><img class="tool-icon" src="../../assets/ui/shovel-x.png" />
+    </div>
+    <div
+      *ngIf="gameData.equippedTool === 'pickaxe' && gameData.canHarvest"
+      [ngClass]="{ active: gameData.equippedTool === 'pickaxe' }"
+      (click)="changeTools('pickaxe')"
+      (mousedown)="$event.preventDefault()"
+    >
+      <span class="floating-number">T</span
+      ><img class="tool-icon" src="../../assets/ui/pickaxe-big.png" />
+    </div>
+    <div
+      *ngIf="gameData.equippedTool === 'rod' && gameData.canHarvest"
+      [ngClass]="{ active: gameData.equippedTool === 'rod' }"
+      (click)="changeTools('rod')"
+      (mousedown)="$event.preventDefault()"
+    >
+      <span class="floating-number">F</span
+      ><img class="tool-icon" src="../../assets/ui/rod-big.png" />
+    </div>
+    <div
+      [ngClass]="{
+        active: gameData.equippedTool === 'water' && gameData.canHarvest
+      }"
+      (click)="changeTools('water')"
+      (mousedown)="$event.preventDefault()"
+    >
       <span class="floating-number">E</span
-      ><img src="../../assets/ui/water-big.png" />
+      ><img class="tool-icon" src="../../assets/ui/water-big.png" />
       <div class="water-bar">
         <div
           class="bar"
           [style.width.%]="(gameData.water.current / gameData.water.max) * 100"
         ></div>
       </div>
-    </div>
-    <div [ngClass]="{ active: gameData.equippedTool === 'hammer' }">
-      <span class="floating-number">R</span
-      ><img src="../../assets/ui/hammer-big.png" />
-    </div>
-    <div [ngClass]="{ active: gameData.equippedTool === 'pickaxe' }">
-      <span class="floating-number">T</span
-      ><img src="../../assets/ui/pickaxe-big.png" />
-    </div>
-    <div [ngClass]="{ active: gameData.equippedTool === 'rod' }">
-      <span class="floating-number">F</span
-      ><img src="../../assets/ui/rod-big.png" />
     </div>
   </div>
   <div class="seed-ui" *ngIf="!gameData.isCarrying">
@@ -48,6 +70,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['potato'].count === 0
       }"
+      (click)="changeTools('potato-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">1</span
       ><img src="../../assets/ui/potato-ui.png" />
@@ -63,6 +87,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['carrot'].count === 0
       }"
+      (click)="changeTools('carrot-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">2</span
       ><img src="../../assets/ui/carrot-ui.png" />
@@ -78,6 +104,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['wheat'].count === 0
       }"
+      (click)="changeTools('wheat-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">3</span
       ><img src="../../assets/ui/wheat-ui.png" />
@@ -93,6 +121,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['cabbage'].count === 0
       }"
+      (click)="changeTools('cabbage-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">4</span
       ><img src="../../assets/ui/cabbage-ui.png" />
@@ -108,6 +138,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['cauliflower'].count === 0
       }"
+      (click)="changeTools('cauliflower-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">5</span
       ><img src="../../assets/ui/cauliflower-ui.png" />
@@ -123,6 +155,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['beets'].count === 0
       }"
+      (click)="changeTools('beet-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">6</span
       ><img src="../../assets/ui/beets-ui.png" />
@@ -138,6 +172,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['radish'].count === 0
       }"
+      (click)="changeTools('radish-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">7</span
       ><img src="../../assets/ui/raddish-ui.png" />
@@ -153,6 +189,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['kale'].count === 0
       }"
+      (click)="changeTools('kale-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">8</span
       ><img src="../../assets/ui/kale-ui.png" />
@@ -169,6 +207,8 @@
         closed: !allSeeds(),
         grayout: gameData.seedsOwned['sunflower'].count === 0
       }"
+      (click)="changeTools('sunflower-seeds')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">9</span
       ><img src="../../assets/ui/sunflower-ui.png" />
@@ -180,6 +220,8 @@
     <div
       class="basket"
       [ngClass]="{ active: gameData.equippedTool === 'basket' }"
+      (click)="changeTools('basket')"
+      (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">B</span>
       <img src="../../assets/ui/seed-basket.png" />

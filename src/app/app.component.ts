@@ -1,4 +1,5 @@
 import {
+  ChangeCanHarvest,
   ChangeEnergy,
   ChangeIsHoveringMerchant,
   ChangeKeyEvent,
@@ -51,5 +52,9 @@ export class AppComponent implements OnInit {
 
   changeIsHoveringMerchant(event) {
     this.facade.dispatch(ChangeIsHoveringMerchant({ payload: event }));
+  }
+
+  changeCanHarvest(event) {
+    this.facade.dispatch(ChangeCanHarvest({ payload: event }));
   }
 }
