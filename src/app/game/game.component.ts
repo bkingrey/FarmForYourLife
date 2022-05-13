@@ -324,7 +324,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           }
           this.hoveredFarmableArea = this.defaultFarmState;
         } else {
-          if (this.gameData.canHarvest === false) {
+          if (
+            this.gameData.canHarvest === false &&
+            this.hoveredFarmableArea.state !== 'untargetable' &&
+            this.hoveredFarmableArea.state !== 'house' &&
+            this.hoveredFarmableArea.state !== 'merchant'
+          ) {
             this.canHarvest.emit(true);
           }
         }
@@ -981,7 +986,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.changeTool.emit('shovel');
       return;
     }
-    if (this.hoveredFarmableArea.state === 'fishable') {
+    if (this.clickedFarmableArea.state === 'fishable') {
       const getRandom = Math.random() * 100;
       if (getRandom < 75) {
         this.changeTool.emit('smallfish');
@@ -990,7 +995,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       } else {
         this.changeTool.emit('hugefish');
       }
-    } else if (this.hoveredFarmableArea.state === 'minable') {
+    } else if (this.clickedFarmableArea.state === 'minable') {
       const getRandom = Math.random() * 100;
       if (getRandom > 99) this.changeTool.emit('nugget');
     }
@@ -2613,7 +2618,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.ctx.lineWidth = 6;
 
         if (this.isMouseCloseToPlayer(this.player, this.mousePos)) {
-          if (area !== this.hoveredFarmableArea && !this.gameData.isCarrying)
+          if (
+            area !== this.hoveredFarmableArea &&
+            !this.gameData.isCarrying &&
+            this.canClick
+          )
             this.changeEquippedTool(area.state);
           this.hoveredFarmableArea = area;
           this.mayFarm = true;
@@ -2662,11 +2671,16 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     } else if (
       state === 'untargetable' ||
       state === 'well' ||
-      state === 'house'
+      state === 'house' ||
+      state === 'merchant' ||
+      state === 'merchant-left' ||
+      state === 'merchant-right'
     ) {
+      console.log('first line');
       this.canHarvest.emit(false);
       this.changeTool.emit('shovel');
     } else if (!this.isHoldingSeed(this.gameData.equippedTool)) {
+      console.log('next line');
       this.changeTool.emit('shovel');
       this.canHarvest.emit(true);
     }
@@ -2862,8 +2876,41 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       switch (this.gameData.equippedTool) {
         case 'potato':
           this.tickMoney(PLANT_COSTS.POTATO * PLANT_MULTIPLIER);
-
           break;
+        case 'carrot':
+          this.tickMoney(PLANT_COSTS.CARROT * PLANT_MULTIPLIER);
+          break;
+        case 'wheat':
+          this.tickMoney(PLANT_COSTS.WHEAT * PLANT_MULTIPLIER);
+          break;
+        case 'cabbage':
+          this.tickMoney(PLANT_COSTS.CABBAGE * PLANT_MULTIPLIER);
+          break;
+        case 'cauliflower':
+          this.tickMoney(PLANT_COSTS.CAULIFLOWER * PLANT_MULTIPLIER);
+          break;
+        case 'beets':
+          this.tickMoney(PLANT_COSTS.BEETS * PLANT_MULTIPLIER);
+          break;
+        case 'kale':
+          this.tickMoney(PLANT_COSTS.KALE * PLANT_MULTIPLIER);
+          break;
+        case 'sunflower':
+          this.tickMoney(PLANT_COSTS.SUNFLOWER * PLANT_MULTIPLIER);
+          break;
+        case 'smallfish':
+          this.tickMoney(PLANT_COSTS.SMALLFISH);
+          break;
+        case 'mediumfish':
+          this.tickMoney(PLANT_COSTS.MEDIUMFISH);
+          break;
+        case 'hugefish':
+          this.tickMoney(PLANT_COSTS.HUGEFISH);
+          break;
+        case 'nugget':
+          this.tickMoney(PLANT_COSTS.NUGGET);
+          break;
+
         default:
           break;
       }
