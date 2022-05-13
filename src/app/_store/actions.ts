@@ -66,3 +66,11 @@ export const ChangeCanOpenShop = createAction(
   '[GameData] Change Can Open Shop',
   props<{ payload: boolean }>()
 );
+export const ChangeCanEnterHouse = createAction(
+  '[GameData] Change Can Enter House',
+  props<{ payload: boolean }>()
+);
+export const ChangeIsSleeping = createAction(
+  '[GameData] Change Is Sleeping',
+  props<{ payload: boolean }>()
+);

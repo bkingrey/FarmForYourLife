@@ -49,6 +49,8 @@ export const intializeState = (): GameState => {
         count: 0,
       },
     },
+    isSleeping: false,
+    canEnterHouse: false,
     canHarvest: true,
     canFillWater: false,
     canOpenShop: false,
@@ -262,6 +264,18 @@ export const gameReducer = createReducer(
     return {
       ...state,
       canOpenShop: payload,
+    };
+  }),
+  on(GameActions.ChangeCanEnterHouse, (state, { payload }) => {
+    return {
+      ...state,
+      canEnterHouse: payload,
+    };
+  }),
+  on(GameActions.ChangeIsSleeping, (state, { payload }) => {
+    return {
+      ...state,
+      isSleeping: payload,
     };
   }),
   on(GameActions.ChangeMoney, (state, { payload }) => {

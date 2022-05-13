@@ -34,6 +34,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() canHarvest = new EventEmitter();
   @Output() canOpenShop = new EventEmitter();
   @Output() canFillWater = new EventEmitter();
+  @Output() canEnterHouse = new EventEmitter();
+  @Output() isSleeping = new EventEmitter();
   isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
@@ -214,7 +216,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   pickupables: Array<Pickupable> = [];
   bubblesFramesDrawn: number = 0;
   bubblesFrameIndex: number = 0;
-  isSleeping: boolean = false;
   memoryKeys: KeyWASD = {
     w: {
       pressed: false,
@@ -348,6 +349,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           } else {
             if (this.gameData.canOpenShop) this.canOpenShop.emit(false);
           }
+          if (this.hoveredFarmableArea.state === 'house') {
+            if (!this.gameData.canEnterHouse) this.canEnterHouse.emit(true);
+          } else {
+            if (this.gameData.canEnterHouse) this.canEnterHouse.emit(false);
+          }
         }
       }
     };
@@ -421,12 +427,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   activatable() {
-    if (this.activatedArea.state === 'house' && !this.isSleeping) {
-      this.isSleeping = true;
+    if (this.activatedArea.state === 'house' && !this.gameData.isSleeping) {
+      this.isSleeping.emit(true);
       this.changeVelocity.emit(0);
       this.goIntoHouse();
     } else {
-      this.isSleeping = false;
+      this.isSleeping.emit(false);
       this.changeVelocity.emit(2);
       this.canClick = true;
     }
@@ -842,7 +848,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   drawSpriteAnimation(spriteSheet: HTMLImageElement, frames: number) {
-    if (this.isSleeping && this.ctx) {
+    if (this.gameData.isSleeping && this.ctx) {
       this.ctx.globalAlpha = 0;
     } else {
       if (this.ctx) this.ctx.globalAlpha = 1;
@@ -2348,7 +2354,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         });
       }
     }
-    if (this.isSleeping) {
+    if (this.gameData.isSleeping) {
       canMoveHorizontal = false;
       moving = false;
       this.drawSleepAnimation();
@@ -2359,7 +2365,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       !this.gameData.keys.a.pressed &&
       !this.gameData.keys.s.pressed &&
       !this.gameData.keys.d.pressed &&
-      !this.isSleeping
+      !this.gameData.isSleeping
     ) {
       if (this.gameData.equippedTool === 'beets') {
         this.drawSpriteAnimation(
@@ -2759,7 +2765,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   doLeftClickOnMouse(evt) {
-    if (this.isSleeping) {
+    if (this.gameData.isSleeping) {
       return;
     }
     if (this.gameData.isCarrying) {
@@ -2790,7 +2796,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       return;
     }
     if (!this.isWatering) {
-      if (this.isSleeping) {
+      if (this.gameData.isSleeping) {
         this.queuedActivation = false;
         this.activatable();
         return;

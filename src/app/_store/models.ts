@@ -12,6 +12,8 @@ export interface GameState {
   houseAreas: Array<number> | [];
   wellAreas: Array<number> | [];
   untargetableAreas: Array<number> | [];
+  isSleeping: boolean;
+  canEnterHouse: boolean;
   canOpenShop: boolean;
   canHarvest: boolean;
   canFillWater: boolean;

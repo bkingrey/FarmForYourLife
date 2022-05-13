@@ -94,6 +94,20 @@
       />
       <img
         [ngClass]="{
+          hideShovel: !gameData.canEnterHouse || gameData.isSleeping
+        }"
+        class="tool-icon"
+        src="../../assets/ui/bed-big.png"
+      />
+      <img
+        [ngClass]="{
+          hideShovel: !gameData.isSleeping
+        }"
+        class="tool-icon"
+        src="../../assets/ui/go-back.png"
+      />
+      <img
+        [ngClass]="{
           hideShovel: !gameData.canHarvest || gameData.equippedTool !== 'shovel'
         }"
         class="tool-icon"
@@ -108,7 +122,7 @@
       />
       <img
         [ngClass]="{
-          hideShovel: !gameData.canOpenShop
+          hideShovel: !gameData.canOpenShop || gameData.isCarrying
         }"
         class="tool-icon"
         src="../../assets/ui/coins-big.png"
