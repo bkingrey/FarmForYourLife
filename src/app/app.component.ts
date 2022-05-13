@@ -1,8 +1,8 @@
 import {
   ChangeCanHarvest,
   ChangeEnergy,
-  ChangeIsHoveringMerchant,
   ChangeKeyEvent,
+  ChangeMoney,
   ChangeTool,
   ChangeVelocity,
   ChangeWaterMeter,
@@ -50,11 +50,10 @@ export class AppComponent implements OnInit {
     this.facade.dispatch(ChangeWaterMeter({ payload: event }));
   }
 
-  changeIsHoveringMerchant(event) {
-    this.facade.dispatch(ChangeIsHoveringMerchant({ payload: event }));
-  }
-
   changeCanHarvest(event) {
     this.facade.dispatch(ChangeCanHarvest({ payload: event }));
+  }
+  changeMoney(event) {
+    this.facade.dispatch(ChangeMoney({ payload: event }));
   }
 }

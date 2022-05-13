@@ -19,6 +19,7 @@
   position: absolute;
   bottom: 0;
   margin: 10px;
+  color: white;
   div {
     display: flex;
     align-items: center;
@@ -254,5 +255,26 @@
     position: absolute;
     height: 5px;
     display: block;
+  }
+}
+
+.gold-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 10px;
+  top: 35px;
+  img {
+    width: 30px;
+    margin-right: 2px;
+  }
+  span {
+    color: white;
+    letter-spacing: 0.5px;
+    text-shadow: 2px 2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
+      -2px -2px 0 #000, 2px 0px 0 #000, 0px 2px 0 #000, -2px 0px 0 #000,
+      0px -2px 0 #000;
+    font-size: 12px;
   }
 }

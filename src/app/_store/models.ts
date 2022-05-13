@@ -36,7 +36,7 @@ export interface GameState {
   keys: KeyWASD;
   equippedTool: string;
   seedsOwned: SeedKey;
-  isHoveringMerchant: boolean;
+  money: number;
 }
 export interface SeedKey {
   [key: string]: SeedsOwned;
@@ -94,3 +94,20 @@ export interface KeyWASD {
     pressed: boolean;
   };
 }
+
+export const PLANT_MULTIPLIER = 4;
+export const PLANT_COSTS = {
+  POTATO: 10,
+  CARROT: 10,
+  WHEAT: 10,
+  CABBAGE: 10,
+  CAULIFLOWER: 20,
+  BEETS: 30,
+  RADISH: 40,
+  KALE: 50,
+  SUNFLOWER: 60,
+  SMALLFISH: 5,
+  MEDIUMFISH: 10,
+  LARGEFISH: 20,
+  NUGGET: 100,
+};

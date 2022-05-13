@@ -109,7 +109,7 @@ export const intializeState = (): GameState => {
         y: 0,
       },
     },
-    isHoveringMerchant: false,
+    money: 0,
   };
 };
 export const gameReducer = createReducer(
@@ -250,10 +250,10 @@ export const gameReducer = createReducer(
       canHarvest: payload,
     };
   }),
-  on(GameActions.ChangeIsHoveringMerchant, (state, { payload }) => {
+  on(GameActions.ChangeMoney, (state, { payload }) => {
     return {
       ...state,
-      isHoveringMerchant: payload,
+      money: state.money + payload,
     };
   }),
   on(GameActions.ChangeWaterMeter, (state, { payload }) => {

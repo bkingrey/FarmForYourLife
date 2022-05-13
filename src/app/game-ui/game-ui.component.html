@@ -6,7 +6,11 @@
     ></div>
     <span>{{ gameData.energy.current }}/{{ gameData.energy.max }}</span>
   </div>
-  <div class="gold-container"></div>
+  <div class="gold-container">
+    <img src="../../assets/ui/coin.png" alt="" /><span>{{
+      gameData.money
+    }}</span>
+  </div>
   <div class="carrying-ui" *ngIf="gameData.isCarrying">
     <div>
       <img src="../../assets/ui/mouse-drop.png" /> <span>Drop/Give</span>
@@ -36,7 +40,6 @@
       [ngClass]="{ active: gameData.equippedTool === 'pickaxe' }"
       (mousedown)="$event.preventDefault()"
     >
-      <span class="floating-number">T</span
       ><img class="click-image" src="../../assets/ui/mouse-drop.png" /><img
         class="tool-icon"
         src="../../assets/ui/pickaxe-big.png"
@@ -47,7 +50,6 @@
       [ngClass]="{ active: gameData.equippedTool === 'rod' }"
       (mousedown)="$event.preventDefault()"
     >
-      <span class="floating-number">F</span
       ><img class="click-image" src="../../assets/ui/mouse-drop.png" /><img
         class="tool-icon"
         src="../../assets/ui/rod-big.png"

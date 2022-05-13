@@ -48,12 +48,12 @@ export const ChangeWaterMeter = createAction(
   props<{ payload: number | string }>()
 );
 
-export const ChangeIsHoveringMerchant = createAction(
-  '[GameData] Is Hovering Merchant',
-  props<{ payload: boolean }>()
-);
-
 export const ChangeCanHarvest = createAction(
   '[GameData] Change Can Harvest',
   props<{ payload: boolean }>()
+);
+
+export const ChangeMoney = createAction(
+  '[GameData] Change Money',
+  props<{ payload: number }>()
 );
