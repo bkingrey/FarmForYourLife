@@ -769,7 +769,7 @@ export const jsonData = {
       y: -40,
     },
   },
-  velocity: 3,
+  velocity: 2,
   keys: {
     w: {
       pressed: false,

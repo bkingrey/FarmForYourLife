@@ -411,7 +411,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.goIntoHouse();
     } else {
       this.isSleeping = false;
-      this.changeVelocity.emit(3);
+      this.changeVelocity.emit(2);
       this.canClick = true;
     }
 
