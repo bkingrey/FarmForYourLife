@@ -50,6 +50,8 @@ export const intializeState = (): GameState => {
       },
     },
     canHarvest: true,
+    canFillWater: false,
+    canOpenShop: false,
     collisions: [],
     farmableAreas: [],
     fishableAreas: [],
@@ -248,6 +250,18 @@ export const gameReducer = createReducer(
     return {
       ...state,
       canHarvest: payload,
+    };
+  }),
+  on(GameActions.ChangeCanFillWater, (state, { payload }) => {
+    return {
+      ...state,
+      canFillWater: payload,
+    };
+  }),
+  on(GameActions.ChangeCanOpenShop, (state, { payload }) => {
+    return {
+      ...state,
+      canOpenShop: payload,
     };
   }),
   on(GameActions.ChangeMoney, (state, { payload }) => {

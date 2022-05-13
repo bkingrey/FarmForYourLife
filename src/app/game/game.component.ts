@@ -32,6 +32,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() changeWaterMeter = new EventEmitter();
   @Output() changeMoney = new EventEmitter();
   @Output() canHarvest = new EventEmitter();
+  @Output() canOpenShop = new EventEmitter();
+  @Output() canFillWater = new EventEmitter();
   isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
@@ -328,9 +330,23 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.gameData.canHarvest === false &&
             this.hoveredFarmableArea.state !== 'untargetable' &&
             this.hoveredFarmableArea.state !== 'house' &&
-            this.hoveredFarmableArea.state !== 'merchant'
+            this.hoveredFarmableArea.state !== 'merchant' &&
+            this.hoveredFarmableArea.state !== 'well'
           ) {
             this.canHarvest.emit(true);
+          }
+          if (
+            this.hoveredFarmableArea.state === 'well' ||
+            this.hoveredFarmableArea.state === 'fishable'
+          ) {
+            if (!this.gameData.canFillWater) this.canFillWater.emit(true);
+          } else {
+            if (this.gameData.canFillWater) this.canFillWater.emit(false);
+          }
+          if (this.hoveredFarmableArea.state === 'merchant') {
+            if (!this.gameData.canOpenShop) this.canOpenShop.emit(true);
+          } else {
+            if (this.gameData.canOpenShop) this.canOpenShop.emit(false);
           }
         }
       }
@@ -2003,22 +2019,22 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   keyDownEvent(e: KeyboardEvent) {
+    if (!this.memoryKeys.w.pressed && e.key === 'w') {
+      this.moveUp(true);
+    }
+    if (!this.memoryKeys.a.pressed && e.key === 'a') {
+      this.moveLeft(true);
+    }
+    if (!this.memoryKeys.s.pressed && e.key === 's') {
+      this.moveDown(true);
+    }
+    if (!this.memoryKeys.d.pressed && e.key === 'd') {
+      this.moveRight(true);
+    }
     if (this.canClick) {
       switch (e.key.toLowerCase()) {
         case 'b':
           this.changeTool.emit('basket');
-          break;
-        case 'w':
-          if (!this.memoryKeys.w.pressed) this.moveUp(true);
-          break;
-        case 'a':
-          if (!this.memoryKeys.a.pressed) this.moveLeft(true);
-          break;
-        case 's':
-          if (!this.memoryKeys.s.pressed) this.moveDown(true);
-          break;
-        case 'd':
-          if (!this.memoryKeys.d.pressed) this.moveRight(true);
           break;
         case '1':
           if (this.gameData.seedsOwned['potato'].count > 0)
@@ -2676,7 +2692,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       state === 'merchant-left' ||
       state === 'merchant-right'
     ) {
-      console.log('first line');
       this.canHarvest.emit(false);
       this.changeTool.emit('shovel');
     } else if (!this.isHoldingSeed(this.gameData.equippedTool)) {
@@ -2767,7 +2782,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   doRightClickOnMouse(evt) {
     evt.preventDefault();
-    if (this.isHoldingSeed(this.gameData.equippedTool)) {
+    if (
+      this.isHoldingSeed(this.gameData.equippedTool) ||
+      this.gameData.equippedTool === 'basket'
+    ) {
       this.changeTool.emit('shovel');
       return;
     }

@@ -53,7 +53,16 @@ export const ChangeCanHarvest = createAction(
   props<{ payload: boolean }>()
 );
 
+export const ChangeCanFillWater = createAction(
+  '[GameData] Change Can Fill Water',
+  props<{ payload: boolean }>()
+);
+
 export const ChangeMoney = createAction(
   '[GameData] Change Money',
   props<{ payload: number }>()
+);
+export const ChangeCanOpenShop = createAction(
+  '[GameData] Change Can Open Shop',
+  props<{ payload: boolean }>()
 );

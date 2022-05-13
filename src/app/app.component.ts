@@ -1,5 +1,7 @@
 import {
+  ChangeCanFillWater,
   ChangeCanHarvest,
+  ChangeCanOpenShop,
   ChangeEnergy,
   ChangeKeyEvent,
   ChangeMoney,
@@ -53,7 +55,13 @@ export class AppComponent implements OnInit {
   changeCanHarvest(event) {
     this.facade.dispatch(ChangeCanHarvest({ payload: event }));
   }
+  changeCanFillWater(event) {
+    this.facade.dispatch(ChangeCanFillWater({ payload: event }));
+  }
   changeMoney(event) {
     this.facade.dispatch(ChangeMoney({ payload: event }));
+  }
+  changeCanOpenShop(event) {
+    this.facade.dispatch(ChangeCanOpenShop({ payload: event }));
   }
 }

@@ -11,59 +11,107 @@
       gameData.money
     }}</span>
   </div>
-  <div class="carrying-ui" *ngIf="gameData.isCarrying">
-    <div>
-      <img src="../../assets/ui/mouse-drop.png" /> <span>Drop/Give</span>
-    </div>
-  </div>
-  <div class="tool-ui" *ngIf="!gameData.isCarrying">
+  <div class="tool-ui">
     <div
-      *ngIf="gameData.equippedTool === 'shovel'"
       class="tool-icon"
       [ngClass]="{ shownShovel: gameData.canHarvest }"
       (mousedown)="$event.preventDefault()"
     >
       <img class="click-image" src="../../assets/ui/mouse-drop.png" />
       <img
-        [ngClass]="{ hideShovel: !gameData.canHarvest }"
+        [ngClass]="{
+          hideShovel: !gameData.isCarrying
+        }"
+        class="tool-icon"
+        src="../../assets/ui/coin.png"
+      />
+      <span
+        [ngClass]="{
+          hideShovel: !gameData.isCarrying
+        }"
+        class="tool-desc"
+        >Drop/Sell</span
+      >
+      <img
+        [ngClass]="{
+          hideShovel:
+            gameData.equippedTool !== 'potato-seeds' &&
+            gameData.equippedTool !== 'carrot-seeds' &&
+            gameData.equippedTool !== 'wheat-seeds' &&
+            gameData.equippedTool !== 'cabbage-seeds' &&
+            gameData.equippedTool !== 'cauliflower-seeds' &&
+            gameData.equippedTool !== 'beet-seeds' &&
+            gameData.equippedTool !== 'radish-seeds' &&
+            gameData.equippedTool !== 'kale-seeds' &&
+            gameData.equippedTool !== 'sunflower-seeds'
+        }"
+        class="tool-icon"
+        src="../../assets/ui/plant-big.png"
+      />
+      <img
+        [ngClass]="{
+          hideShovel: !gameData.canHarvest || gameData.equippedTool !== 'shovel'
+        }"
         class="tool-icon"
         src="../../assets/ui/shovel-big.png"
       />
+
       <img
-        class="tool-icon"
-        [ngClass]="{ hideShovel: gameData.canHarvest }"
-        src="../../assets/ui/shovel-x.png"
-      />
-    </div>
-    <div
-      *ngIf="gameData.equippedTool === 'pickaxe' && gameData.canHarvest"
-      [ngClass]="{ active: gameData.equippedTool === 'pickaxe' }"
-      (mousedown)="$event.preventDefault()"
-    >
-      ><img class="click-image" src="../../assets/ui/mouse-drop.png" /><img
+        [ngClass]="{
+          hideShovel:
+            !gameData.canHarvest || gameData.equippedTool !== 'pickaxe'
+        }"
         class="tool-icon"
         src="../../assets/ui/pickaxe-big.png"
       />
-    </div>
-    <div
-      *ngIf="gameData.equippedTool === 'rod' && gameData.canHarvest"
-      [ngClass]="{ active: gameData.equippedTool === 'rod' }"
-      (mousedown)="$event.preventDefault()"
-    >
-      ><img class="click-image" src="../../assets/ui/mouse-drop.png" /><img
+      <img
+        [ngClass]="{
+          hideShovel: !gameData.canHarvest || gameData.equippedTool !== 'rod'
+        }"
         class="tool-icon"
         src="../../assets/ui/rod-big.png"
       />
     </div>
-    <div
-      [ngClass]="{
-        active: gameData.equippedTool === 'water' && gameData.canHarvest
-      }"
-      (mousedown)="$event.preventDefault()"
-    >
-      <img class="click-image" src="../../assets/ui/mouse-drop-right.png" /><img
+
+    <div (mousedown)="$event.preventDefault()">
+      <img class="click-image" src="../../assets/ui/mouse-drop-right.png" />
+      <img
+        [ngClass]="{
+          hideShovel:
+            gameData.equippedTool !== 'potato-seeds' &&
+            gameData.equippedTool !== 'carrot-seeds' &&
+            gameData.equippedTool !== 'wheat-seeds' &&
+            gameData.equippedTool !== 'cabbage-seeds' &&
+            gameData.equippedTool !== 'cauliflower-seeds' &&
+            gameData.equippedTool !== 'beet-seeds' &&
+            gameData.equippedTool !== 'radish-seeds' &&
+            gameData.equippedTool !== 'kale-seeds' &&
+            gameData.equippedTool !== 'sunflower-seeds' &&
+            gameData.equippedTool !== 'basket'
+        }"
+        class="tool-icon"
+        src="../../assets/ui/go-back.png"
+      />
+      <img
+        [ngClass]="{
+          hideShovel: !gameData.canHarvest || gameData.equippedTool !== 'shovel'
+        }"
         class="tool-icon"
         src="../../assets/ui/water-big.png"
+      />
+      <img
+        [ngClass]="{
+          hideShovel: !gameData.canFillWater
+        }"
+        class="tool-icon"
+        src="../../assets/ui/water-fill.png"
+      />
+      <img
+        [ngClass]="{
+          hideShovel: !gameData.canOpenShop
+        }"
+        class="tool-icon"
+        src="../../assets/ui/coins-big.png"
       />
       <div class="water-bar">
         <div
