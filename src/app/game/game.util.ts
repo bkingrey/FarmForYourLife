@@ -26,4 +26,18 @@ export class GameUtils {
     }
     return false;
   }
+
+  isHoldingSeed(tool) {
+    return (
+      tool === 'beets-seeds' ||
+      tool === 'cabbage-seeds' ||
+      tool === 'carrot-seeds' ||
+      tool === 'cauliflower-seed' ||
+      tool === 'kale-seeds' ||
+      tool === 'potato-seeds' ||
+      tool === 'radish-seeds' ||
+      tool === 'sunflower-seeds' ||
+      tool === 'wheat-seeds'
+    );
+  }
 }

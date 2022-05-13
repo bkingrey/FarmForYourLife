@@ -30,6 +30,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() changeWaterMeter = new EventEmitter();
   @Output() changeIsHoveringMerchant = new EventEmitter();
   @Output() canHarvest = new EventEmitter();
+  isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
   canvasId: string = 'game-canvas';
@@ -283,8 +284,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           this.activatable();
         }
         // MOVEMENT
-        if (this.cultivatable()) {
+        if (this.cultivatable() && !this.isWatering && this.queuedCultivate) {
+          console.log(this.queuedCultivate);
           this.cultivate();
+        } else if (this.isWatering) {
+          this.waterAnimation();
         } else {
           this.movement();
         }
@@ -314,7 +318,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
         this.ctx.restore();
         if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
+          if (this.gameData.canHarvest === true) {
+            this.canHarvest.emit(false);
+          }
           this.hoveredFarmableArea = this.defaultFarmState;
+        } else {
+          if (this.gameData.canHarvest === false) {
+            this.canHarvest.emit(true);
+          }
         }
       }
     };
@@ -365,8 +376,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.clickedFarmableArea.state !== 'merchant-left' &&
         this.clickedFarmableArea.state !== 'merchant-right' &&
         (this.gameData.equippedTool === 'shovel' ||
-          (this.gameData.equippedTool === 'water' &&
-            this.gameData.water.current > 0) ||
           this.gameData.equippedTool === 'beets-seeds' ||
           this.gameData.equippedTool === 'cabbage-seeds' ||
           this.gameData.equippedTool === 'carrot-seeds' ||
@@ -390,7 +399,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   activatable() {
-    if (this.activatedArea.state === 'well') {
+    if (this.isShovelable(this.activatedArea, this.player, this.mousePos)) {
+      this.waterArea(this.activatedArea);
+    } else if (this.activatedArea.state === 'well') {
       this.changeWaterMeter.emit('max');
     } else if (this.activatedArea.state === 'house' && !this.isSleeping) {
       this.isSleeping = true;
@@ -421,8 +432,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   moveAllMovables(difference) {
-    console.log('difference');
-    console.log(difference.x, difference.y);
     this.movables.forEach((element) => {
       element.position.y += difference.y;
     });
@@ -882,7 +891,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   drawCultivateAnimation(spriteSheet: HTMLImageElement, frames: number) {
     let width = 128;
     let height = 65;
-
     if (this.framesDrawn > 10) {
       if (this.actionFrameIndex < frames - 1) {
         if (
@@ -890,16 +898,19 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           this.gameData.equippedTool !== 'rod' &&
           this.gameData.equippedTool !== 'pickaxe'
         ) {
+          console.log('1');
           this.changeStateOfHoveredFarmable();
         } else if (
           this.actionFrameIndex > 7 &&
           this.gameData.equippedTool === 'pickaxe'
         ) {
+          console.log('2');
           this.changeStateOfHoveredFarmable();
         } else if (
           this.actionFrameIndex > 39 &&
           this.gameData.equippedTool === 'rod'
         ) {
+          console.log('3');
           this.changeStateOfHoveredFarmable();
         }
         this.actionFrameIndex++;
@@ -942,23 +953,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   changeStateOfHoveredFarmable() {
-    if (this.hoveredFarmableArea.state === 'fishable') {
-      const getRandom = Math.random() * 100;
-      if (getRandom < 75) {
-        this.changeTool.emit('smallfish');
-      } else if (getRandom < 95) {
-        this.changeTool.emit('mediumfish');
-      } else {
-        this.changeTool.emit('hugefish');
-      }
-    } else if (this.hoveredFarmableArea.state === 'minable') {
-      const getRandom = Math.random() * 100;
-      if (getRandom > 99) this.changeTool.emit('nugget');
-    }
-    if (this.gameData.equippedTool === 'shovel') {
-      this.farmAction('soil-0', 'soil-1', 'soil-2', 'soil-3');
-    }
-    if (this.gameData.equippedTool === 'water') {
+    console.log(this.gameData.equippedTool);
+    if (this.isWatering) {
+      console.log('should water');
       if (
         this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
       ) {
@@ -982,6 +979,30 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           (area) => area === this.clickedFarmableArea
         )[0];
       }
+      this.isWatering = false;
+      this.queuedCultivate = false;
+      this.canClick = true;
+      this.actionFrameIndex = 0;
+      this.framesDrawn = 0;
+      this.changeTool.emit('shovel');
+      return;
+    }
+    if (this.hoveredFarmableArea.state === 'fishable') {
+      const getRandom = Math.random() * 100;
+      if (getRandom < 75) {
+        this.changeTool.emit('smallfish');
+      } else if (getRandom < 95) {
+        this.changeTool.emit('mediumfish');
+      } else {
+        this.changeTool.emit('hugefish');
+      }
+    } else if (this.hoveredFarmableArea.state === 'minable') {
+      const getRandom = Math.random() * 100;
+      if (getRandom > 99) this.changeTool.emit('nugget');
+    }
+    if (this.gameData.equippedTool === 'shovel') {
+      console.log('should shovel');
+      this.farmAction('soil-0', 'soil-1', 'soil-2', 'soil-3');
     }
     if (this.isAPlantSeed()) {
       this.plantSeed();
@@ -1166,7 +1187,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     const clickedFarm = this.farmableArea.filter(
       (area) => area === this.clickedFarmableArea
     )[0];
-    console.log(clickedFarm);
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
         this.farmableArea.filter(
@@ -1821,9 +1841,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       x: area.position.x + area.width / 2,
       y: area.position.y + area.height / 2,
     };
-    if (area.center !== this.hoveredFarmableArea.center) {
-      this.targetNearestSquare(area);
-    }
+
+    this.targetNearestSquare(area);
   }
 
   retangularCollision({ rectangle1, rectangle2 }) {
@@ -1988,21 +2007,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   keyDownEvent(e: KeyboardEvent) {
     if (this.canClick) {
       switch (e.key.toLowerCase()) {
-        case 'q':
-          this.changeTool.emit('shovel');
-          break;
-        case 'e':
-          this.changeTool.emit('water');
-          break;
-        case 'r':
-          this.changeTool.emit('potato');
-          break;
-        case 't':
-          this.changeTool.emit('pickaxe');
-          break;
-        case 'f':
-          this.changeTool.emit('rod');
-          break;
         case 'b':
           this.changeTool.emit('basket');
           break;
@@ -2139,13 +2143,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   cultivate() {
     const spriteSheet = this.getCultivateSpriteSheet();
 
-    if (spriteSheet)
+    if (spriteSheet) {
       this.drawCultivateAnimation(
         this.useRightAnims() ? spriteSheet.right : spriteSheet.left,
         this.useRightAnims()
           ? this.gameData.spriteAnimations[spriteSheet.rightKey].frames
           : this.gameData.spriteAnimations[spriteSheet.leftKey].frames
       );
+    }
   }
 
   getCultivateSpriteSheet() {
@@ -2156,13 +2161,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           left: this.spriteSheetDigLeft,
           rightKey: 'spriteSheetDigRight',
           leftKey: 'spriteSheetDigLeft',
-        };
-      case 'water':
-        return {
-          right: this.spriteSheetWaterRight,
-          left: this.spriteSheetWaterLeft,
-          rightKey: 'spriteSheetWaterRight',
-          leftKey: 'spriteSheetWaterLeft',
         };
       case 'hammer':
         return {
@@ -2620,9 +2618,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       ) {
         this.ctx.beginPath();
         this.ctx.lineWidth = 6;
-        this.hoveredFarmableArea = area;
-        this.changeEquippedTool(area.state);
+
         if (this.isMouseCloseToPlayer(this.player, this.mousePos)) {
+          if (
+            area !== this.hoveredFarmableArea &&
+            this.gameData.isHoveringMerchant === false
+          )
+            this.changeEquippedTool(area.state);
+          this.hoveredFarmableArea = area;
           this.mayFarm = true;
           this.hoveredFarmableArea.center = {
             x: area.position.x + 32,
@@ -2681,7 +2684,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     ) {
       this.canHarvest.emit(false);
       this.changeTool.emit('shovel');
-    } else {
+    } else if (!this.isHoldingSeed(this.gameData.equippedTool)) {
       this.changeTool.emit('shovel');
       this.canHarvest.emit(true);
     }
@@ -2765,16 +2768,50 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   doRightClickOnMouse(evt) {
     evt.preventDefault();
-    if (this.isSleeping) {
-      this.queuedActivation = false;
-      this.activatable();
+    if (this.isHoldingSeed(this.gameData.equippedTool)) {
+      this.changeTool.emit('shovel');
       return;
     }
-    this.canClick = true;
-    this.queuedActivation = true;
-    this.activatedArea = this.hoveredFarmableArea;
+    if (!this.isWatering) {
+      if (this.isSleeping) {
+        this.queuedActivation = false;
+        this.activatable();
+        return;
+      }
+      this.canClick = true;
+      this.queuedActivation = true;
+      this.activatedArea = this.hoveredFarmableArea;
+      if (
+        this.isShovelable(this.activatedArea.state, this.player, this.mousePos)
+      ) {
+        this.canClick = false;
+        this.waterArea(this.activatedArea);
+      }
+    }
   }
 
+  waterArea(clickedArea) {
+    if (this.gameData.equippedTool === 'shovel') {
+      this.clickedFarmableArea = clickedArea;
+      this.isWatering = true;
+    }
+  }
+  waterAnimation() {
+    const spriteSheet = {
+      right: this.spriteSheetWaterRight,
+      left: this.spriteSheetWaterLeft,
+      rightKey: 'spriteSheetWaterRight',
+      leftKey: 'spriteSheetWaterLeft',
+    };
+
+    if (spriteSheet)
+      this.drawCultivateAnimation(
+        this.useRightAnims() ? spriteSheet.right : spriteSheet.left,
+        this.useRightAnims()
+          ? this.gameData.spriteAnimations[spriteSheet.rightKey].frames
+          : this.gameData.spriteAnimations[spriteSheet.leftKey].frames
+      );
+  }
   doScrollOnMouse(evt) {
     if (this.player.center && this.mayFarm && this.ctx && this.canClick) {
       if (evt.wheelDelta < 0) {

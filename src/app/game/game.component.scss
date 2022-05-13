@@ -42,6 +42,10 @@ canvas {
 }
 
 .shovel {
-  cursor: url("../../assets/ui/shovel-big.png"),
+  cursor: url("../../assets/ui/shovel-water-cursor.png"),
+    url("../../assets/ui/cursor_03.cur"), default;
+}
+.seed {
+  cursor: url("../../assets/ui/plant-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), default;
 }

@@ -14,45 +14,55 @@
   </div>
   <div class="tool-ui" *ngIf="!gameData.isCarrying">
     <div
-      *ngIf="gameData.equippedTool === 'shovel' && gameData.canHarvest"
-      [ngClass]="{ active: gameData.equippedTool === 'shovel' }"
-      (click)="changeTools('shovel')"
+      *ngIf="gameData.equippedTool === 'shovel'"
+      class="tool-icon"
+      [ngClass]="{ shownShovel: gameData.canHarvest }"
       (mousedown)="$event.preventDefault()"
     >
-      <span class="floating-number"></span
-      ><img class="tool-icon" src="../../assets/ui/shovel-big.png" />
-    </div>
-    <div *ngIf="!gameData.canHarvest" (mousedown)="$event.preventDefault()">
-      <span class="floating-number">R</span
-      ><img class="tool-icon" src="../../assets/ui/shovel-x.png" />
+      <img class="click-image" src="../../assets/ui/mouse-drop.png" />
+      <img
+        [ngClass]="{ hideShovel: !gameData.canHarvest }"
+        class="tool-icon"
+        src="../../assets/ui/shovel-big.png"
+      />
+      <img
+        class="tool-icon"
+        [ngClass]="{ hideShovel: gameData.canHarvest }"
+        src="../../assets/ui/shovel-x.png"
+      />
     </div>
     <div
       *ngIf="gameData.equippedTool === 'pickaxe' && gameData.canHarvest"
       [ngClass]="{ active: gameData.equippedTool === 'pickaxe' }"
-      (click)="changeTools('pickaxe')"
       (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">T</span
-      ><img class="tool-icon" src="../../assets/ui/pickaxe-big.png" />
+      ><img class="click-image" src="../../assets/ui/mouse-drop.png" /><img
+        class="tool-icon"
+        src="../../assets/ui/pickaxe-big.png"
+      />
     </div>
     <div
       *ngIf="gameData.equippedTool === 'rod' && gameData.canHarvest"
       [ngClass]="{ active: gameData.equippedTool === 'rod' }"
-      (click)="changeTools('rod')"
       (mousedown)="$event.preventDefault()"
     >
       <span class="floating-number">F</span
-      ><img class="tool-icon" src="../../assets/ui/rod-big.png" />
+      ><img class="click-image" src="../../assets/ui/mouse-drop.png" /><img
+        class="tool-icon"
+        src="../../assets/ui/rod-big.png"
+      />
     </div>
     <div
       [ngClass]="{
         active: gameData.equippedTool === 'water' && gameData.canHarvest
       }"
-      (click)="changeTools('water')"
       (mousedown)="$event.preventDefault()"
     >
-      <span class="floating-number">E</span
-      ><img class="tool-icon" src="../../assets/ui/water-big.png" />
+      <img class="click-image" src="../../assets/ui/mouse-drop-right.png" /><img
+        class="tool-icon"
+        src="../../assets/ui/water-big.png"
+      />
       <div class="water-bar">
         <div
           class="bar"
