@@ -401,8 +401,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   activatable() {
     if (this.isShovelable(this.activatedArea, this.player, this.mousePos)) {
       this.waterArea(this.activatedArea);
-    } else if (this.activatedArea.state === 'well') {
-      this.changeWaterMeter.emit('max');
     } else if (this.activatedArea.state === 'house' && !this.isSleeping) {
       this.isSleeping = true;
       this.changeVelocity.emit(0);
@@ -2619,7 +2617,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.ctx.beginPath();
         this.ctx.lineWidth = 6;
 
-        if (this.isMouseCloseToPlayer(this.player, this.mousePos)) {
+        if (
+          this.isMouseCloseToPlayer(this.player, this.mousePos) &&
+          !this.gameData.isCarrying
+        ) {
           if (
             area !== this.hoveredFarmableArea &&
             this.gameData.isHoveringMerchant === false
@@ -2675,7 +2676,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.changeTool.emit('pickaxe');
       this.canHarvest.emit(true);
     } else if (state === 'well') {
-      this.changeTool.emit('water');
       this.canHarvest.emit(false);
     } else if (
       state === 'untargetable' ||
@@ -2758,11 +2758,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.mayFarm &&
       this.ctx &&
       this.canClick &&
-      this.gameData.energy.current >= 3
+      this.gameData.energy.current >= 3 &&
+      this.gameData.canHarvest
     ) {
       this.clickedFarmableArea = this.hoveredFarmableArea;
+      if (this.clickedFarmableArea.state !== 'well') {
+        this.queuedCultivate = true;
+      }
       this.canClick = false;
-      this.queuedCultivate = true;
     }
   }
 
@@ -2781,13 +2784,20 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.canClick = true;
       this.queuedActivation = true;
       this.activatedArea = this.hoveredFarmableArea;
-      if (
+      if (this.activatedArea.state === 'well') {
+        this.refillWaterCan();
+      } else if (
         this.isShovelable(this.activatedArea.state, this.player, this.mousePos)
       ) {
+        console.log('shovelable');
         this.canClick = false;
         this.waterArea(this.activatedArea);
       }
     }
+  }
+
+  refillWaterCan() {
+    this.changeWaterMeter.emit('max');
   }
 
   waterArea(clickedArea) {
