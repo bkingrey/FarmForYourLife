@@ -9,9 +9,10 @@ import { GameComponent } from './game/game.component';
 import { GameEffects } from './_store/effects';
 import { AppFacade } from './app.facade';
 import { GameUiComponent } from './game-ui/game-ui.component';
+import { MerchantComponent } from './merchant/merchant.component';
 
 @NgModule({
-  declarations: [AppComponent, GameComponent, GameUiComponent],
+  declarations: [AppComponent, GameComponent, GameUiComponent, MerchantComponent],
   imports: [
     BrowserModule,
     StoreModule.forRoot({}),

@@ -54,6 +54,7 @@ export const intializeState = (): GameState => {
     canHarvest: true,
     canFillWater: false,
     canOpenShop: false,
+    openShop: false,
     collisions: [],
     farmableAreas: [],
     fishableAreas: [],
@@ -113,7 +114,60 @@ export const intializeState = (): GameState => {
         y: 0,
       },
     },
-    money: 0,
+    money: 1000,
+    buyableItems: [
+      {
+        name: 'Potato Seeds',
+        cost: 10,
+
+        img: 'assets/ui/potato-ui.png',
+      },
+      {
+        name: 'Carrot Seeds',
+        cost: 10,
+        img: 'assets/ui/carrot-ui.png',
+      },
+      {
+        name: 'Wheat Seeds',
+        cost: 10,
+        img: 'assets/ui/wheat-ui.png',
+      },
+      {
+        name: 'Cabbage Seeds',
+        cost: 10,
+        img: 'assets/ui/cabbage-ui.png',
+      },
+      {
+        name: 'Cauliflower Seeds',
+        cost: 20,
+        img: 'assets/ui/cauliflower-ui.png',
+      },
+      {
+        name: 'Beets Seeds',
+        cost: 30,
+        img: 'assets/ui/beets-ui.png',
+      },
+      {
+        name: 'Radish Seeds',
+        cost: 40,
+        img: 'assets/ui/raddish-ui.png',
+      },
+      {
+        name: 'Kale Seeds',
+        cost: 50,
+        img: 'assets/ui/kale-ui.png',
+      },
+      {
+        name: 'Sunflower Seeds',
+        cost: 60,
+        img: 'assets/ui/sunflower-ui.png',
+      },
+      {
+        name: 'Progress Badge',
+        cost: 1000,
+        img: 'assets/ui/progress-medal.png',
+      },
+    ],
   };
 };
 export const gameReducer = createReducer(
@@ -260,10 +314,61 @@ export const gameReducer = createReducer(
       canFillWater: payload,
     };
   }),
+  on(GameActions.OpenShop, (state, { payload }) => {
+    return {
+      ...state,
+      openShop: payload,
+    };
+  }),
   on(GameActions.ChangeCanOpenShop, (state, { payload }) => {
     return {
       ...state,
       canOpenShop: payload,
+    };
+  }),
+  on(GameActions.PurchaseItem, (state, { payload }) => {
+    let boughtPlant;
+    switch (payload.name) {
+      case 'Potato Seeds':
+        boughtPlant = 'potato';
+        break;
+      case 'Beets Seeds':
+        boughtPlant = 'beets';
+        break;
+      case 'Cabbage Seeds':
+        boughtPlant = 'cabbage';
+        break;
+      case 'Carrot Seeds':
+        boughtPlant = 'carrot';
+        break;
+      case 'Cauliflower Seeds':
+        boughtPlant = 'cauliflower';
+        break;
+      case 'Kale Seeds':
+        boughtPlant = 'kale';
+        break;
+      case 'Radish Seeds':
+        boughtPlant = 'radish';
+        break;
+      case 'Sunflower Seeds':
+        boughtPlant = 'sunflower';
+        break;
+      case 'Wheat Seeds':
+        boughtPlant = 'wheat';
+        break;
+      default:
+        break;
+    }
+    return {
+      ...state,
+      money: state.money - payload.cost,
+      seedsOwned: {
+        ...state.seedsOwned,
+        [boughtPlant]: {
+          ...state.seedsOwned[boughtPlant],
+          count: state.seedsOwned[boughtPlant].count + 1,
+        },
+      },
     };
   }),
   on(GameActions.ChangeCanEnterHouse, (state, { payload }) => {

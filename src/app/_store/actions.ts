@@ -74,3 +74,11 @@ export const ChangeIsSleeping = createAction(
   '[GameData] Change Is Sleeping',
   props<{ payload: boolean }>()
 );
+export const OpenShop = createAction(
+  '[GameData] Open/Close Shop',
+  props<{ payload: boolean }>()
+);
+export const PurchaseItem = createAction(
+  '[GameData] Purchase Item',
+  props<{ payload: { name; cost } }>()
+);

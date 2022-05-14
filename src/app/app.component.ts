@@ -11,6 +11,8 @@ import {
   ChangeVelocity,
   ChangeWaterMeter,
   getGameData,
+  OpenShop,
+  PurchaseItem,
   ReduceSeedCount,
   RemoveKeyDown,
 } from './_store/actions';
@@ -71,5 +73,11 @@ export class AppComponent implements OnInit {
   }
   changeIsSleeping(event) {
     this.facade.dispatch(ChangeIsSleeping({ payload: event }));
+  }
+  openShop(event) {
+    this.facade.dispatch(OpenShop({ payload: event }));
+  }
+  purchaseItem(event) {
+    this.facade.dispatch(PurchaseItem({ payload: event }));
   }
 }

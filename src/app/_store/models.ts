@@ -15,6 +15,7 @@ export interface GameState {
   isSleeping: boolean;
   canEnterHouse: boolean;
   canOpenShop: boolean;
+  openShop: boolean;
   canHarvest: boolean;
   canFillWater: boolean;
   collisionMap: any | [];
@@ -41,6 +42,13 @@ export interface GameState {
   equippedTool: string;
   seedsOwned: SeedKey;
   money: number;
+  buyableItems: Array<MerchantItems>;
+}
+
+export interface MerchantItems {
+  name: string;
+  cost: number;
+  img: string;
 }
 export interface SeedKey {
   [key: string]: SeedsOwned;

@@ -36,6 +36,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() canFillWater = new EventEmitter();
   @Output() canEnterHouse = new EventEmitter();
   @Output() isSleeping = new EventEmitter();
+  @Output() openShop = new EventEmitter();
   isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
@@ -2137,6 +2138,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   getMousePos(evt) {
     if (this.canvas) {
+      // this.canvas.setAttribute(
+      //   'style',
+      //   'cursor: ' + "url('../../assets/ui/cursor_big.png')"
+      // );
       const rect = this.canvas.getBoundingClientRect();
       this.mousePos = {
         x:
@@ -2691,17 +2696,20 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     } else if (state === 'well') {
       this.canHarvest.emit(false);
     } else if (
-      state === 'untargetable' ||
-      state === 'well' ||
-      state === 'house' ||
-      state === 'merchant' ||
-      state === 'merchant-left' ||
-      state === 'merchant-right'
+      (state === 'untargetable' ||
+        state === 'well' ||
+        state === 'house' ||
+        state === 'merchant' ||
+        state === 'merchant-left' ||
+        state === 'merchant-right') &&
+      !this.gameData.openShop
     ) {
       this.canHarvest.emit(false);
       this.changeTool.emit('shovel');
-    } else if (!this.isHoldingSeed(this.gameData.equippedTool)) {
-      console.log('next line');
+    } else if (
+      !this.isHoldingSeed(this.gameData.equippedTool) &&
+      !this.gameData.openShop
+    ) {
       this.changeTool.emit('shovel');
       this.canHarvest.emit(true);
     }
@@ -2788,11 +2796,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   doRightClickOnMouse(evt) {
     evt.preventDefault();
+    if (this.gameData.openShop === true) {
+      this.openShop.emit(false);
+      return;
+    }
     if (
       this.isHoldingSeed(this.gameData.equippedTool) ||
       this.gameData.equippedTool === 'basket'
     ) {
-      this.changeTool.emit('shovel');
+      if (!this.gameData.openShop) this.changeTool.emit('shovel');
       return;
     }
     if (!this.isWatering) {
@@ -2804,12 +2816,18 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.canClick = true;
       this.queuedActivation = true;
       this.activatedArea = this.hoveredFarmableArea;
+      if (
+        this.activatedArea.state === 'merchant' &&
+        this.gameData.canOpenShop &&
+        this.gameData.openShop === false
+      ) {
+        this.openShop.emit(true);
+      }
       if (this.activatedArea.state === 'well') {
         this.refillWaterCan();
       } else if (
         this.isShovelable(this.activatedArea.state, this.player, this.mousePos)
       ) {
-        console.log(this.activatedArea.state);
         this.canClick = false;
         this.waterArea(this.activatedArea);
       }
@@ -2895,7 +2913,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   dropCarriedItem() {
-    if (this.hoveredFarmableArea.state === 'merchant') {
+    if (
+      this.hoveredFarmableArea.state === 'merchant' &&
+      this.gameData.isCarrying
+    ) {
       this.changeTool.emit('shovel');
       switch (this.gameData.equippedTool) {
         case 'potato':

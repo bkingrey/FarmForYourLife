@@ -1,0 +1,91 @@
+$dash-size: 5px;
+$theme-color: #d77643;
+$fill-color: #ead4aa;
+#merchant-shop {
+  pointer-events: none;
+  width: 900px;
+  height: 500px;
+  border: 1px solid black;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5000;
+  background-color: #f8dd99;
+  opacity: 1;
+
+  padding: 6px;
+  max-width: 650px;
+  background: lighten($theme-color, 20%);
+  border: $dash-size dashed #ca774b;
+  box-shadow: 0 0 0 2.5px #ca774b, 0 0 0 2.5px #fff, inset 0 0 0 2.5px #ca774b,
+    0 5px 10px 15px rgb(0 0 0 / 50%), inset 0 0 0 2px #fff,
+    inset 0 0 100vw 100vw #ead4aa;
+  color: darken($theme-color, 20%);
+  font-size: 3em;
+  text-align: center;
+  cursor: url("../../assets/ui/cursor_big.png"),
+    url("../../assets/ui/cursor_03.cur"), default;
+  pointer-events: auto !important;
+
+  .title {
+    font-size: 40px;
+    font-family: "Tangerine", cursive;
+    margin: 16px;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .close-button {
+    pointer-events: auto;
+    position: absolute;
+    top: -8px;
+    right: 32px;
+    img {
+      width: 15px;
+    }
+  }
+}
+
+.merch-item {
+  pointer-events: auto;
+  display: inline-block;
+  text-align: center;
+  font-size: 10px;
+  margin: 10px;
+  min-width: 100px;
+  padding: 5px;
+  transition-duration: 300ms;
+  border-radius: 10px;
+  background-color: white;
+  .coin {
+    width: 11px;
+    margin-right: 1px;
+  }
+  img {
+    width: 30px;
+  }
+}
+
+.merch-item:hover {
+  -webkit-box-shadow: 5px 5px 7px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 5px 5px 7px 0px rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+}
+
+.error {
+  color: red;
+  opacity: 0;
+  font-size: 14px;
+  transition-duration: 200ms;
+  position: absolute;
+  width: 400px;
+  left: 133px;
+  bottom: 48px;
+}
+.showError {
+  opacity: 1;
+}
+.makeClickThroughable {
+}

@@ -10,6 +10,7 @@
     (changeMoney)="changeMoney($event)"
     (canHarvest)="changeCanHarvest($event)"
     (canOpenShop)="changeCanOpenShop($event)"
+    (openShop)="openShop($event)"
     (canFillWater)="changeCanFillWater($event)"
     (canEnterHouse)="changeCanEnterHouse($event)"
     (isSleeping)="changeIsSleeping($event)"
@@ -18,4 +19,11 @@
     [gameData]="gameData"
     (changeTool)="changeTool($event)"
   ></app-game-ui>
+  <app-merchant
+    [gameData]="gameData"
+    (purchase)="purchaseItem($event)"
+    (openShop)="openShop($event)"
+    (changeTool)="changeTool($event)"
+    *ngIf="gameData.openShop"
+  ></app-merchant>
 </ng-container>

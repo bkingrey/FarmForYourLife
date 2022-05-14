@@ -122,7 +122,8 @@
       />
       <img
         [ngClass]="{
-          hideShovel: !gameData.canOpenShop || gameData.isCarrying
+          hideShovel:
+            gameData.openShop || !gameData.canOpenShop || gameData.isCarrying
         }"
         class="tool-icon"
         src="../../assets/ui/coins-big.png"
