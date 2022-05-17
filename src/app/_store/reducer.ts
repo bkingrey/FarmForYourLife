@@ -181,7 +181,13 @@ export const gameReducer = createReducer(
     return { ...state, scene: payload };
   }),
   on(GameActions.AddPlayerToLobby, (state, { payload }) => {
-    return { ...state, lobbyPlayers: payload };
+    let newLobby = payload.map((p) => {
+      return {
+        ...p,
+      };
+    });
+    console.log(newLobby);
+    return { ...state, lobbyPlayers: newLobby };
   }),
   on(GameActions.SuccessGetGameDataAction, (state: GameState, { payload }) => {
     const newCollisionMap: Array<any> = [];

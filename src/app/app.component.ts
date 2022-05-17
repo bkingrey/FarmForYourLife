@@ -1,4 +1,3 @@
-import { GameState } from './_store/models';
 import {
   AddPlayerToLobby,
   ChangeCanEnterHouse,
@@ -17,12 +16,10 @@ import {
   OpenShop,
   PurchaseItem,
   ReduceSeedCount,
-  RemoveKeyDown,
 } from './_store/actions';
 import { Component, OnInit } from '@angular/core';
 import { AppFacade } from './app.facade';
 import io, { Socket } from 'socket.io-client';
-import { take } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -39,11 +36,8 @@ export class AppComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    this.socket.on('position', (position) => {
-      console.log(position.x, position.y);
-    });
     this.socket.on('lobbyPlayers', (lobbyPlayers) => {
-      console.log('got back here');
+      console.log(lobbyPlayers);
       this.facade.dispatch(AddPlayerToLobby({ payload: lobbyPlayers }));
     });
   }
@@ -100,6 +94,7 @@ export class AppComponent implements OnInit {
     this.facade.dispatch(ChangeScene({ payload: event }));
   }
   addPlayer(event, lobbyPlayers) {
+    console.log(lobbyPlayers);
     var playerToServer = {
       currentLobby: lobbyPlayers,
       name: event,

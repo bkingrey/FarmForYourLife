@@ -148,9 +148,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   movables: Array<any> = [];
   animate: any;
   frameIndex = 0;
+  framesDrawn = 0;
+  otherPlayersFrameIndex = [0, 0, 0];
+  otherPlayersFramesDrawn = [0, 0, 0];
   actionFrameIndex = 0;
   pickupableFrameIndex: Array<number> = [];
-  framesDrawn = 0;
+
   pickupableFramesDrawn: Array<number> = [];
   mousePos = {
     x: 0,
@@ -231,6 +234,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       pressed: false,
     },
   };
+  lobbyPlayers: any = [];
 
   constructor() {
     super();
@@ -283,6 +287,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         });
         this.traders.forEach((trader) => {
           this.drawMerchant(trader);
+        });
+
+        this.lobbyPlayers.forEach((player) => {
+          this.getOtherPlayerSpriteSheet(player);
         });
 
         // SLEEP
@@ -484,9 +492,23 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.createHouseArea(this.gameData.houseAreaMap);
     this.createWellArea(this.gameData.wellAreaMap);
     this.createTraders();
+    this.createOtherPlayers();
     this.createMovables();
     this.loadCanvas();
   }
+
+  createOtherPlayers() {
+    this.lobbyPlayers = this.gameData.lobbyPlayers.map((lp) => {
+      return {
+        ...lp,
+        position: {
+          ...lp.position,
+          writable: true,
+        },
+      };
+    });
+  }
+
   loadCanvas() {
     if (document.getElementById(this.canvasId)) {
       this.canvas = document.getElementById(this.canvasId) as HTMLCanvasElement;
@@ -844,6 +866,74 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         190,
         128,
         128
+      );
+    }
+  }
+
+  getOtherPlayerSpriteSheet(player) {
+    const useRightAnims = false;
+    this.drawOtherSpriteAnimation(
+      useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
+      useRightAnims
+        ? this.gameData.spriteAnimations['playerIdleRight'].frames
+        : this.gameData.spriteAnimations['playerIdleLeft'].frames,
+      player
+    );
+  }
+
+  drawOtherSpriteAnimation(
+    spriteSheet: HTMLImageElement,
+    frames: number,
+    otherplayer
+  ) {
+    if (this.gameData.isSleeping && this.ctx) {
+      this.ctx.globalAlpha = 0;
+    } else {
+      if (this.ctx) this.ctx.globalAlpha = 1;
+    }
+    if (this.otherPlayersFramesDrawn[0] > 15) {
+      if (this.otherPlayersFrameIndex[0] < frames - 1) {
+        this.otherPlayersFrameIndex[0]++;
+      } else {
+        this.otherPlayersFrameIndex[0] = 0;
+      }
+      this.otherPlayersFramesDrawn[0] = 0;
+    } else {
+      this.otherPlayersFramesDrawn[0]++;
+    }
+    let player = {
+      name: otherplayer.name,
+      width: 13,
+      height: 18,
+      position: otherplayer.position,
+    };
+    if (this.canvas && this.ctx) {
+      const spriteWidth = this.gameData.isCarrying ? 128 : 13;
+      const spriteHeight = this.gameData.isCarrying
+        ? this.squareSize
+        : player.height;
+      const positionX = this.gameData.isCarrying
+        ? player.position.x - 228
+        : player.position.x + 1;
+      const positionY = this.gameData.isCarrying
+        ? player.position.y - 84
+        : player.position.y;
+      const dx = this.gameData.isCarrying ? 128 * 4 : 52;
+      const dy = spriteSheet.height * 4;
+      this.player.center = {
+        x: player.position.x + player.width * 2,
+        y: player.position.y + player.height * 2,
+      };
+      this.ctx.drawImage(
+        spriteSheet,
+        spriteWidth * this.otherPlayersFrameIndex[0],
+        0,
+        spriteWidth,
+        spriteHeight,
+        positionX,
+        positionY,
+        dx,
+        dy
       );
     }
   }
@@ -2022,6 +2112,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       ...this.houseArea,
       ...this.wellArea,
       ...this.traders,
+      ...this.lobbyPlayers,
     ];
   }
 

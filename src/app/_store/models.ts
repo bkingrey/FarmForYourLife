@@ -49,7 +49,15 @@ export interface GameState {
 
 export interface LobbyPlayer {
   name: string;
-  id: number;
+  id: string;
+  state: string;
+  width: number;
+  height: number;
+  roomId: number;
+  position: {
+    x: number;
+    y: number;
+  };
 }
 
 export interface MerchantItems {

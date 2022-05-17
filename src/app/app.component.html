@@ -12,6 +12,7 @@
   <app-play-lobby
     *ngIf="gameData.scene === 'play-lobby'"
     [gameData]="gameData"
+    (changeScene)="changeScene($event)"
   ></app-play-lobby>
   <app-game
     *ngIf="gameData.scene === 'game'"
