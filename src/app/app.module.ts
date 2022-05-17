@@ -10,11 +10,24 @@ import { GameEffects } from './_store/effects';
 import { AppFacade } from './app.facade';
 import { GameUiComponent } from './game-ui/game-ui.component';
 import { MerchantComponent } from './merchant/merchant.component';
+import { TitleScreenComponent } from './title-screen/title-screen.component';
+import { GameSelectComponent } from './game-select/game-select.component';
+import { PlayLobbyComponent } from './play-lobby/play-lobby.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [AppComponent, GameComponent, GameUiComponent, MerchantComponent],
+  declarations: [
+    AppComponent,
+    GameComponent,
+    GameUiComponent,
+    MerchantComponent,
+    TitleScreenComponent,
+    GameSelectComponent,
+    PlayLobbyComponent,
+  ],
   imports: [
     BrowserModule,
+    FormsModule,
     StoreModule.forRoot({}),
     StoreModule.forFeature('gameData', gameReducer),
     StoreDevtoolsModule.instrument({ maxAge: 25 }),

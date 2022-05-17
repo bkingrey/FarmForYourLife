@@ -1,0 +1,14 @@
+<div class="name-container" *ngIf="!nameSet">
+  <input type="text" placeholder="Name" [(ngModel)]="playerName" />
+  <button (click)="setPlayer(playerName)">
+    {{ playerName.length > 0 ? "That's Me!" : "Enter Name" }}
+  </button>
+</div>
+<div class="hello" *ngIf="nameSet">Hi, {{ playerName }}!</div>
+<div class="games-container">
+  <div class="play">
+    <button (click)="changeScene.emit('play-lobby')">Play</button>
+  </div>
+  <div class="settings"><button>Settings</button></div>
+  <div class="private"><button>Private</button></div>
+</div>

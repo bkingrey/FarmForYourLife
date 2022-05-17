@@ -1,5 +1,20 @@
 <ng-container *ngIf="facade.gameData$ | async as gameData">
+  <app-title-screen
+    (changeScene)="changeScene($event)"
+    *ngIf="gameData.scene === 'title'"
+  >
+  </app-title-screen>
+  <app-game-select
+    *ngIf="gameData.scene === 'game-select'"
+    (changeScene)="changeScene($event)"
+    (setPlayerName)="addPlayer($event, gameData.lobbyPlayers)"
+  ></app-game-select>
+  <app-play-lobby
+    *ngIf="gameData.scene === 'play-lobby'"
+    [gameData]="gameData"
+  ></app-play-lobby>
   <app-game
+    *ngIf="gameData.scene === 'game'"
     [gameData]="gameData"
     (keyChange)="keyChange($event)"
     (changeTool)="changeTool($event)"
@@ -16,6 +31,7 @@
     (isSleeping)="changeIsSleeping($event)"
   ></app-game>
   <app-game-ui
+    *ngIf="gameData.scene === 'game'"
     [gameData]="gameData"
     (changeTool)="changeTool($event)"
   ></app-game-ui>

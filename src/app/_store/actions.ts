@@ -1,5 +1,11 @@
 import { createAction, props } from '@ngrx/store';
-import { GameState, KeyWASD, SpriteMetrics, SeedsOwned } from './models';
+import {
+  GameState,
+  KeyWASD,
+  SpriteMetrics,
+  SeedsOwned,
+  LobbyPlayer,
+} from './models';
 
 // CONFIG ACTIONS
 export const getGameData = createAction('[GameData] Get Game Data');
@@ -81,4 +87,12 @@ export const OpenShop = createAction(
 export const PurchaseItem = createAction(
   '[GameData] Purchase Item',
   props<{ payload: { name; cost } }>()
+);
+export const ChangeScene = createAction(
+  '[GameData] Change Scene',
+  props<{ payload: string }>()
+);
+export const AddPlayerToLobby = createAction(
+  '[GameData] Add Player to Lobby',
+  props<{ payload: Array<LobbyPlayer> }>()
 );

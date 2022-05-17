@@ -5,6 +5,8 @@ export interface GameState {
     x: number;
     y: number;
   };
+  lobbyPlayers: Array<LobbyPlayer>;
+  scene: string;
   collisions: Array<number> | [];
   farmableAreas: Array<number> | [];
   fishableAreas: Array<number> | [];
@@ -43,6 +45,11 @@ export interface GameState {
   seedsOwned: SeedKey;
   money: number;
   buyableItems: Array<MerchantItems>;
+}
+
+export interface LobbyPlayer {
+  name: string;
+  id: number;
 }
 
 export interface MerchantItems {

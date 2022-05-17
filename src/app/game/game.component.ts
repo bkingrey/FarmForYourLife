@@ -2228,8 +2228,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     return null;
   }
 
-  bouncePlayer(direction) {}
-
   movement() {
     let useRightAnims;
     if (this.mousePos.x > this.player.position.x) {

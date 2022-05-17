@@ -1,0 +1,9 @@
+<div class="lobby-container" *ngIf="gameData.lobbyPlayers.length">
+  <h2>Lobby:</h2>
+  <div
+    class="players"
+    *ngFor="let player of gameData.lobbyPlayers; let i = index"
+  >
+    Player{{ i + 1 }}: {{ player.name }}
+  </div>
+</div>

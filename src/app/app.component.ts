@@ -1,4 +1,6 @@
+import { GameState } from './_store/models';
 import {
+  AddPlayerToLobby,
   ChangeCanEnterHouse,
   ChangeCanFillWater,
   ChangeCanHarvest,
@@ -7,6 +9,7 @@ import {
   ChangeIsSleeping,
   ChangeKeyEvent,
   ChangeMoney,
+  ChangeScene,
   ChangeTool,
   ChangeVelocity,
   ChangeWaterMeter,
@@ -18,6 +21,8 @@ import {
 } from './_store/actions';
 import { Component, OnInit } from '@angular/core';
 import { AppFacade } from './app.facade';
+import io, { Socket } from 'socket.io-client';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -26,10 +31,21 @@ import { AppFacade } from './app.facade';
 })
 export class AppComponent implements OnInit {
   title = 'FarmForYourLife';
+  socket: Socket = io('http://localhost:3000');
   constructor(public facade: AppFacade) {}
 
   ngOnInit() {
     this.facade.dispatch(getGameData());
+  }
+
+  ngAfterViewInit(): void {
+    this.socket.on('position', (position) => {
+      console.log(position.x, position.y);
+    });
+    this.socket.on('lobbyPlayers', (lobbyPlayers) => {
+      console.log('got back here');
+      this.facade.dispatch(AddPlayerToLobby({ payload: lobbyPlayers }));
+    });
   }
 
   keyChange(event) {
@@ -79,5 +95,16 @@ export class AppComponent implements OnInit {
   }
   purchaseItem(event) {
     this.facade.dispatch(PurchaseItem({ payload: event }));
+  }
+  changeScene(event) {
+    this.facade.dispatch(ChangeScene({ payload: event }));
+  }
+  addPlayer(event, lobbyPlayers) {
+    var playerToServer = {
+      currentLobby: lobbyPlayers,
+      name: event,
+    };
+    console.log('sending name to server', playerToServer);
+    this.socket.emit('AddPlayerToLobby', playerToServer);
   }
 }

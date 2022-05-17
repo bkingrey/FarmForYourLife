@@ -11,6 +11,8 @@ export const intializeState = (): GameState => {
       x: 1024,
       y: 576,
     },
+    lobbyPlayers: [],
+    scene: 'title',
     seedsOwned: {
       beets: {
         name: 'beets-seeds',
@@ -174,6 +176,12 @@ export const gameReducer = createReducer(
   intializeState(),
   on(GameActions.getGameData, (state) => {
     return { ...state, loading: true };
+  }),
+  on(GameActions.ChangeScene, (state, { payload }) => {
+    return { ...state, scene: payload };
+  }),
+  on(GameActions.AddPlayerToLobby, (state, { payload }) => {
+    return { ...state, lobbyPlayers: payload };
   }),
   on(GameActions.SuccessGetGameDataAction, (state: GameState, { payload }) => {
     const newCollisionMap: Array<any> = [];
