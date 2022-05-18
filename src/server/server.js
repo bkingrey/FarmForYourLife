@@ -33,6 +33,7 @@ io.on("connection", (socket) => {
             getStartingPosition(room.length)
           )
         );
+        io.emit("lobbyPlayers", rooms[i]);
       } else {
         room = [
           addNewPlayerToLobby(playerToServer, getStartingPosition(room.length)),
@@ -45,6 +46,7 @@ io.on("connection", (socket) => {
       room.forEach((player) => {
         if (player.id === socket.id) {
           rooms[i] = room.filter((play) => play !== player);
+          io.emit("lobbyPlayers", rooms[i]);
         }
       });
     });
@@ -58,37 +60,20 @@ httpServer.listen(3000, () => {
 
 // FUNCTIONS
 function addNewPlayerToLobby(playerToServer, id, roomId, position) {
-  const newLobby = playerToServer.currentLobby.length
-    ? playerToServer.currentLobby
-    : [];
-  const name = playerToServer.name;
-  console.log("old lobby");
-  console.log(newLobby);
-  newLobby.push({
-    name,
-    id,
-    roomId,
-    position,
-    width: 96,
-    height: 64,
-    state: "otherPlayer",
-  });
-  console.log("newLobby");
-  console.log(newLobby);
-  io.emit("lobbyPlayers", newLobby);
+  const name = playerToServer;
   return { name, id, roomId, position };
 }
 
 function getStartingPosition(roomcount) {
   switch (roomcount) {
     case 0:
-      return { x: 837, y: 480 };
+      return { x: 756, y: 565 };
     case 1:
-      return { x: 837, y: 580 };
+      return { x: 1970, y: 565 };
     case 2:
-      return { x: 237, y: 40 };
+      return { x: 1970, y: 1402 };
     case 3:
-      return { x: 237, y: 40 };
+      return { x: 756, y: 1402 };
     default:
       break;
   }

@@ -18,5 +18,6 @@ export class GameSelectComponent implements OnInit {
   setPlayer(name) {
     this.nameSet = true;
     this.setPlayerName.emit(name);
+    this.changeScene.emit('play-lobby');
   }
 }

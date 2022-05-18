@@ -11,6 +11,7 @@ export const intializeState = (): GameState => {
       x: 1024,
       y: 576,
     },
+    me: null,
     lobbyPlayers: [],
     scene: 'title',
     seedsOwned: {
@@ -179,6 +180,9 @@ export const gameReducer = createReducer(
   }),
   on(GameActions.ChangeScene, (state, { payload }) => {
     return { ...state, scene: payload };
+  }),
+  on(GameActions.Me, (state, { payload }) => {
+    return { ...state, me: payload };
   }),
   on(GameActions.AddPlayerToLobby, (state, { payload }) => {
     let newLobby = payload.map((p) => {

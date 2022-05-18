@@ -7,7 +7,7 @@
   <app-game-select
     *ngIf="gameData.scene === 'game-select'"
     (changeScene)="changeScene($event)"
-    (setPlayerName)="addPlayer($event, gameData.lobbyPlayers)"
+    (setPlayerName)="addPlayer($event)"
   ></app-game-select>
   <app-play-lobby
     *ngIf="gameData.scene === 'play-lobby'"

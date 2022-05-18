@@ -15,6 +15,7 @@ import {
   Output,
 } from '@angular/core';
 import { intializeState } from '../_store/reducer';
+import { isNull } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-game',
@@ -290,7 +291,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         });
 
         this.lobbyPlayers.forEach((player) => {
-          this.getOtherPlayerSpriteSheet(player);
+          if (player) {
+            this.getOtherPlayerSpriteSheet(player);
+          }
         });
 
         // SLEEP
@@ -464,6 +467,19 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.moveAllMovables(difference);
   }
 
+  setPlayersInPosition() {
+    const map = this.mapImage.position;
+    const player = this.lobbyPlayers.filter(
+      (player) => player.name === this.gameData.me
+    )[0];
+    const difference = {
+      x: player.position.x - map.x,
+      y: player.position.y - map.y,
+    };
+    console.log(difference);
+    this.moveAllMovables(difference);
+  }
+
   moveAllMovables(difference) {
     this.movables.forEach((element) => {
       element.position.y += difference.y;
@@ -499,6 +515,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   createOtherPlayers() {
     this.lobbyPlayers = this.gameData.lobbyPlayers.map((lp) => {
+      // add to remove multiplayer same character
+      // if (lp.name !== this.gameData.me)
       return {
         ...lp,
         position: {
@@ -506,7 +524,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           writable: true,
         },
       };
+      // else {
+      //   return null;
+      // }
     });
+    this.lobbyPlayers = this.lobbyPlayers.filter((player) => player);
+    this.setPlayersInPosition();
   }
 
   loadCanvas() {

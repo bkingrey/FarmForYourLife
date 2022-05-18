@@ -13,6 +13,7 @@ import {
   ChangeVelocity,
   ChangeWaterMeter,
   getGameData,
+  Me,
   OpenShop,
   PurchaseItem,
   ReduceSeedCount,
@@ -93,13 +94,8 @@ export class AppComponent implements OnInit {
   changeScene(event) {
     this.facade.dispatch(ChangeScene({ payload: event }));
   }
-  addPlayer(event, lobbyPlayers) {
-    console.log(lobbyPlayers);
-    var playerToServer = {
-      currentLobby: lobbyPlayers,
-      name: event,
-    };
-    console.log('sending name to server', playerToServer);
-    this.socket.emit('AddPlayerToLobby', playerToServer);
+  addPlayer(event) {
+    this.facade.dispatch(Me({ payload: event }));
+    this.socket.emit('AddPlayerToLobby', event);
   }
 }
