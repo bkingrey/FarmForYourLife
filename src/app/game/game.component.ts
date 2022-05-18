@@ -15,7 +15,6 @@ import {
   Output,
 } from '@angular/core';
 import { intializeState } from '../_store/reducer';
-import { isNull } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-game',
@@ -237,138 +236,163 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   };
   lobbyPlayers: any = [];
 
+  mainFrameIndex = 0;
+  mainFrameCount = 0;
+  fpsInterval = 0;
+  now = 0;
+  then = 0;
+  startTime = 0;
+  elaspsed = 0;
+
   constructor() {
     super();
     this.animate = () => {
-      if (this.ctx && this.canvas) {
-        this.ctx.save();
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.scale(this.scale, this.scale);
         requestAnimationFrame(this.animate);
+        this.now = Date.now();
+        this.elaspsed = this.now - this.then;
 
-        this.ctx.drawImage(
-          this.map,
-          this.mapImage.position.x,
-          this.mapImage.position.y
-        );
-        this.boundaries.forEach((boundary) => {
-          if (this.ctx) {
-            this.drawBoundary(boundary);
-          }
-        });
-        this.untargetableArea.forEach((untargetableArea) => {
-          if (this.ctx) {
-            this.drawFarmable(untargetableArea);
-          }
-        });
-        this.farmableArea.forEach((farmableArea) => {
-          if (this.ctx) {
-            this.drawFarmable(farmableArea);
-          }
-        });
-        this.fishableArea.forEach((fishableArea) => {
-          if (this.ctx) {
-            this.drawFarmable(fishableArea);
-          }
-        });
-        this.minableArea.forEach((minableArea) => {
-          if (this.ctx) {
-            this.drawFarmable(minableArea);
-          }
-        });
-        this.houseArea.forEach((houseTile) => {
-          if (this.ctx) {
-            this.drawFarmable(houseTile);
-          }
-        });
-        this.wellArea.forEach((wellTile) => {
-          if (this.ctx) {
-            this.drawFarmable(wellTile);
-          }
-        });
-        this.traders.forEach((trader) => {
-          this.drawMerchant(trader);
-        });
-
-        this.lobbyPlayers.forEach((player) => {
-          if (player) {
-            this.getOtherPlayerSpriteSheet(player);
-          }
-        });
-
-        // SLEEP
-        if (this.queuedActivation) {
-          this.activatable();
+        if(this.elaspsed > this.fpsInterval) {
+          this.then = this.now - (this.elaspsed % this.fpsInterval)
+          this.drawingCode()
         }
-        // MOVEMENT
-        if (this.cultivatable() && !this.isWatering && this.queuedCultivate) {
-          this.cultivate();
-        } else if (this.isWatering) {
-          this.waterAnimation();
-        } else {
-          this.movement();
-        }
+  }
+}
 
-        if (this.pickupables.length) {
-          let removableItem;
-          this.pickupables.forEach((item: Pickupable, i) => {
-            if (item) {
-              item.width = this.squareSize;
-              item.height = this.squareSize;
-              if (this.playerIsPickingUpItem(item)) {
-                removableItem = item;
-              }
-              if (this.ctx) {
-                this.drawPickupableAnimation(item, 16, i);
-              }
+  drawingCode() {
+    if (this.ctx && this.canvas) {
+      this.ctx.save();
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.scale(this.scale, this.scale);
+      this.ctx.drawImage(
+        this.map,
+        this.mapImage.position.x,
+        this.mapImage.position.y
+      );
+      this.boundaries.forEach((boundary) => {
+        if (this.ctx) {
+          this.drawBoundary(boundary);
+        }
+      });
+      this.untargetableArea.forEach((untargetableArea) => {
+        if (this.ctx) {
+          this.drawFarmable(untargetableArea);
+        }
+      });
+      this.farmableArea.forEach((farmableArea) => {
+        if (this.ctx) {
+          this.drawFarmable(farmableArea);
+        }
+      });
+      this.fishableArea.forEach((fishableArea) => {
+        if (this.ctx) {
+          this.drawFarmable(fishableArea);
+        }
+      });
+      this.minableArea.forEach((minableArea) => {
+        if (this.ctx) {
+          this.drawFarmable(minableArea);
+        }
+      });
+      this.houseArea.forEach((houseTile) => {
+        if (this.ctx) {
+          this.drawFarmable(houseTile);
+        }
+      });
+      this.wellArea.forEach((wellTile) => {
+        if (this.ctx) {
+          this.drawFarmable(wellTile);
+        }
+      });
+      this.traders.forEach((trader) => {
+        this.drawMerchant(trader);
+      });
+
+      this.lobbyPlayers.forEach((player) => {
+        if (player) {
+          this.getOtherPlayerSpriteSheet(player);
+        }
+      });
+
+      // SLEEP
+      if (this.queuedActivation) {
+        this.activatable();
+      }
+      // MOVEMENT
+      if (this.cultivatable() && !this.isWatering && this.queuedCultivate) {
+        this.cultivate();
+      } else if (this.isWatering) {
+        this.waterAnimation();
+      } else {
+        this.movement();
+      }
+
+      if (this.pickupables.length) {
+        let removableItem;
+        this.pickupables.forEach((item: Pickupable, i) => {
+          if (item) {
+            item.width = this.squareSize;
+            item.height = this.squareSize;
+            if (this.playerIsPickingUpItem(item)) {
+              removableItem = item;
             }
-          });
-          this.pickupables = this.pickupables.filter(
-            (pickupable) => pickupable !== removableItem
-          );
-        }
-        this.ctx.drawImage(
-          this.foregroundMap,
-          this.mapImage.position.x,
-          this.mapImage.position.y
+            if (this.ctx) {
+              this.drawPickupableAnimation(item, 16, i);
+            }
+          }
+        });
+        this.pickupables = this.pickupables.filter(
+          (pickupable) => pickupable !== removableItem
         );
-        this.ctx.restore();
-        if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
-          if (this.gameData.canHarvest === true) {
-            this.canHarvest.emit(false);
-          }
-          this.hoveredFarmableArea = this.defaultFarmState;
+      }
+      this.ctx.drawImage(
+        this.foregroundMap,
+        this.mapImage.position.x,
+        this.mapImage.position.y
+      );
+      this.ctx.restore();
+      if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
+        if (this.gameData.canHarvest === true) {
+          this.canHarvest.emit(false);
+        }
+        this.hoveredFarmableArea = this.defaultFarmState;
+      } else {
+        if (
+          this.gameData.canHarvest === false &&
+          this.hoveredFarmableArea.state !== 'untargetable' &&
+          this.hoveredFarmableArea.state !== 'house' &&
+          this.hoveredFarmableArea.state !== 'merchant' &&
+          this.hoveredFarmableArea.state !== 'well'
+        ) {
+          this.canHarvest.emit(true);
+        }
+        if (
+          this.hoveredFarmableArea.state === 'well' ||
+          this.hoveredFarmableArea.state === 'fishable'
+        ) {
+          if (!this.gameData.canFillWater) this.canFillWater.emit(true);
         } else {
-          if (
-            this.gameData.canHarvest === false &&
-            this.hoveredFarmableArea.state !== 'untargetable' &&
-            this.hoveredFarmableArea.state !== 'house' &&
-            this.hoveredFarmableArea.state !== 'merchant' &&
-            this.hoveredFarmableArea.state !== 'well'
-          ) {
-            this.canHarvest.emit(true);
-          }
-          if (
-            this.hoveredFarmableArea.state === 'well' ||
-            this.hoveredFarmableArea.state === 'fishable'
-          ) {
-            if (!this.gameData.canFillWater) this.canFillWater.emit(true);
-          } else {
-            if (this.gameData.canFillWater) this.canFillWater.emit(false);
-          }
-          if (this.hoveredFarmableArea.state === 'merchant') {
-            if (!this.gameData.canOpenShop) this.canOpenShop.emit(true);
-          } else {
-            if (this.gameData.canOpenShop) this.canOpenShop.emit(false);
-          }
-          if (this.hoveredFarmableArea.state === 'house') {
-            if (!this.gameData.canEnterHouse) this.canEnterHouse.emit(true);
-          } else {
-            if (this.gameData.canEnterHouse) this.canEnterHouse.emit(false);
-          }
+          if (this.gameData.canFillWater) this.canFillWater.emit(false);
+        }
+        if (this.hoveredFarmableArea.state === 'merchant') {
+          if (!this.gameData.canOpenShop) this.canOpenShop.emit(true);
+        } else {
+          if (this.gameData.canOpenShop) this.canOpenShop.emit(false);
+        }
+        if (this.hoveredFarmableArea.state === 'house') {
+          if (!this.gameData.canEnterHouse) this.canEnterHouse.emit(true);
+        } else {
+          if (this.gameData.canEnterHouse) this.canEnterHouse.emit(false);
         }
       }
-    };
+    }
+
+  }
+
+  startAnimating(fps) {
+    this.fpsInterval = 1000/fps;
+    this.then = Date.now();
+    this.startTime = this.then;
+this.animate();
   }
 
   playerIsPickingUpItem(item: Pickupable) {
@@ -473,10 +497,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       (player) => player.name === this.gameData.me
     )[0];
     const difference = {
-      x: player.position.x - map.x,
-      y: player.position.y - map.y,
+      x: player.position.x-278 - map.x,
+      y: player.position.y-626 - map.y,
     };
-    console.log(difference);
     this.moveAllMovables(difference);
   }
 
@@ -529,7 +552,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       // }
     });
     this.lobbyPlayers = this.lobbyPlayers.filter((player) => player);
-    this.setPlayersInPosition();
   }
 
   loadCanvas() {
@@ -763,7 +785,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.gameData.spriteAnimations['spriteReadyWheat'].src;
 
     this.spriteSheetSoil.onload = () => {
-      this.animate();
+      this.startAnimating(60)
     };
   }
 
@@ -2137,6 +2159,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       ...this.traders,
       ...this.lobbyPlayers,
     ];
+    this.setPlayersInPosition();
   }
 
   keyDownEvent(e: KeyboardEvent) {
