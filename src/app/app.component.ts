@@ -18,9 +18,11 @@ import {
   PurchaseItem,
   ReduceSeedCount,
 } from './_store/actions';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { AppFacade } from './app.facade';
 import io, { Socket } from 'socket.io-client';
+import { KeyWASD } from './_store/models';
+import { GameComponent } from './game/game.component';
 
 @Component({
   selector: 'app-root',
@@ -30,6 +32,7 @@ import io, { Socket } from 'socket.io-client';
 export class AppComponent implements OnInit {
   title = 'FarmForYourLife';
   socket: Socket = io('http://localhost:3000');
+  @ViewChild('gameComp') gameComponent:GameComponent | null = null;
   constructor(public facade: AppFacade) {}
 
   ngOnInit() {
@@ -38,12 +41,24 @@ export class AppComponent implements OnInit {
 
   ngAfterViewInit(): void {
     this.socket.on('lobbyPlayers', (lobbyPlayers) => {
-      console.log(lobbyPlayers);
       this.facade.dispatch(AddPlayerToLobby({ payload: lobbyPlayers }));
     });
+    this.socket.on('move', (moveObj) => {
+      if (this.gameComponent) {
+        this.gameComponent.moveOtherPlayer(moveObj)
+      }
+    })
   }
 
-  keyChange(event) {
+  keyChange(event: KeyWASD, me, lobbyPlayers) {
+    const moveChangeObject = {
+      player: lobbyPlayers.filter(player => player.name === me)[0],
+      moveup: event.w && event.w.pressed,
+      movedown: event.s && event.s.pressed,
+      moveleft: event.a && event.a.pressed,
+      moveright: event.d && event.d.pressed
+    }
+    this.socket.emit('keychange', moveChangeObject)
     this.facade.dispatch(ChangeKeyEvent({ payload: event }));
   }
 

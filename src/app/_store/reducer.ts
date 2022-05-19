@@ -188,9 +188,12 @@ export const gameReducer = createReducer(
     let newLobby = payload.map((p) => {
       return {
         ...p,
+        moveup: false,
+        movedown: false,
+        moveleft: false,
+        moveright: false,
       };
     });
-    console.log(newLobby);
     return { ...state, lobbyPlayers: newLobby };
   }),
   on(GameActions.SuccessGetGameDataAction, (state: GameState, { payload }) => {

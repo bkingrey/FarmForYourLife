@@ -41,6 +41,44 @@ io.on("connection", (socket) => {
       }
     });
   });
+  socket.on("keychange", (event) => {
+    const player = event.player;
+    const roomId = event.player.roomId;
+    let move;
+    console.log({
+      up: event.moveup,
+      down: event.movedown,
+      right: event.moveright,
+      left: event.moveleft
+    })
+      if(event.moveup && event.movedown && event.moveleft && event.moveright)
+      move = 'none';
+      else if ((event.moveup && event.moveleft && event.moveright) || (event.moveup && !event.movedown && !event.moveleft && !event.moveright))
+      move = "up"
+      else if ((event.movedown && event.moveleft && event.moveright) || (event.movedown && !event.moveup && !event.moveleft && !event.moveright))
+      move = "down"
+      else if ((event.moveleft && event.movedown && event.moveup) || (event.moveleft && !event.moveup && !event.movedown && !event.moveright))
+      move = "left"
+      else if ((event.moveright && event.movedown && event.moveup) || (event.moveright && !event.moveup && !event.movedown && !event.moveleft))
+      move = "right"
+      else if (event.moveright && event.moveup)
+      move = "up-right"
+      else if (event.moveleft && event.moveup)
+      move = "up-left"
+      else if (event.moveright && event.movedown)
+      move = "down-right"
+      else if (event.moveleft && event.movedown)
+      move = "down-left"
+      else
+      move = "none"
+
+    const objToSend = {
+      player,
+      roomId,
+      move
+    }
+    io.emit("move",objToSend)
+  })
   socket.on("disconnect", () => {
     rooms.forEach((room, i) => {
       room.forEach((player) => {
@@ -67,7 +105,8 @@ function addNewPlayerToLobby(playerToServer, id, roomId, position) {
 function getStartingPosition(roomcount) {
   switch (roomcount) {
     case 0:
-      return { x: 756, y: 565 };
+    // return { x: 756+242, y: 565-25 };
+     return { x: 756, y: 565 };
     case 1:
       return { x: 1970, y: 565 };
     case 2:
