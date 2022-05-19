@@ -247,16 +247,16 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   constructor() {
     super();
     this.animate = () => {
-        requestAnimationFrame(this.animate);
-        this.now = Date.now();
-        this.elaspsed = this.now - this.then;
+      requestAnimationFrame(this.animate);
+      this.now = Date.now();
+      this.elaspsed = this.now - this.then;
 
-        if(this.elaspsed > this.fpsInterval) {
-          this.then = this.now - (this.elaspsed % this.fpsInterval)
-          this.drawingCode()
-        }
+      if (this.elaspsed > this.fpsInterval) {
+        this.then = this.now - (this.elaspsed % this.fpsInterval);
+        this.drawingCode();
+      }
+    };
   }
-}
 
   drawingCode() {
     if (this.ctx && this.canvas) {
@@ -307,9 +307,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.drawMerchant(trader);
       });
 
-      this.lobbyPlayers.forEach((player) => {
+      this.lobbyPlayers.forEach((player, i) => {
         if (player) {
-          this.getOtherPlayerSpriteSheet(player);
+          this.getOtherPlayerSpriteSheet(player, i);
         }
       });
 
@@ -385,14 +385,13 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         }
       }
     }
-
   }
 
   startAnimating(fps) {
-    this.fpsInterval = 1000/fps;
+    this.fpsInterval = 1000 / fps;
     this.then = Date.now();
     this.startTime = this.then;
-this.animate();
+    this.animate();
   }
 
   playerIsPickingUpItem(item: Pickupable) {
@@ -469,7 +468,7 @@ this.animate();
       this.goIntoHouse();
     } else {
       this.isSleeping.emit(false);
-      this.changeVelocity.emit(2);
+      this.changeVelocity.emit(4);
       this.canClick = true;
     }
 
@@ -496,10 +495,34 @@ this.animate();
     const player = this.lobbyPlayers.filter(
       (player) => player.name === this.gameData.me
     )[0];
-    const difference = {
-      x: player.position.x-278 - map.x,
-      y: player.position.y-626 - map.y,
+    let difference = {
+      x: 0,
+      y: 0,
     };
+    console.log(map.x, map.y);
+    console.log(player.position.x, player.position.y);
+    if (this.gameData.me === this.lobbyPlayers[0].name) {
+      difference = {
+        x: player.position.x - 278 - map.x,
+        y: player.position.y - 630 - map.y,
+      };
+    } else if (this.gameData.me === this.lobbyPlayers[1].name) {
+      difference = {
+        x: -player.position.x / 2 + 13,
+        y: -player.position.y / 20 + 8,
+      };
+    } else if (this.gameData.me === this.lobbyPlayers[2].name) {
+      difference = {
+        x: player.position.x - 278 - map.x,
+        y: player.position.y - 630 - map.y,
+      };
+    } else if (this.gameData.me === this.lobbyPlayers[3].name) {
+      difference = {
+        x: player.position.x - 278 - map.x,
+        y: player.position.y - 630 - map.y,
+      };
+    }
+
     this.moveAllMovables(difference);
   }
 
@@ -785,7 +808,7 @@ this.animate();
       this.gameData.spriteAnimations['spriteReadyWheat'].src;
 
     this.spriteSheetSoil.onload = () => {
-      this.startAnimating(60)
+      this.startAnimating(60);
     };
   }
 
@@ -852,7 +875,7 @@ this.animate();
       trader.state === 'merchant-left'
         ? this.goblinMerchantLeft
         : this.goblinMerchantRight;
-    if (this.goblinFramesDrawn > 20) {
+    if (this.goblinFramesDrawn > 8) {
       if (this.goblinFrameIndex < 7) {
         this.goblinFrameIndex++;
       } else {
@@ -887,7 +910,7 @@ this.animate();
   }
 
   drawSleepAnimation() {
-    if (this.bubblesFramesDrawn > 13) {
+    if (this.bubblesFramesDrawn > 5) {
       if (this.bubblesFrameIndex < 15) {
         if (this.gameData.energy.current < this.gameData.energy.max) {
           this.changeEnergy.emit(1);
@@ -915,36 +938,38 @@ this.animate();
     }
   }
 
-  getOtherPlayerSpriteSheet(player) {
+  getOtherPlayerSpriteSheet(player, i) {
     const useRightAnims = false;
     this.drawOtherSpriteAnimation(
       useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
       useRightAnims
         ? this.gameData.spriteAnimations['playerIdleRight'].frames
         : this.gameData.spriteAnimations['playerIdleLeft'].frames,
-      player
+      player,
+      i
     );
   }
 
   drawOtherSpriteAnimation(
     spriteSheet: HTMLImageElement,
     frames: number,
-    otherplayer
+    otherplayer,
+    i
   ) {
     if (this.gameData.isSleeping && this.ctx) {
       this.ctx.globalAlpha = 0;
     } else {
       if (this.ctx) this.ctx.globalAlpha = 1;
     }
-    if (this.otherPlayersFramesDrawn[0] > 15) {
-      if (this.otherPlayersFrameIndex[0] < frames - 1) {
-        this.otherPlayersFrameIndex[0]++;
+    if (this.otherPlayersFramesDrawn[i] > 8) {
+      if (this.otherPlayersFrameIndex[i] < frames - 1) {
+        this.otherPlayersFrameIndex[i]++;
       } else {
-        this.otherPlayersFrameIndex[0] = 0;
+        this.otherPlayersFrameIndex[i] = 0;
       }
-      this.otherPlayersFramesDrawn[0] = 0;
+      this.otherPlayersFramesDrawn[i] = 0;
     } else {
-      this.otherPlayersFramesDrawn[0]++;
+      this.otherPlayersFramesDrawn[i]++;
     }
     let player = {
       name: otherplayer.name,
@@ -959,7 +984,7 @@ this.animate();
         : player.height;
       const positionX = this.gameData.isCarrying
         ? player.position.x - 228
-        : player.position.x + 1;
+        : player.position.x;
       const positionY = this.gameData.isCarrying
         ? player.position.y - 84
         : player.position.y;
@@ -971,7 +996,7 @@ this.animate();
       };
       this.ctx.drawImage(
         spriteSheet,
-        spriteWidth * this.otherPlayersFrameIndex[0],
+        spriteWidth * this.otherPlayersFrameIndex[0] + 0.1,
         0,
         spriteWidth,
         spriteHeight,
@@ -989,7 +1014,7 @@ this.animate();
     } else {
       if (this.ctx) this.ctx.globalAlpha = 1;
     }
-    if (this.framesDrawn > 15) {
+    if (this.framesDrawn > 8) {
       if (this.frameIndex < frames - 1) {
         this.frameIndex++;
       } else {
@@ -1053,7 +1078,7 @@ this.animate();
   drawCultivateAnimation(spriteSheet: HTMLImageElement, frames: number) {
     let width = 128;
     let height = 65;
-    if (this.framesDrawn > 10) {
+    if (this.framesDrawn > 3) {
       if (this.actionFrameIndex < frames - 1) {
         if (
           this.actionFrameIndex === 3 &&
