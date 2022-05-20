@@ -23,6 +23,7 @@ import { AppFacade } from './app.facade';
 import io, { Socket } from 'socket.io-client';
 import { KeyWASD } from './_store/models';
 import { GameComponent } from './game/game.component';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,7 @@ import { GameComponent } from './game/game.component';
 export class AppComponent implements OnInit {
   title = 'FarmForYourLife';
   socket: Socket = io('http://localhost:3000');
-  @ViewChild('gameComp') gameComponent:GameComponent | null = null;
+  @ViewChild('gameComp') gameComponent: GameComponent | null = null;
   constructor(public facade: AppFacade) {}
 
   ngOnInit() {
@@ -45,20 +46,27 @@ export class AppComponent implements OnInit {
     });
     this.socket.on('move', (moveObj) => {
       if (this.gameComponent) {
-        this.gameComponent.moveOtherPlayer(moveObj)
+        this.gameComponent.moveOtherPlayer(moveObj);
       }
-    })
+    });
+    this.socket.on('updatePlayer', (updatedPlayer) => {
+      this.gameComponent?.lobbyPlayers.forEach((player) => {
+        if (player.name === updatedPlayer.name) {
+          player.loadedIn = updatedPlayer.loadedIn;
+        }
+      });
+    });
   }
 
   keyChange(event: KeyWASD, me, lobbyPlayers) {
     const moveChangeObject = {
-      player: lobbyPlayers.filter(player => player.name === me)[0],
+      player: lobbyPlayers.filter((player) => player.name === me)[0],
       moveup: event.w && event.w.pressed,
       movedown: event.s && event.s.pressed,
       moveleft: event.a && event.a.pressed,
-      moveright: event.d && event.d.pressed
-    }
-    this.socket.emit('keychange', moveChangeObject)
+      moveright: event.d && event.d.pressed,
+    };
+    this.socket.emit('keychange', moveChangeObject);
     this.facade.dispatch(ChangeKeyEvent({ payload: event }));
   }
 
@@ -107,6 +115,16 @@ export class AppComponent implements OnInit {
     this.facade.dispatch(PurchaseItem({ payload: event }));
   }
   changeScene(event) {
+    if (event === 'game') {
+      this.facade.gameData$.pipe(take(1)).subscribe((data) => {
+        console.log(data.lobbyPlayers);
+        let player = data.lobbyPlayers.filter(
+          (player) => player.name === data.me
+        )[0];
+        console.log(player);
+        this.socket.emit('StartGame', player);
+      });
+    }
     this.facade.dispatch(ChangeScene({ payload: event }));
   }
   addPlayer(event) {

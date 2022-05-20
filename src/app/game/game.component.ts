@@ -37,6 +37,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() canEnterHouse = new EventEmitter();
   @Output() isSleeping = new EventEmitter();
   @Output() openShop = new EventEmitter();
+  @Output() changePlayerState = new EventEmitter();
   isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
@@ -259,38 +260,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   drawingCode() {
-    if (this.lobbyPlayers[0]) {
-      if(this.lobbyPlayers[1])
-      this.moveOthers(this.lobbyPlayers[1]);
-      if(this.lobbyPlayers[2])
-      this.moveOthers(this.lobbyPlayers[2]);
-      if(this.lobbyPlayers[3])
-      this.moveOthers(this.lobbyPlayers[3]);
-    }
-    if (this.lobbyPlayers[1]) {
-      if(this.lobbyPlayers[0])
-      this.moveOthers(this.lobbyPlayers[0]);
-      if(this.lobbyPlayers[2])
-      this.moveOthers(this.lobbyPlayers[2]);
-      if(this.lobbyPlayers[3])
-      this.moveOthers(this.lobbyPlayers[3]);
-    }
-    if (this.lobbyPlayers[2]) {
-      if(this.lobbyPlayers[0])
-      this.moveOthers(this.lobbyPlayers[0]);
-      if(this.lobbyPlayers[1])
-      this.moveOthers(this.lobbyPlayers[1]);
-      if(this.lobbyPlayers[3])
-      this.moveOthers(this.lobbyPlayers[3]);
-    }
-    if (this.lobbyPlayers[3]) {
-      if(this.lobbyPlayers[0])
-      this.moveOthers(this.lobbyPlayers[0]);
-      if(this.lobbyPlayers[1])
-      this.moveOthers(this.lobbyPlayers[1]);
-      if(this.lobbyPlayers[2])
-      this.moveOthers(this.lobbyPlayers[2]);
-    }
     if (this.ctx && this.canvas) {
       this.ctx.save();
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -357,7 +326,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       } else {
         this.movement();
       }
-
 
       if (this.pickupables.length) {
         let removableItem;
@@ -527,441 +495,359 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.moveAllMovables(difference);
   }
   moveOthers(player) {
-        let useRightAnims = true;
-      //  // if (this.mousePos.x > this.player.position.x) {
-      //  //   useRightAnims = true;
-      //  // } else {
-      //  //   useRightAnims = false;
-      //  // }
-        let moving = true;
-        let canMoveHorizontal = true;
-        if (player.moveup) {
-          console.log(player.name)
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x,
-                    y: boundary.position.y + 3,
-                  },
-                },
-              })
-            ) {
-              moving = false;
-              canMoveHorizontal = true;
-            }
-          }
-          if (moving) {
-            player.position.y -= this.gameData.velocity
-            console.log(player.position.x, player.position.y)
-          }
-        }
-        if (player.movedown) {
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x,
-                    y: boundary.position.y - 30,
-                  },
-                },
-              })
-            ) {
-              moving = false;
-              canMoveHorizontal = true;
-            }
-          }
-          if (moving) {
-            player.position.y += this.gameData.velocity
-          }
-        }
-        if (player.moveright) {
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x - 3,
-                    y: boundary.position.y,
-                  },
-                },
-              })
-            ) {
-              canMoveHorizontal = false;
-              moving = false;
-            }
-          }
-          if (moving || canMoveHorizontal) {
-            player.position.x += this.gameData.velocity
-          }
-        }
-        if (player.moveleft) {
-          for (let i = 0; i < this.boundaries.length; i++) {
-            const boundary = this.boundaries[i];
-            if (
-              this.retangularCollision({
-                rectangle1: this.player,
-                rectangle2: {
-                  ...boundary,
-                  position: {
-                    x: boundary.position.x + 3,
-                    y: boundary.position.y,
-                  },
-                },
-              })
-            ) {
-              canMoveHorizontal = false;
-              moving = false;
-            }
-          }
-          if (moving || canMoveHorizontal) {
-            player.position.x -= this.gameData.velocity
-          }
-        }
-       // if (player.isSleeping) {
-       //   canMoveHorizontal = false;
-       //   moving = false;
-       //   this.drawSleepAnimation();
-       // }
+    //  // if (this.mousePos.x > this.player.position.x) {
+    //  //   useRightAnims = true;
+    //  // } else {
+    //  //   useRightAnims = false;
+    //  // }
+    if (player.moveup) {
+      if (player.moving || player.canMoveVertical) {
+        player.position.y -= this.gameData.velocity;
+      }
+    }
+    if (player.movedown) {
+      if (player.moving || player.canMoveVertical) {
+        player.position.y += this.gameData.velocity;
+      }
+    }
+    if (player.moveright) {
+      if (player.moving || player.canMoveHorizontal) {
+        player.position.x += this.gameData.velocity;
+      }
+    }
+    if (player.moveleft) {
+      if (player.moving || player.canMoveHorizontal) {
+        player.position.x -= this.gameData.velocity;
+      }
+    }
+    // if (player.isSleeping) {
+    //   canMoveHorizontal = false;
+    //   moving = false;
+    //   this.drawSleepAnimation();
+    // }
 
-        if (
-          !player.moveup &&
-          !player.moveleft &&
-          !player.movedown &&
-          !player.moveright &&
-          !player.isSleeping
-        ) {
-          if (player.equippedTool === 'beets') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryBeetsRight
-                : this.spriteCarryBeetsLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
-            );
-          } else if (player.equippedTool === 'cabbage') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryCabbageRight
-                : this.spriteCarryCabbageLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
-            );
-          } else if (player.equippedTool === 'carrot') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryCarrotRight
-                : this.spriteCarryCarrotLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
-            );
-          } else if (player.equippedTool === 'cauliflower') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryCauliflowerRight
-                : this.spriteCarryCauliflowerLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
-                    .frames
-                : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
-                    .frames
-            );
-          } else if (player.equippedTool === 'kale') {
-            this.drawSpriteAnimation(
-              useRightAnims ? this.spriteCarryKaleRight : this.spriteCarryKaleLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
-            );
-          } else if (player.equippedTool === 'potato') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryPotatoRight
-                : this.spriteCarryPotatoLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
-            );
-          } else if (player.equippedTool === 'radish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryRadishRight
-                : this.spriteCarryRadishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
-            );
-          } else if (player.equippedTool === 'sunflower') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarrySunflowerRight
-                : this.spriteCarrySunflowerLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
-                : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
-            );
-          } else if (player.equippedTool === 'wheat') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryWheatRight
-                : this.spriteCarryWheatLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
-            );
-          } else if (player.equippedTool === 'smallfish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarrySmallFishRight
-                : this.spriteCarrySmallFishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
-                : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
-            );
-          } else if (player.equippedTool === 'mediumfish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryMediumFishRight
-                : this.spriteCarryMediumFishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
-                    .frames
-                : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
-            );
-          } else if (player.equippedTool === 'hugefish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryHugeFishRight
-                : this.spriteCarryHugeFishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
-            );
-          } else if (player.equippedTool === 'nugget') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryNuggetRight
-                : this.spriteCarryNuggetLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
-            );
-          } else {
-            this.drawSpriteAnimation(
-              useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['playerIdleRight'].frames
-                : this.gameData.spriteAnimations['playerIdleLeft'].frames
-            );
-          }
-        } else {
-          if (player.equippedTool === 'beets') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryBeetsRight
-                : this.spriteCarryBeetsLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
-            );
-          } else if (player.equippedTool === 'cabbage') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryCabbageRight
-                : this.spriteCarryCabbageLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
-            );
-          } else if (player.equippedTool === 'carrot') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryCarrotRight
-                : this.spriteCarryCarrotLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
-            );
-          } else if (player.equippedTool === 'cauliflower') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryCauliflowerRight
-                : this.spriteCarryCauliflowerLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
-                    .frames
-                : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
-                    .frames
-            );
-          } else if (player.equippedTool === 'kale') {
-            this.drawSpriteAnimation(
-              useRightAnims ? this.spriteCarryKaleRight : this.spriteCarryKaleLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
-            );
-          } else if (player.equippedTool === 'potato') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryPotatoRight
-                : this.spriteCarryPotatoLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
-            );
-          } else if (player.equippedTool === 'radish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryRadishRight
-                : this.spriteCarryRadishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
-            );
-          } else if (player.equippedTool === 'sunflower') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarrySunflowerRight
-                : this.spriteCarrySunflowerLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
-                : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
-            );
-          } else if (player.equippedTool === 'wheat') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryWheatRight
-                : this.spriteCarryWheatLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
-            );
-          } else if (player.equippedTool === 'smallfish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarrySmallFishRight
-                : this.spriteCarrySmallFishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
-                : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
-            );
-          } else if (player.equippedTool === 'mediumfish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryMediumFishRight
-                : this.spriteCarryMediumFishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
-                    .frames
-                : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
-            );
-          } else if (player.equippedTool === 'hugefish') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryHugeFishRight
-                : this.spriteCarryHugeFishLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
-            );
-          } else if (player.equippedTool === 'nugget') {
-            this.drawSpriteAnimation(
-              useRightAnims
-                ? this.spriteCarryNuggetRight
-                : this.spriteCarryNuggetLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
-                : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
-            );
-          } else {
-            this.drawSpriteAnimation(
-              useRightAnims ? this.spriteSheetWalkRight : this.spriteSheetWalkLeft,
-              useRightAnims
-                ? this.gameData.spriteAnimations['playerWalkRight'].frames
-                : this.gameData.spriteAnimations['playerWalkLeft'].frames
-            );
-          }
-        }
-
+    if (
+      !player.moveup &&
+      !player.moveleft &&
+      !player.movedown &&
+      !player.moveright &&
+      !player.isSleeping
+    ) {
+      if (player.equippedTool === 'beets') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryBeetsRight
+            : this.spriteCarryBeetsLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
+        );
+      } else if (player.equippedTool === 'cabbage') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryCabbageRight
+            : this.spriteCarryCabbageLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
+        );
+      } else if (player.equippedTool === 'carrot') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryCarrotRight
+            : this.spriteCarryCarrotLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
+        );
+      } else if (player.equippedTool === 'cauliflower') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryCauliflowerRight
+            : this.spriteCarryCauliflowerLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
+                .frames
+        );
+      } else if (player.equippedTool === 'kale') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryKaleRight
+            : this.spriteCarryKaleLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
+        );
+      } else if (player.equippedTool === 'potato') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryPotatoRight
+            : this.spriteCarryPotatoLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
+        );
+      } else if (player.equippedTool === 'radish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryRadishRight
+            : this.spriteCarryRadishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
+        );
+      } else if (player.equippedTool === 'sunflower') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarrySunflowerRight
+            : this.spriteCarrySunflowerLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
+        );
+      } else if (player.equippedTool === 'wheat') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryWheatRight
+            : this.spriteCarryWheatLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
+        );
+      } else if (player.equippedTool === 'smallfish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarrySmallFishRight
+            : this.spriteCarrySmallFishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
+        );
+      } else if (player.equippedTool === 'mediumfish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryMediumFishRight
+            : this.spriteCarryMediumFishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
+        );
+      } else if (player.equippedTool === 'hugefish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryHugeFishRight
+            : this.spriteCarryHugeFishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
+        );
+      } else if (player.equippedTool === 'nugget') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryNuggetRight
+            : this.spriteCarryNuggetLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
+        );
+      } else {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteSheetIdleRight
+            : this.spriteSheetIdleLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['playerIdleRight'].frames
+            : this.gameData.spriteAnimations['playerIdleLeft'].frames
+        );
+      }
+    } else {
+      if (player.equippedTool === 'beets') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryBeetsRight
+            : this.spriteCarryBeetsLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
+        );
+      } else if (player.equippedTool === 'cabbage') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryCabbageRight
+            : this.spriteCarryCabbageLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
+        );
+      } else if (player.equippedTool === 'carrot') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryCarrotRight
+            : this.spriteCarryCarrotLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
+        );
+      } else if (player.equippedTool === 'cauliflower') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryCauliflowerRight
+            : this.spriteCarryCauliflowerLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
+                .frames
+        );
+      } else if (player.equippedTool === 'kale') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryKaleRight
+            : this.spriteCarryKaleLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
+        );
+      } else if (player.equippedTool === 'potato') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryPotatoRight
+            : this.spriteCarryPotatoLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
+        );
+      } else if (player.equippedTool === 'radish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryRadishRight
+            : this.spriteCarryRadishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
+        );
+      } else if (player.equippedTool === 'sunflower') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarrySunflowerRight
+            : this.spriteCarrySunflowerLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
+        );
+      } else if (player.equippedTool === 'wheat') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryWheatRight
+            : this.spriteCarryWheatLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
+        );
+      } else if (player.equippedTool === 'smallfish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarrySmallFishRight
+            : this.spriteCarrySmallFishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
+        );
+      } else if (player.equippedTool === 'mediumfish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryMediumFishRight
+            : this.spriteCarryMediumFishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
+                .frames
+            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
+        );
+      } else if (player.equippedTool === 'hugefish') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryHugeFishRight
+            : this.spriteCarryHugeFishLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
+        );
+      } else if (player.equippedTool === 'nugget') {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteCarryNuggetRight
+            : this.spriteCarryNuggetLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
+            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
+        );
+      } else {
+        this.drawSpriteAnimation(
+          player.useRightAnims
+            ? this.spriteSheetWalkRight
+            : this.spriteSheetWalkLeft,
+          player.useRightAnims
+            ? this.gameData.spriteAnimations['playerWalkRight'].frames
+            : this.gameData.spriteAnimations['playerWalkLeft'].frames
+        );
+      }
+    }
   }
   moveOtherPlayer(event) {
-    const player = this.lobbyPlayers.filter(player => player.name === event.player.name)[0]
+    const player = this.lobbyPlayers.filter(
+      (player) => player.name === event.player.name
+    )[0];
     if (player && event.roomId === player.roomId) {
-        if (event.move === "up-left"){
-          player.moveup = true;
-          player.moveleft = true;
-          player.moveright = false;
-          player.movedown = false;
-        }
-        else if (event.move === "up-right"){
-          player.moveup = true;
-          player.moveright = true;
-          player.moveleft = false;
-          player.movedown = false;
-        }
-        else if (event.move === "down-left"){
-          player.movedown = true;
-          player.moveleft = true;
-          player.moveup = false;
-          player.moveright = false;
-        }
-        else if (event.move === "down-right"){
-          player.movedown = true;
-          player.moveright = true;
-          player.moveup = false;
-          player.moveleft = false
-        }
-       else if (event.move === "up") {
+      if (event.move === 'up-left') {
+        player.moveup = true;
+        player.moveleft = true;
+        player.moveright = false;
+        player.movedown = false;
+      } else if (event.move === 'up-right') {
+        player.moveup = true;
+        player.moveright = true;
+        player.moveleft = false;
+        player.movedown = false;
+      } else if (event.move === 'down-left') {
+        player.movedown = true;
+        player.moveleft = true;
+        player.moveup = false;
+        player.moveright = false;
+      } else if (event.move === 'down-right') {
+        player.movedown = true;
+        player.moveright = true;
+        player.moveup = false;
+        player.moveleft = false;
+      } else if (event.move === 'up') {
         player.moveup = true;
         player.movedown = false;
         player.moveleft = false;
         player.moveright = false;
-       }
-
-        else if (event.move === "down") {
-          player.movedown = true;
-          player.moveup = false;
-          player.moveleft = false;
-          player.moveright = false;
-        }
-
-       else if (event.move === "left") {
-          player.moveleft = true;
-          player.movedown = false;
-          player.moveright = false;
-          player.moveup = false;
-        }
-
-       else if (event.move === "right") {
-          player.moveright = true;
-          player.movedown = false;
-          player.moveleft = false;
-          player.moveup = false;
-        }
-
-        else if(event.move === "none") {
-          player.moveup= false;
-          player.movedown = false;
-          player.moveleft = false;
-          player.moveright = false;
-          player.position = player.position
-        }
-
-
+      } else if (event.move === 'down') {
+        player.movedown = true;
+        player.moveup = false;
+        player.moveleft = false;
+        player.moveright = false;
+      } else if (event.move === 'left') {
+        player.moveleft = true;
+        player.movedown = false;
+        player.moveright = false;
+        player.moveup = false;
+      } else if (event.move === 'right') {
+        player.moveright = true;
+        player.movedown = false;
+        player.moveleft = false;
+        player.moveup = false;
+      } else if (event.move === 'none') {
+        player.moveup = false;
+        player.movedown = false;
+        player.moveleft = false;
+        player.moveright = false;
+        player.position = player.position;
+      }
     }
   }
 
@@ -975,7 +861,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (this.gameData.me === this.lobbyPlayers[0].name) {
       difference = {
         x: this.lobbyPlayers[0].position.x - 278 - map.x,
-        y: this.lobbyPlayers[0].position.y - 630 - map.y
+        y: this.lobbyPlayers[0].position.y - 630 - map.y,
       };
     } else if (this.gameData.me === this.lobbyPlayers[1].name) {
       difference = {
@@ -1017,17 +903,35 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.createCollisionsAndMovables();
-    this.createUntargetableArea(this.gameData.untargetableAreaMap);
-    this.createFarmableArea(this.gameData.farmableAreaMap);
-    this.createFishableArea(this.gameData.fishableAreaMap);
-    this.createMinableArea(this.gameData.minableAreaMap);
-    this.createHouseArea(this.gameData.houseAreaMap);
-    this.createWellArea(this.gameData.wellAreaMap);
-    this.createTraders();
-    this.createOtherPlayers();
-    this.createMovables();
-    this.loadCanvas();
+    this.loadLobby();
+  }
+
+  loadLobby() {
+    const tickInterval = setInterval(() => {
+      this.createOtherPlayers();
+      if (
+        !this.gameData.lobbyPlayers[0] ||
+        !this.gameData.lobbyPlayers[1] ||
+        !this.gameData.lobbyPlayers[0].loadedIn ||
+        !this.gameData.lobbyPlayers[1].loadedIn
+      ) {
+        console.log(this.lobbyPlayers);
+        console.log('waiting for players');
+      } else {
+        clearInterval(tickInterval);
+        this.createCollisionsAndMovables();
+        this.createUntargetableArea(this.gameData.untargetableAreaMap);
+        this.createFarmableArea(this.gameData.farmableAreaMap);
+        this.createFishableArea(this.gameData.fishableAreaMap);
+        this.createMinableArea(this.gameData.minableAreaMap);
+        this.createHouseArea(this.gameData.houseAreaMap);
+        this.createWellArea(this.gameData.wellAreaMap);
+        this.createTraders();
+        this.createOtherPlayers();
+        this.createMovables();
+        this.loadCanvas();
+      }
+    }, 3000);
   }
 
   createOtherPlayers() {
@@ -1040,6 +944,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           ...lp.position,
           writable: true,
         },
+        canMoveVertical: true,
+        canMoveHorizontal: true,
+        moving: true,
+        useRightAnims: true,
       };
       // else {
       //   return null;
@@ -1410,7 +1318,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   getOtherPlayerSpriteSheet(player, i) {
-    const useRightAnims = false;
+    const useRightAnims = player.useRightAnims;
     this.drawOtherSpriteAnimation(
       useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
       useRightAnims
@@ -1442,28 +1350,22 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     } else {
       this.otherPlayersFramesDrawn[i]++;
     }
-    let player = {
-      name: otherplayer.name,
-      width: 13,
-      height: 18,
-      position: otherplayer.position,
-    };
     if (this.canvas && this.ctx) {
       const spriteWidth = this.gameData.isCarrying ? 128 : 13;
       const spriteHeight = this.gameData.isCarrying
         ? this.squareSize
-        : player.height;
+        : otherplayer.height;
       const positionX = this.gameData.isCarrying
-        ? player.position.x - 228
-        : player.position.x;
+        ? otherplayer.position.x - 228
+        : otherplayer.position.x;
       const positionY = this.gameData.isCarrying
-        ? player.position.y - 84
-        : player.position.y;
+        ? otherplayer.position.y - 84
+        : otherplayer.position.y;
       const dx = this.gameData.isCarrying ? 128 * 4 : 52;
       const dy = spriteSheet.height * 4;
       this.player.center = {
-        x: player.position.x + player.width * 2,
-        y: player.position.y + player.height * 2,
+        x: otherplayer.position.x + otherplayer.width * 2,
+        y: otherplayer.position.y + otherplayer.height * 2,
       };
       this.ctx.drawImage(
         spriteSheet,
@@ -1476,6 +1378,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         dx,
         dy
       );
+      this.moveOthers(otherplayer);
     }
   }
 
@@ -2742,14 +2645,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         pressed: this.memoryKeys.w.pressed,
       },
       a: {
-        pressed: this.memoryKeys.a.pressed
+        pressed: this.memoryKeys.a.pressed,
       },
       s: {
-        pressed: this.memoryKeys.s.pressed
+        pressed: this.memoryKeys.s.pressed,
       },
       d: {
-        pressed: this.memoryKeys.d.pressed
-      }
+        pressed: this.memoryKeys.d.pressed,
+      },
     } as KeyWASD);
   }
   moveLeft(bool: boolean) {
@@ -2759,14 +2662,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         pressed: this.memoryKeys.w.pressed,
       },
       a: {
-        pressed: this.memoryKeys.a.pressed
+        pressed: this.memoryKeys.a.pressed,
       },
       s: {
-        pressed: this.memoryKeys.s.pressed
+        pressed: this.memoryKeys.s.pressed,
       },
       d: {
-        pressed: this.memoryKeys.d.pressed
-      }
+        pressed: this.memoryKeys.d.pressed,
+      },
     } as KeyWASD);
   }
   moveRight(bool: boolean) {
@@ -2776,14 +2679,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         pressed: this.memoryKeys.w.pressed,
       },
       a: {
-        pressed: this.memoryKeys.a.pressed
+        pressed: this.memoryKeys.a.pressed,
       },
       s: {
-        pressed: this.memoryKeys.s.pressed
+        pressed: this.memoryKeys.s.pressed,
       },
       d: {
-        pressed: this.memoryKeys.d.pressed
-      }
+        pressed: this.memoryKeys.d.pressed,
+      },
     } as KeyWASD);
   }
   moveDown(bool: boolean) {
@@ -2793,14 +2696,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         pressed: this.memoryKeys.w.pressed,
       },
       a: {
-        pressed: this.memoryKeys.a.pressed
+        pressed: this.memoryKeys.a.pressed,
       },
       s: {
-        pressed: this.memoryKeys.s.pressed
+        pressed: this.memoryKeys.s.pressed,
       },
       d: {
-        pressed: this.memoryKeys.d.pressed
-      }
+        pressed: this.memoryKeys.d.pressed,
+      },
     } as KeyWASD);
   }
 
@@ -2827,8 +2730,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   useRightAnims() {
     if (this.mousePos.x > this.player.position.x) {
+      this.lobbyPlayers.filter(
+        (player) => player.name === this.gameData.me
+      )[0].useRightAnims = true;
       return true;
     } else {
+      this.lobbyPlayers.filter(
+        (player) => player.name === this.gameData.me
+      )[0].useRightAnims = false;
       return false;
     }
   }
@@ -2897,6 +2806,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   movement() {
+    let player = this.lobbyPlayers.filter(
+      (player) => player.name === this.gameData.me
+    )[0];
     let useRightAnims;
     if (this.mousePos.x > this.player.position.x) {
       useRightAnims = true;
@@ -2905,6 +2817,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     let moving = true;
     let canMoveHorizontal = true;
+    let canMoveVertical = true;
+
     if (this.gameData.keys.w.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
@@ -2922,9 +2836,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         ) {
           moving = false;
           canMoveHorizontal = true;
+          canMoveVertical = false;
         }
       }
-      if (moving) {
+      if (moving || canMoveVertical) {
         this.movables.forEach((element) => {
           element.position.y += this.gameData.velocity;
         });
@@ -2952,9 +2867,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         ) {
           moving = false;
           canMoveHorizontal = true;
+          canMoveVertical = false;
         }
       }
-      if (moving) {
+      if (moving || canMoveVertical) {
         this.movables.forEach((element) => {
           element.position.y -= this.gameData.velocity;
         });
@@ -3292,6 +3208,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       }
     }
+    player.moving = moving;
+    player.canMoveHorizontal = canMoveHorizontal;
+    player.canMoveVertical = canMoveVertical;
+    player.useRightAnims = useRightAnims;
   }
 
   targetNearestSquare(area) {

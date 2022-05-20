@@ -49,6 +49,7 @@ export interface GameState {
 }
 
 export interface LobbyPlayer {
+  loadedIn: boolean;
   name: string;
   id: string;
   state: string;

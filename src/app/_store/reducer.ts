@@ -178,11 +178,11 @@ export const gameReducer = createReducer(
   on(GameActions.getGameData, (state) => {
     return { ...state, loading: true };
   }),
-  on(GameActions.ChangeScene, (state, { payload }) => {
-    return { ...state, scene: payload };
-  }),
   on(GameActions.Me, (state, { payload }) => {
     return { ...state, me: payload };
+  }),
+  on(GameActions.ChangeScene, (state, { payload }) => {
+    return { ...state, scene: payload };
   }),
   on(GameActions.AddPlayerToLobby, (state, { payload }) => {
     let newLobby = payload.map((p) => {
@@ -192,6 +192,7 @@ export const gameReducer = createReducer(
         movedown: false,
         moveleft: false,
         moveright: false,
+        loadedIn: false,
       };
     });
     return { ...state, lobbyPlayers: newLobby };
