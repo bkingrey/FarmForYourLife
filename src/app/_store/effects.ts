@@ -50,12 +50,21 @@ export class GameEffects {
       map(([action, gameData]) => {
         let newLobby;
         if (gameData.loadedPlayers.length && gameData.lobbyPlayers.length) {
-          newLobby = gameData.lobbyPlayers.map((player) => {
-            return {
-              ...player,
-              loadedIn: true,
-            };
+          // newLobby = gameData.lobbyPlayers.map((player) => {
+          //   return {
+          //     ...player,
+          //     loadedIn: true,
+          //   };
+          // });
+          newLobby = gameData.lobbyPlayers.map((lobbyPlayer) => {
+            const loadedPlayers = gameData.loadedPlayers.find(
+              (loadedPlayer) => loadedPlayer.name === lobbyPlayer.name
+            );
+            return loadedPlayers
+              ? { ...lobbyPlayer, loadedIn: true }
+              : lobbyPlayer;
           });
+          console.log(newLobby);
         }
         return AddPlayerToLobby({ payload: newLobby });
       })

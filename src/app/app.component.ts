@@ -46,9 +46,12 @@ export class AppComponent implements OnInit {
       this.facade.dispatch(AddPlayerToLobby({ payload: lobbyPlayers }));
     });
     this.socket.on('move', (moveObj) => {
-      if (this.gameComponent) {
-        this.gameComponent.moveOtherPlayer(moveObj);
-      }
+      this.facade.gameData$.pipe(take(1)).subscribe((data) => {
+        if (this.gameComponent && moveObj.player.name !== data.me) {
+          console.log(moveObj.player.name);
+          this.gameComponent.moveOtherPlayer(moveObj);
+        }
+      });
     });
     this.socket.on('updatePlayer', (updatedPlayer) => {
       this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));

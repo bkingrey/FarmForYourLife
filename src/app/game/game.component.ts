@@ -310,7 +310,18 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
       this.lobbyPlayers.forEach((player, i) => {
         if (player) {
-          this.getOtherPlayerSpriteSheet(player, i);
+          if (this.ctx && this.player.width && this.player.height) {
+            this.ctx.strokeStyle = 'red';
+            this.ctx.beginPath();
+            this.ctx.rect(
+              player.position.x,
+              player.position.y,
+              this.player.width * 4,
+              this.player.height * 4
+            );
+            this.ctx.stroke();
+            this.getOtherPlayerSpriteSheet(player, i);
+          }
         }
       });
 
@@ -494,7 +505,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
     this.moveAllMovables(difference);
   }
-  moveOthers(player) {
+  moveOthers(player, i) {
     //  // if (this.mousePos.x > this.player.position.x) {
     //  //   useRightAnims = true;
     //  // } else {
@@ -534,34 +545,40 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       !player.isSleeping
     ) {
       if (player.equippedTool === 'beets') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryBeetsRight
             : this.spriteCarryBeetsLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'cabbage') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryCabbageRight
             : this.spriteCarryCabbageLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'carrot') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryCarrotRight
             : this.spriteCarryCarrotLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'cauliflower') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryCauliflowerRight
             : this.spriteCarryCauliflowerLeft,
@@ -569,130 +586,159 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
                 .frames
             : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
-                .frames
+                .frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'kale') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryKaleRight
             : this.spriteCarryKaleLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'potato') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryPotatoRight
             : this.spriteCarryPotatoLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'radish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryRadishRight
             : this.spriteCarryRadishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'sunflower') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarrySunflowerRight
             : this.spriteCarrySunflowerLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
-            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'wheat') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryWheatRight
             : this.spriteCarryWheatLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'smallfish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarrySmallFishRight
             : this.spriteCarrySmallFishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
-            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'mediumfish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryMediumFishRight
             : this.spriteCarryMediumFishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
                 .frames
-            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft']
+                .frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'hugefish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryHugeFishRight
             : this.spriteCarryHugeFishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'nugget') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryNuggetRight
             : this.spriteCarryNuggetLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames,
+          player,
+          i
         );
       } else {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteSheetIdleRight
             : this.spriteSheetIdleLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['playerIdleRight'].frames
-            : this.gameData.spriteAnimations['playerIdleLeft'].frames
+            : this.gameData.spriteAnimations['playerIdleLeft'].frames,
+          player,
+          i
         );
       }
     } else {
       if (player.equippedTool === 'beets') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryBeetsRight
             : this.spriteCarryBeetsLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'cabbage') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryCabbageRight
             : this.spriteCarryCabbageLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryCabbageRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryCabbageLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'carrot') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryCarrotRight
             : this.spriteCarryCarrotLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryCarrotRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryCarrotLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'cauliflower') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryCauliflowerRight
             : this.spriteCarryCauliflowerLeft,
@@ -700,98 +746,121 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
                 .frames
             : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
-                .frames
+                .frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'kale') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryKaleRight
             : this.spriteCarryKaleLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryKaleRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryKaleLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'potato') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryPotatoRight
             : this.spriteCarryPotatoLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryPotatoRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryPotatoLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'radish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryRadishRight
             : this.spriteCarryRadishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryRadishRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryRadishLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'sunflower') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarrySunflowerRight
             : this.spriteCarrySunflowerLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarrySunflowerRight'].frames
-            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarrySunflowerLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'wheat') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryWheatRight
             : this.spriteCarryWheatLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'smallfish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarrySmallFishRight
             : this.spriteCarrySmallFishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarrySmallFishRight'].frames
-            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarrySmallFishLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'mediumfish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryMediumFishRight
             : this.spriteCarryMediumFishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
                 .frames
-            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryMediumFishLeft']
+                .frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'hugefish') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryHugeFishRight
             : this.spriteCarryHugeFishLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryHugeFishRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryHugeFishLeft'].frames,
+          player,
+          i
         );
       } else if (player.equippedTool === 'nugget') {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryNuggetRight
             : this.spriteCarryNuggetLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['spriteCarryNuggetRight'].frames
-            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames
+            : this.gameData.spriteAnimations['spriteCarryNuggetLeft'].frames,
+          player,
+          i
         );
       } else {
-        this.drawSpriteAnimation(
+        this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteSheetWalkRight
             : this.spriteSheetWalkLeft,
           player.useRightAnims
             ? this.gameData.spriteAnimations['playerWalkRight'].frames
-            : this.gameData.spriteAnimations['playerWalkLeft'].frames
+            : this.gameData.spriteAnimations['playerWalkLeft'].frames,
+          player,
+          i
         );
       }
     }
@@ -915,13 +984,13 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   loadLobby() {
     const tickInterval = setInterval(() => {
       this.lobbyPlayers = this.gameData.lobbyPlayers;
-      this.createOtherPlayers();
       if (
         !this.gameData.lobbyPlayers[0] ||
-        !this.gameData.lobbyPlayers[1] ||
         !this.gameData.lobbyPlayers[0].loadedIn ||
+        !this.gameData.lobbyPlayers[1] ||
         !this.gameData.lobbyPlayers[1].loadedIn
       ) {
+        console.log('waiting for players');
       } else {
         clearInterval(tickInterval);
         this.createCollisionsAndMovables();
@@ -942,23 +1011,32 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   createOtherPlayers() {
     this.lobbyPlayers = this.gameData.lobbyPlayers.map((lp) => {
       // add to remove multiplayer same character
-      // if (lp.name !== this.gameData.me)
-      return {
-        ...lp,
-        position: {
-          ...lp.position,
-          writable: true,
-        },
-        canMoveVertical: true,
-        canMoveHorizontal: true,
-        moving: true,
-        useRightAnims: true,
-      };
-      // else {
-      //   return null;
-      // }
+      if (lp.name !== this.gameData.me)
+        return {
+          ...lp,
+          position: {
+            ...lp.position,
+            writable: true,
+          },
+          canMoveVertical: true,
+          canMoveHorizontal: true,
+          moving: true,
+          useRightAnims: true,
+        };
+      else {
+        return {
+          ...lp,
+          position: {
+            ...lp.position,
+            writable: true,
+          },
+          canMoveVertical: true,
+          canMoveHorizontal: true,
+          moving: true,
+          useRightAnims: true,
+        };
+      }
     });
-    this.lobbyPlayers = this.lobbyPlayers.filter((player) => player);
   }
 
   loadCanvas() {
@@ -1332,6 +1410,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       player,
       i
     );
+    this.moveOthers(player, i);
   }
 
   drawOtherSpriteAnimation(
@@ -1355,11 +1434,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     } else {
       this.otherPlayersFramesDrawn[i]++;
     }
-    if (this.canvas && this.ctx) {
-      const spriteWidth = this.gameData.isCarrying ? 128 : 13;
+    if (this.canvas && this.ctx && this.player.width && this.player.height) {
+      const spriteWidth = this.gameData.isCarrying ? 128 : this.player.width;
       const spriteHeight = this.gameData.isCarrying
         ? this.squareSize
-        : otherplayer.height;
+        : this.player.height;
       const positionX = this.gameData.isCarrying
         ? otherplayer.position.x - 228
         : otherplayer.position.x;
@@ -1368,9 +1447,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         : otherplayer.position.y;
       const dx = this.gameData.isCarrying ? 128 * 4 : 52;
       const dy = spriteSheet.height * 4;
-      this.player.center = {
-        x: otherplayer.position.x + otherplayer.width * 2,
-        y: otherplayer.position.y + otherplayer.height * 2,
+      otherplayer.center = {
+        x: otherplayer.position.x + this.player.width * 2,
+        y: otherplayer.position.y + this.player.height * 2,
       };
       this.ctx.drawImage(
         spriteSheet,
@@ -1383,7 +1462,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         dx,
         dy
       );
-      this.moveOthers(otherplayer);
     }
   }
 
