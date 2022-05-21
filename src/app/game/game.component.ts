@@ -309,7 +309,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       });
 
       this.lobbyPlayers.forEach((player, i) => {
-        if (player) {
+        if (player && player.name !== this.gameData.me) {
           if (this.ctx && this.player.width && this.player.height) {
             this.ctx.strokeStyle = 'red';
             this.ctx.beginPath();
@@ -512,22 +512,23 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     //  //   useRightAnims = false;
     //  // }
     if (player.moveup) {
-      if (player.moving || player.canMoveVertical) {
+      if (player.moving) {
+        console.log('MOVING!');
         player.position.y -= this.gameData.velocity;
       }
     }
     if (player.movedown) {
-      if (player.moving || player.canMoveVertical) {
+      if (player.moving) {
         player.position.y += this.gameData.velocity;
       }
     }
     if (player.moveright) {
-      if (player.moving || player.canMoveHorizontal) {
+      if (player.moving) {
         player.position.x += this.gameData.velocity;
       }
     }
     if (player.moveleft) {
-      if (player.moving || player.canMoveHorizontal) {
+      if (player.moving) {
         player.position.x -= this.gameData.velocity;
       }
     }
@@ -1402,14 +1403,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   getOtherPlayerSpriteSheet(player, i) {
     const useRightAnims = player.useRightAnims;
-    this.drawOtherSpriteAnimation(
-      useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
-      useRightAnims
-        ? this.gameData.spriteAnimations['playerIdleRight'].frames
-        : this.gameData.spriteAnimations['playerIdleLeft'].frames,
-      player,
-      i
-    );
+    // this.drawOtherSpriteAnimation(
+    //   useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
+    //   useRightAnims
+    //     ? this.gameData.spriteAnimations['playerIdleRight'].frames
+    //     : this.gameData.spriteAnimations['playerIdleLeft'].frames,
+    //   player,
+    //   i
+    // );
     this.moveOthers(player, i);
   }
 
@@ -3291,6 +3292,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       }
     }
+    console.log(player.moving);
     player.moving = moving;
     player.canMoveHorizontal = canMoveHorizontal;
     player.canMoveVertical = canMoveVertical;
