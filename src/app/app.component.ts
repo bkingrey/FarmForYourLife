@@ -17,6 +17,7 @@ import {
   OpenShop,
   PurchaseItem,
   ReduceSeedCount,
+  UpdatePlayer,
 } from './_store/actions';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AppFacade } from './app.facade';
@@ -50,11 +51,7 @@ export class AppComponent implements OnInit {
       }
     });
     this.socket.on('updatePlayer', (updatedPlayer) => {
-      this.gameComponent?.lobbyPlayers.forEach((player) => {
-        if (player.name === updatedPlayer.name) {
-          player.loadedIn = updatedPlayer.loadedIn;
-        }
-      });
+      this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));
     });
   }
 
@@ -117,11 +114,9 @@ export class AppComponent implements OnInit {
   changeScene(event) {
     if (event === 'game') {
       this.facade.gameData$.pipe(take(1)).subscribe((data) => {
-        console.log(data.lobbyPlayers);
         let player = data.lobbyPlayers.filter(
           (player) => player.name === data.me
         )[0];
-        console.log(player);
         this.socket.emit('StartGame', player);
       });
     }

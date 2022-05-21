@@ -42,19 +42,12 @@ io.on("connection", (socket) => {
     });
   });
   socket.on("StartGame", (player) => {
-    player.loadedIn = true;
     io.emit("updatePlayer", player);
   });
   socket.on("keychange", (event) => {
     const player = event.player;
     const roomId = event.player.roomId;
     let move;
-    console.log({
-      up: event.moveup,
-      down: event.movedown,
-      right: event.moveright,
-      left: event.moveleft,
-    });
     if (event.moveup && event.movedown && event.moveleft && event.moveright)
       move = "none";
     else if (

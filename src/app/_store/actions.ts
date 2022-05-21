@@ -97,4 +97,9 @@ export const AddPlayerToLobby = createAction(
   props<{ payload: Array<LobbyPlayer> }>()
 );
 
+export const UpdatePlayer = createAction(
+  '[GameData] Updated Player',
+  props<{ payload: Array<LobbyPlayer> }>()
+);
+
 export const Me = createAction('[GameData] Me', props<{ payload: string }>());

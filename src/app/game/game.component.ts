@@ -868,12 +868,18 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         x: -this.lobbyPlayers[1].position.x / 2 + 13,
         y: -this.lobbyPlayers[1].position.y / 20 + 8,
       };
-    } else if (this.gameData.me === this.lobbyPlayers[2].name) {
+    } else if (
+      this.lobbyPlayers[2] &&
+      this.gameData.me === this.lobbyPlayers[2].name
+    ) {
       difference = {
         x: this.lobbyPlayers[2].position.x - 278 - map.x,
         y: this.lobbyPlayers[2].position.y - 630 - map.y,
       };
-    } else if (this.gameData.me === this.lobbyPlayers[3].name) {
+    } else if (
+      this.lobbyPlayers[3] &&
+      this.gameData.me === this.lobbyPlayers[3].name
+    ) {
       difference = {
         x: this.lobbyPlayers[3].position.x - 278 - map.x,
         y: this.lobbyPlayers[3].position.y - 630 - map.y,
@@ -908,6 +914,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   loadLobby() {
     const tickInterval = setInterval(() => {
+      this.lobbyPlayers = this.gameData.lobbyPlayers;
       this.createOtherPlayers();
       if (
         !this.gameData.lobbyPlayers[0] ||
@@ -915,8 +922,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         !this.gameData.lobbyPlayers[0].loadedIn ||
         !this.gameData.lobbyPlayers[1].loadedIn
       ) {
-        console.log(this.lobbyPlayers);
-        console.log('waiting for players');
       } else {
         clearInterval(tickInterval);
         this.createCollisionsAndMovables();

@@ -1,3 +1,4 @@
+import { selectGameData } from './selectors';
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 
@@ -11,9 +12,11 @@ import {
   catchError,
 } from 'rxjs';
 import {
+  AddPlayerToLobby,
   ErrorGameDataAction,
   getGameData,
   SuccessGetGameDataAction,
+  UpdatePlayer,
 } from './actions';
 import { jsonData } from 'src/assets/json/jsonData';
 import { GameState } from './models';
@@ -37,6 +40,25 @@ export class GameEffects {
           })
         )
       )
+    )
+  );
+
+  UpdateLobbyPlayers$: Observable<Action> = createEffect(() =>
+    this.action$.pipe(
+      ofType(UpdatePlayer),
+      withLatestFrom(this.store.pipe(select(selectGameData))),
+      map(([action, gameData]) => {
+        let newLobby;
+        if (gameData.loadedPlayers.length && gameData.lobbyPlayers.length) {
+          newLobby = gameData.lobbyPlayers.map((player) => {
+            return {
+              ...player,
+              loadedIn: true,
+            };
+          });
+        }
+        return AddPlayerToLobby({ payload: newLobby });
+      })
     )
   );
 }

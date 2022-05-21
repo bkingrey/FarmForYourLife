@@ -13,6 +13,7 @@ export const intializeState = (): GameState => {
     },
     me: null,
     lobbyPlayers: [],
+    loadedPlayers: [],
     scene: 'title',
     seedsOwned: {
       beets: {
@@ -192,7 +193,7 @@ export const gameReducer = createReducer(
         movedown: false,
         moveleft: false,
         moveright: false,
-        loadedIn: false,
+        moving: true,
       };
     });
     return { ...state, lobbyPlayers: newLobby };
@@ -421,6 +422,12 @@ export const gameReducer = createReducer(
             ? state.water.max
             : state.water.current + Number(payload),
       },
+    };
+  }),
+  on(GameActions.UpdatePlayer, (state, { payload }) => {
+    return {
+      ...state,
+      loadedPlayers: state.loadedPlayers.concat(payload),
     };
   })
 );

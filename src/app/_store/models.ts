@@ -6,6 +6,7 @@ export interface GameState {
     y: number;
   };
   lobbyPlayers: Array<LobbyPlayer>;
+  loadedPlayers: Array<LobbyPlayer>;
   me: string | null;
   scene: string;
   collisions: Array<number> | [];
