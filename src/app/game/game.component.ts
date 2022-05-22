@@ -16,8 +16,6 @@ import {
   Output,
 } from '@angular/core';
 import { intializeState } from '../_store/reducer';
-import { state } from '@angular/animations';
-import * as e from 'express';
 
 @Component({
   selector: 'app-game',
@@ -311,7 +309,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       });
 
       this.lobbyPlayers.forEach((player, i) => {
-        if (player && player.name !== this.gameData.me) {
+        // if (player && player.name !== this.gameData.me) {
           if (this.ctx && this.player.width && this.player.height) {
             this.ctx.strokeStyle = 'red';
             this.ctx.beginPath();
@@ -324,7 +322,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.ctx.stroke();
             this.getOtherPlayerSpriteSheet(player, i);
           }
-        }
+        // }
       });
 
       // SLEEP
@@ -404,7 +402,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   startAnimating(fps) {
     setTimeout(() => {
       this.setPlayersInPosition();
-    });
+    }, 5000);
 
     this.fpsInterval = 1000 / fps;
     this.then = Date.now();
@@ -926,13 +924,13 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
     if (this.gameData.me === this.lobbyPlayers[0].name) {
       difference = {
-        x: this.lobbyPlayers[0].position.x - 278 - map.x,
-        y: this.lobbyPlayers[0].position.y - 630 - map.y,
+        x: 240,
+        y: -21
       };
     } else if (this.gameData.me === this.lobbyPlayers[1].name) {
       difference = {
-        x: -this.lobbyPlayers[1].position.x / 2 + 13,
-        y: -this.lobbyPlayers[1].position.y / 20 + 8,
+        x: -972,
+        y: -21,
       };
     } else if (
       this.lobbyPlayers[2] &&
@@ -1008,10 +1006,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.createHouseArea(this.gameData.houseAreaMap);
         this.createWellArea(this.gameData.wellAreaMap);
         this.createTraders();
+        this.createOtherPlayers();
         this.createMovables();
         this.loadCanvas();
       }
     }, 3000);
+  }
+
+  createOtherPlayers() {
+    console.log("put other players in position")
   }
 
   loadCanvas() {
