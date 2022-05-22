@@ -1636,26 +1636,26 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     console.log("made it")
     if (evt.isWatering) {
       if (
-        this.farmableArea.filter((area) => area === evt.clickedFarmableArea)[0]
+        this.farmableArea.filter((area) => area.id === evt.clickedFarmableArea.id)[0]
       ) {
         if (
           !this.farmableArea.filter(
-            (area) => area === evt.clickedFarmableArea
+            (area) => area.id === evt.clickedFarmableArea.id
           )[0].watered
         ) {
           this.farmableArea.filter(
-            (area) => area === evt.clickedFarmableArea
+            (area) => area.id === evt.clickedFarmableArea.id
           )[0].watered = true;
           this.changeWaterMeter.emit(-8);
           this.startWaterTimer(
             this.farmableArea.filter(
-              (area) => area === evt.clickedFarmableArea
+              (area) => area.id === evt.clickedFarmableArea.id
             )[0]
           );
         }
 
         this.farmableArea.filter(
-          (area) => area === evt.clickedFarmableArea
+          (area) => area.id === evt.clickedFarmableArea.id
         )[0];
       }
       if (evt.me === this.gameData.me) {
@@ -1733,14 +1733,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   plantSeed(evt) {
     const clickedFarm = this.farmableArea.filter(
-      (area) => area === evt.clickedFarmableArea
+      (area) => area.id === evt.clickedFarmableArea.id
     )[0];
     if (
       clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'potato-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'potato-0';
       if (evt.me === this.gameData.me) {
         const payload = {
@@ -1757,7 +1757,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.gameData.equippedTool === 'carrot-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'carrot-0';
 
       if (evt.me === this.gameData.me) {
@@ -1774,7 +1774,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.gameData.equippedTool === 'wheat-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'wheat-0';
 
       if (evt.me === this.gameData.me) {
@@ -1792,7 +1792,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.gameData.equippedTool === 'cabbage-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'cabbage-0';
       if (evt.me === this.gameData.me) {
       const payload = {
@@ -1808,7 +1808,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.gameData.equippedTool === 'cauliflower-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'cauliflower-0';
       if (evt.me === this.gameData.me) {
       const payload = {
@@ -1824,7 +1824,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       evt.equippedTool === 'beet-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'beets-0';
       if (evt.me === this.gameData.me) {
       const payload = {
@@ -1840,7 +1840,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       evt.equippedTool === 'radish-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'radish-0';
       if (evt.me === this.gameData.me) {
       const payload = {
@@ -1856,7 +1856,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       evt.equippedTool === 'kale-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === evt.clickedFarmableArea
+        (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'kale-0';
       if (evt.me === this.gameData.me) {
       const payload = {
@@ -1889,30 +1889,30 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     console.log("in farm action")
     console.log(clickedFarmableArea)
     const clickedFarm = this.farmableArea.filter(
-      (area) => area === clickedFarmableArea
+      (area) => area.id === clickedFarmableArea.id
     )[0];
     console.log(clickedFarm)
     // Unidentified because farm positions are different. need to give farms ids
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
         this.farmableArea.filter(
-          (area) => area === clickedFarmableArea
+          (area) => area.id === clickedFarmableArea.id
         )[0].state = state0;
       } else if (clickedFarm.state === state0) {
         this.farmableArea.filter(
-          (area) => area === clickedFarmableArea
+          (area) => area.id === clickedFarmableArea.id
         )[0].state = state1;
       } else if (clickedFarm.state === state1) {
         this.farmableArea.filter(
-          (area) => area === clickedFarmableArea
+          (area) => area.id === clickedFarmableArea.id
         )[0].state = state2;
       } else if (clickedFarm.state === state2) {
         this.farmableArea.filter(
-          (area) => area === clickedFarmableArea
+          (area) => area.id === clickedFarmableArea.id
         )[0].state = state3;
       } else {
         this.farmableArea.filter(
-          (area) => area === clickedFarmableArea
+          (area) => area.id === clickedFarmableArea.id
         )[0].state = state3;
       }
     }
@@ -2618,6 +2618,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             width: this.boundary.width,
             height: this.boundary.height,
             state: 'none',
+            id: 'i'+i.toString()+'j'+j.toString()
           };
           this.farmableArea.push(newFarmableArea);
         }

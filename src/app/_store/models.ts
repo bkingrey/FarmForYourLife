@@ -66,6 +66,7 @@ export interface LobbyPlayer {
   canMoveVertical: boolean;
   moving: boolean;
   equippedTool: string;
+  isCarrying: boolean;
   position: {
     x: number;
     y: number;

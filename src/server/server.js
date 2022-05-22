@@ -19,6 +19,12 @@ var rooms = [];
 
 // IO
 io.on("connection", (socket) => {
+  socket.on("ChangePlayerTool", data => {
+    io.emit("changePlayerTool", data)
+  })
+  socket.on("ChangeHoveredFarm", (farm) => {
+    io.emit("changeHoveredFarm", farm)
+  })
   socket.on("AddPlayerToLobby", (playerToServer) => {
     if (!rooms.length) {
       rooms.push([]);

@@ -60,6 +60,16 @@ export class AppComponent implements OnInit {
       this.facade.dispatch(ChangePlayerState({ payload: player}))
       this.gameComponent?.changePlayerUpdate(player)
     })
+    this.socket.on('changePlayerTool', data => {
+      const player = this.gameComponent?.lobbyPlayers.filter(player => player.name === data.player)[0]
+      if (player) {
+        player.equippedTool = data.tool
+        player.isCarrying = data.isCarrying
+      }
+    })
+    this.socket.on('changeHoveredFarm', farm => {
+      this.gameComponent?.changeStateOfHoveredFarmable(farm)
+    })
   }
 
   keyChange(event: KeyWASD, me, lobbyPlayers) {
@@ -76,6 +86,15 @@ export class AppComponent implements OnInit {
 
   changeTool(event) {
     this.facade.dispatch(ChangeTool({ payload: event }));
+    this.facade.gameData$.pipe(take(1)).subscribe(data => {
+      const sendData = {
+        player: data.me,
+        tool: event,
+        isCarrying: data.isCarrying
+      }
+      this.socket.emit('ChangePlayerTool', sendData)
+    })
+
   }
 
   reduceSeedCount(event) {
@@ -135,5 +154,8 @@ export class AppComponent implements OnInit {
   }
   changePlayerState(event) {
     this.socket.emit('ChangePlayerState', event)
+  }
+  changeHoveredFarm(event) {
+    this.socket.emit('ChangeHoveredFarm', event)
   }
 }
