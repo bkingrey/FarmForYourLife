@@ -39,6 +39,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() isSleeping = new EventEmitter();
   @Output() openShop = new EventEmitter();
   @Output() changePlayerState = new EventEmitter();
+  @Output() changeHoveredFarm = new EventEmitter();
   isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
@@ -1507,6 +1508,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   drawCultivateAnimation(spriteSheet: HTMLImageElement, frames: number) {
     let width = 128;
     let height = 65;
+    let clickedFarmEvent = {
+      clickedFarmableArea: this.clickedFarmableArea,
+      isWatering: this.isWatering,
+      equippedTool: this.gameData.equippedTool,
+      me: this.gameData.me
+    }
     if (this.framesDrawn > 3) {
       if (this.actionFrameIndex < frames - 1) {
         if (
@@ -1514,17 +1521,17 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           this.gameData.equippedTool !== 'rod' &&
           this.gameData.equippedTool !== 'pickaxe'
         ) {
-          this.changeStateOfHoveredFarmable();
+          this.changeHoveredFarm.emit(clickedFarmEvent)
         } else if (
           this.actionFrameIndex > 7 &&
           this.gameData.equippedTool === 'pickaxe'
         ) {
-          this.changeStateOfHoveredFarmable();
+          this.changeHoveredFarm.emit(clickedFarmEvent)
         } else if (
           this.actionFrameIndex > 39 &&
           this.gameData.equippedTool === 'rod'
         ) {
-          this.changeStateOfHoveredFarmable();
+          this.changeHoveredFarm.emit(clickedFarmEvent)
         }
         this.actionFrameIndex++;
       } else {
@@ -1565,40 +1572,103 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
   }
 
-  changeStateOfHoveredFarmable() {
-    if (this.isWatering) {
+  // drawOtherCultivateAnimation(spriteSheet: HTMLImageElement, frames: number) {
+  //   let width = 128;
+  //   let height = 65;
+  //   if (this.framesDrawn > 3) {
+  //     if (this.actionFrameIndex < frames - 1) {
+  //       if (
+  //         this.actionFrameIndex === 3 &&
+  //         this.gameData.equippedTool !== 'rod' &&
+  //         this.gameData.equippedTool !== 'pickaxe'
+  //       ) {
+  //         this.changeStateOfHoveredFarmable();
+  //       } else if (
+  //         this.actionFrameIndex > 7 &&
+  //         this.gameData.equippedTool === 'pickaxe'
+  //       ) {
+  //         this.changeStateOfHoveredFarmable();
+  //       } else if (
+  //         this.actionFrameIndex > 39 &&
+  //         this.gameData.equippedTool === 'rod'
+  //       ) {
+  //         this.changeStateOfHoveredFarmable();
+  //       }
+  //     } else {
+  //       if (this.ctx) {
+  //         this.ctx.drawImage(
+  //           spriteSheet,
+  //           width * 12,
+  //           0,
+  //           width,
+  //           spriteSheet.height,
+  //           this.player.position.x - 224,
+  //           this.player.position.y - 84,
+  //           width * 4,
+  //           height * 4
+  //         );
+  //       }
+  //       this.actionFrameIndex = 0;
+  //       this.queuedCultivate = false;
+  //       this.canClick = true;
+  //     }
+  //     this.framesDrawn = 0;
+  //   } else {
+  //     this.framesDrawn++;
+  //   }
+
+  //   if (this.ctx) {
+  //     this.ctx.drawImage(
+  //       spriteSheet,
+  //       width * this.actionFrameIndex,
+  //       0,
+  //       width,
+  //       spriteSheet.height,
+  //       this.player.position.x - 224,
+  //       this.player.position.y - 84,
+  //       width * 4,
+  //       height * 4
+  //     );
+  //   }
+  // }
+
+  changeStateOfHoveredFarmable(evt) {
+    console.log("made it")
+    if (evt.isWatering) {
       if (
-        this.farmableArea.filter((area) => area === this.clickedFarmableArea)[0]
+        this.farmableArea.filter((area) => area === evt.clickedFarmableArea)[0]
       ) {
         if (
           !this.farmableArea.filter(
-            (area) => area === this.clickedFarmableArea
+            (area) => area === evt.clickedFarmableArea
           )[0].watered
         ) {
           this.farmableArea.filter(
-            (area) => area === this.clickedFarmableArea
+            (area) => area === evt.clickedFarmableArea
           )[0].watered = true;
           this.changeWaterMeter.emit(-8);
           this.startWaterTimer(
             this.farmableArea.filter(
-              (area) => area === this.clickedFarmableArea
+              (area) => area === evt.clickedFarmableArea
             )[0]
           );
         }
 
         this.farmableArea.filter(
-          (area) => area === this.clickedFarmableArea
+          (area) => area === evt.clickedFarmableArea
         )[0];
       }
-      this.isWatering = false;
-      this.queuedCultivate = false;
-      this.canClick = true;
-      this.actionFrameIndex = 0;
-      this.framesDrawn = 0;
-      this.changeTool.emit('shovel');
+      if (evt.me === this.gameData.me) {
+        this.isWatering = false;
+        this.queuedCultivate = false;
+        this.canClick = true;
+        this.actionFrameIndex = 0;
+        this.framesDrawn = 0;
+        this.changeTool.emit('shovel');
+      }
       return;
     }
-    if (this.clickedFarmableArea.state === 'fishable') {
+    if (evt.clickedFarmableArea.state === 'fishable' && evt.me === this.gameData.me) {
       const getRandom = Math.random() * 100;
       if (getRandom < 75) {
         this.changeTool.emit('smallfish');
@@ -1607,15 +1677,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       } else {
         this.changeTool.emit('hugefish');
       }
-    } else if (this.clickedFarmableArea.state === 'minable') {
+    } else if (evt.clickedFarmableArea.state === 'minable' && evt.me === this.gameData.me) {
       const getRandom = Math.random() * 100;
       if (getRandom > 99) this.changeTool.emit('nugget');
     }
-    if (this.gameData.equippedTool === 'shovel') {
-      this.farmAction('soil-0', 'soil-1', 'soil-2', 'soil-3');
+    if (evt.equippedTool === 'shovel') {
+      this.farmAction(evt.clickedFarmableArea, 'soil-0', 'soil-1', 'soil-2', 'soil-3');
     }
-    if (this.isAPlantSeed()) {
-      this.plantSeed();
+    if (this.isAPlantSeed(evt.equippedTool)) {
+      this.plantSeed(evt);
     }
     this.changeEnergy.emit(-3);
   }
@@ -1647,73 +1717,84 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.pickupableFramesDrawn[this.pickupables.length - 1] = 0;
     this.pickupableFrameIndex[this.pickupables.length - 1] = 0;
   }
-  isAPlantSeed() {
+  isAPlantSeed(tool) {
     return (
-      this.gameData.equippedTool === 'potato-seeds' ||
-      this.gameData.equippedTool === 'carrot-seeds' ||
-      this.gameData.equippedTool === 'wheat-seeds' ||
-      this.gameData.equippedTool === 'cabbage-seeds' ||
-      this.gameData.equippedTool === 'cauliflower-seeds' ||
-      this.gameData.equippedTool === 'beet-seeds' ||
-      this.gameData.equippedTool === 'radish-seeds' ||
-      this.gameData.equippedTool === 'kale-seeds' ||
-      this.gameData.equippedTool === 'sunflower-seeds'
+      tool === 'potato-seeds' ||
+      tool === 'carrot-seeds' ||
+      tool === 'wheat-seeds' ||
+      tool === 'cabbage-seeds' ||
+      tool === 'cauliflower-seeds' ||
+      tool === 'beet-seeds' ||
+      tool === 'radish-seeds' ||
+      tool === 'kale-seeds' ||
+      tool === 'sunflower-seeds'
     );
   }
 
-  plantSeed() {
+  plantSeed(evt) {
     const clickedFarm = this.farmableArea.filter(
-      (area) => area === this.clickedFarmableArea
+      (area) => area === evt.clickedFarmableArea
     )[0];
     if (
       clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'potato-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'potato-0';
-      const payload = {
-        name: this.gameData.seedsOwned['potato'].name,
-        count: this.gameData.seedsOwned['potato'].count,
-        keyname: 'potato',
-      };
-      this.reduceSeedCount.emit(payload);
+      if (evt.me === this.gameData.me) {
+        const payload = {
+          name: this.gameData.seedsOwned['potato'].name,
+          count: this.gameData.seedsOwned['potato'].count,
+          keyname: 'potato',
+        };
+        this.reduceSeedCount.emit(payload);
+      }
+
     }
     if (
       clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'carrot-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'carrot-0';
-      const payload = {
-        name: this.gameData.seedsOwned['carrot'].name,
-        count: this.gameData.seedsOwned['carrot'].count,
-        keyname: 'carrot',
-      };
+
+      if (evt.me === this.gameData.me) {
+        const payload = {
+          name: this.gameData.seedsOwned['carrot'].name,
+          count: this.gameData.seedsOwned['carrot'].count,
+          keyname: 'carrot',
+        };
       this.reduceSeedCount.emit(payload);
+      }
     }
     if (
       clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'wheat-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'wheat-0';
-      const payload = {
-        name: this.gameData.seedsOwned['wheat'].name,
-        count: this.gameData.seedsOwned['wheat'].count,
-        keyname: 'wheat',
-      };
-      this.reduceSeedCount.emit(payload);
+
+      if (evt.me === this.gameData.me) {
+        const payload = {
+          name: this.gameData.seedsOwned['wheat'].name,
+          count: this.gameData.seedsOwned['wheat'].count,
+          keyname: 'wheat',
+        };
+        this.reduceSeedCount.emit(payload);
+      }
+
     }
     if (
       clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'cabbage-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'cabbage-0';
+      if (evt.me === this.gameData.me) {
       const payload = {
         name: this.gameData.seedsOwned['cabbage'].name,
         count: this.gameData.seedsOwned['cabbage'].count,
@@ -1721,27 +1802,31 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       };
       this.reduceSeedCount.emit(payload);
     }
+    }
     if (
       clickedFarm.state === 'soil-3' &&
       this.gameData.equippedTool === 'cauliflower-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'cauliflower-0';
+      if (evt.me === this.gameData.me) {
       const payload = {
         name: this.gameData.seedsOwned['cauliflower'].name,
         count: this.gameData.seedsOwned['cauliflower'].count,
         keyname: 'wheat',
       };
       this.reduceSeedCount.emit(payload);
-    }
+
+          }    }
     if (
       clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'beet-seeds'
+      evt.equippedTool === 'beet-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'beets-0';
+      if (evt.me === this.gameData.me) {
       const payload = {
         name: this.gameData.seedsOwned['beets'].name,
         count: this.gameData.seedsOwned['beets'].count,
@@ -1749,13 +1834,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       };
       this.reduceSeedCount.emit(payload);
     }
+    }
     if (
       clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'radish-seeds'
+      evt.equippedTool === 'radish-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'radish-0';
+      if (evt.me === this.gameData.me) {
       const payload = {
         name: this.gameData.seedsOwned['radish'].name,
         count: this.gameData.seedsOwned['radish'].count,
@@ -1763,13 +1850,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       };
       this.reduceSeedCount.emit(payload);
     }
+    }
     if (
       clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'kale-seeds'
+      evt.equippedTool === 'kale-seeds'
     ) {
       this.farmableArea.filter(
-        (area) => area === this.clickedFarmableArea
+        (area) => area === evt.clickedFarmableArea
       )[0].state = 'kale-0';
+      if (evt.me === this.gameData.me) {
       const payload = {
         name: this.gameData.seedsOwned['kale'].name,
         count: this.gameData.seedsOwned['kale'].count,
@@ -1777,13 +1866,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       };
       this.reduceSeedCount.emit(payload);
     }
+    }
     if (
       clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'sunflower-seeds'
+      evt.equippedTool === 'sunflower-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area === this.clickedFarmableArea
       )[0].state = 'sunflower-0';
+      if (evt.me === this.gameData.me) {
       const payload = {
         name: this.gameData.seedsOwned['sunflower'].name,
         count: this.gameData.seedsOwned['sunflower'].count,
@@ -1791,32 +1882,37 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       };
       this.reduceSeedCount.emit(payload);
     }
+    }
   }
 
-  farmAction(state0, state1, state2, state3) {
+  farmAction(clickedFarmableArea, state0, state1, state2, state3) {
+    console.log("in farm action")
+    console.log(clickedFarmableArea)
     const clickedFarm = this.farmableArea.filter(
-      (area) => area === this.clickedFarmableArea
+      (area) => area === clickedFarmableArea
     )[0];
+    console.log(clickedFarm)
+    // Unidentified because farm positions are different. need to give farms ids
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
         this.farmableArea.filter(
-          (area) => area === this.clickedFarmableArea
+          (area) => area === clickedFarmableArea
         )[0].state = state0;
       } else if (clickedFarm.state === state0) {
         this.farmableArea.filter(
-          (area) => area === this.clickedFarmableArea
+          (area) => area === clickedFarmableArea
         )[0].state = state1;
       } else if (clickedFarm.state === state1) {
         this.farmableArea.filter(
-          (area) => area === this.clickedFarmableArea
+          (area) => area === clickedFarmableArea
         )[0].state = state2;
       } else if (clickedFarm.state === state2) {
         this.farmableArea.filter(
-          (area) => area === this.clickedFarmableArea
+          (area) => area === clickedFarmableArea
         )[0].state = state3;
       } else {
         this.farmableArea.filter(
-          (area) => area === this.clickedFarmableArea
+          (area) => area === clickedFarmableArea
         )[0].state = state3;
       }
     }
