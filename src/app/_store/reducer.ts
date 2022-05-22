@@ -200,6 +200,7 @@ export const gameReducer = createReducer(
         canMoveVertical: true,
         canMoveHorizontal: true,
         useRightAnims: true,
+        equippedTool: 'shovel'
       };
     });
     return { ...state, lobbyPlayers: newLobby };

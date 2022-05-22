@@ -70,6 +70,11 @@ export class AppComponent implements OnInit {
     this.socket.on('changeHoveredFarm', farm => {
       this.gameComponent?.changeStateOfHoveredFarmable(farm)
     })
+    this.socket.on('cultivateOther', player => {
+      if (this.gameComponent) {
+        this.gameComponent.lobbyPlayers.filter(p => p.name === player)[0].isCultivating = true
+      }
+    })
   }
 
   keyChange(event: KeyWASD, me, lobbyPlayers) {
@@ -157,5 +162,8 @@ export class AppComponent implements OnInit {
   }
   changeHoveredFarm(event) {
     this.socket.emit('ChangeHoveredFarm', event)
+  }
+  cultivateOthers(event) {
+    this.socket.emit('CultivateOthers', event);
   }
 }

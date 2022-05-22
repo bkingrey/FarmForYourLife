@@ -40,6 +40,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() openShop = new EventEmitter();
   @Output() changePlayerState = new EventEmitter();
   @Output() changeHoveredFarm = new EventEmitter();
+  @Output() cultivateOther = new EventEmitter();
   isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
@@ -152,8 +153,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   animate: any;
   frameIndex = 0;
   framesDrawn = 0;
-  otherPlayersFrameIndex = [0, 0, 0];
-  otherPlayersFramesDrawn = [0, 0, 0];
+  otherPlayersFrameIndex = [0, 0, 0, 0];
+  otherPlayersFramesDrawn = [0, 0, 0, 0];
+  otherCultivateFrameIndex = [0, 0, 0, 0];
+  otherCultivateFramesDrawn = [0, 0, 0, 0];
   actionFrameIndex = 0;
   pickupableFrameIndex: Array<number> = [];
 
@@ -310,9 +313,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       });
 
       this.lobbyPlayers.forEach((player, i) => {
-        // if (player && player.name !== this.gameData.me) {
+        if (player && player.name !== this.gameData.me) {
           if (this.ctx && this.player.width && this.player.height) {
-            this.ctx.strokeStyle = 'red';
+            this.ctx.strokeStyle = 'transparent';
             this.ctx.beginPath();
             this.ctx.rect(
               player.position.x,
@@ -323,7 +326,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.ctx.stroke();
             this.getOtherPlayerSpriteSheet(player, i);
           }
-        // }
+        }
       });
 
       // SLEEP
@@ -506,6 +509,23 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
     this.moveAllMovables(difference);
   }
+
+  cultivateOthers(play, i) {
+    const player = this.lobbyPlayers.filter(p => p.name === play.name)[0]
+    const spriteSheet = this.getCultivateOthersSpriteSheet(player);
+
+    if (spriteSheet) {
+      this.drawOtherCultivateAnimation(
+        this.useRightAnims() ? spriteSheet.right : spriteSheet.left,
+        this.useRightAnims()
+          ? this.gameData.spriteAnimations[spriteSheet.rightKey].frames
+          : this.gameData.spriteAnimations[spriteSheet.leftKey].frames,
+          player,
+          i
+      );
+    }
+  }
+
   moveOthers(player, i) {
     if (player.moveup) {
       if (player.moving || player.canMoveVertical) {
@@ -527,11 +547,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         player.position.x -= this.gameData.velocity;
       }
     }
-    // if (player.isSleeping) {
-    //   canMoveHorizontal = false;
-    //   moving = false;
-    //   this.drawSleepAnimation();
-    // }
+   // if (player.isSleeping) {
+      // player.canMoveHorizontal = false;
+      // moving = false;
+      //this.drawSleepAnimation();
+   // }
 
     if (
       !player.moveup &&
@@ -540,7 +560,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       !player.moveright &&
       !player.isSleeping
     ) {
-      if (player.equippedTool === 'beets') {
+      if(player.isCultivating) {
+        console.log("in isCultivating")
+        this.cultivateOthers(player, i)
+      }
+     else if (player.equippedTool === 'beets') {
         this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryBeetsRight
@@ -700,7 +724,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       }
     } else {
-      if (player.equippedTool === 'beets') {
+      if(player.isCultivating) {
+        this.cultivateOthers(player, i)
+      }
+     else if (player.equippedTool === 'beets') {
         this.drawOtherSpriteAnimation(
           player.useRightAnims
             ? this.spriteCarryBeetsRight
@@ -990,7 +1017,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.updateLobbyPlayers()
       if (
         !this.lobbyPlayers[0] ||
-        !this.lobbyPlayers[0].loadedIn
+        !this.lobbyPlayers[0].loadedIn ||
+        !this.lobbyPlayers[1] ||
+        !this.lobbyPlayers[1].loadedIn
       ) {
         console.log('waiting for players');
       } else {
@@ -1334,14 +1363,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         trader.width * 4,
         225
       );
-      // this.ctx.beginPath();
-      // this.ctx.rect(
-      //   traderHitbox.position.x,
-      //   traderHitbox.position.y,
-      //   traderHitbox.width,
-      //   traderHitbox.height
-      // );
-      // this.ctx.stroke();
       this.targetNearestSquare(traderHitbox);
     }
   }
@@ -1547,7 +1568,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             width * 4,
             height * 4
           );
+          this.cultivateOther.emit(this.gameData.me)
         }
+
         this.actionFrameIndex = 0;
         this.queuedCultivate = false;
         this.canClick = true;
@@ -1572,65 +1595,49 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
   }
 
-  // drawOtherCultivateAnimation(spriteSheet: HTMLImageElement, frames: number) {
-  //   let width = 128;
-  //   let height = 65;
-  //   if (this.framesDrawn > 3) {
-  //     if (this.actionFrameIndex < frames - 1) {
-  //       if (
-  //         this.actionFrameIndex === 3 &&
-  //         this.gameData.equippedTool !== 'rod' &&
-  //         this.gameData.equippedTool !== 'pickaxe'
-  //       ) {
-  //         this.changeStateOfHoveredFarmable();
-  //       } else if (
-  //         this.actionFrameIndex > 7 &&
-  //         this.gameData.equippedTool === 'pickaxe'
-  //       ) {
-  //         this.changeStateOfHoveredFarmable();
-  //       } else if (
-  //         this.actionFrameIndex > 39 &&
-  //         this.gameData.equippedTool === 'rod'
-  //       ) {
-  //         this.changeStateOfHoveredFarmable();
-  //       }
-  //     } else {
-  //       if (this.ctx) {
-  //         this.ctx.drawImage(
-  //           spriteSheet,
-  //           width * 12,
-  //           0,
-  //           width,
-  //           spriteSheet.height,
-  //           this.player.position.x - 224,
-  //           this.player.position.y - 84,
-  //           width * 4,
-  //           height * 4
-  //         );
-  //       }
-  //       this.actionFrameIndex = 0;
-  //       this.queuedCultivate = false;
-  //       this.canClick = true;
-  //     }
-  //     this.framesDrawn = 0;
-  //   } else {
-  //     this.framesDrawn++;
-  //   }
+  drawOtherCultivateAnimation(spriteSheet: HTMLImageElement, frames: number, player: LobbyPlayer, i: number) {
+    let width = 128;
+    let height = 65;
+    if (this.otherCultivateFramesDrawn[i] > 3) {
+      if (this.otherCultivateFrameIndex[i] < frames - 1) {
 
-  //   if (this.ctx) {
-  //     this.ctx.drawImage(
-  //       spriteSheet,
-  //       width * this.actionFrameIndex,
-  //       0,
-  //       width,
-  //       spriteSheet.height,
-  //       this.player.position.x - 224,
-  //       this.player.position.y - 84,
-  //       width * 4,
-  //       height * 4
-  //     );
-  //   }
-  // }
+        this.otherCultivateFrameIndex[i]++;
+      } else {
+        if (this.ctx) {
+          this.ctx.drawImage(
+            spriteSheet,
+            width * 12,
+            0,
+            width,
+            spriteSheet.height,
+            player.position.x - 224,
+            player.position.y - 84,
+            width * 4,
+            height * 4
+          );
+        }
+        this.otherCultivateFrameIndex[i] = 0;
+        player.isCultivating = false;
+      }
+      this.otherCultivateFramesDrawn[i] = 0;
+    } else {
+      this.otherCultivateFramesDrawn[i]++;
+    }
+
+    if (this.ctx) {
+      this.ctx.drawImage(
+        spriteSheet,
+        width * this.otherCultivateFrameIndex[i],
+        0,
+        width,
+        spriteSheet.height,
+        player.position.x - 224,
+        player.position.y - 84,
+        width * 4,
+        height * 4
+      );
+    }
+  }
 
   changeStateOfHoveredFarmable(evt) {
     console.log("made it")
@@ -2554,11 +2561,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   retangularCollision({ rectangle1, rectangle2 }) {
     // *4 is for width scale.
 
-    // if (this.framesDrawn > 7 && this.ctx) {
-    //   this.ctx.strokeStyle = 'purple'
-    //   this.ctx.rect(rectangle1.position.x, rectangle1.position.y, rectangle1.width * 4, rectangle1.height)
-    //   this.ctx.stroke()
-    // }
     return (
       rectangle1.position.x + rectangle1.width * 4 >=
         rectangle2.position.x &&
@@ -2866,10 +2868,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   getMousePos(evt) {
     if (this.canvas) {
-      // this.canvas.setAttribute(
-      //   'style',
-      //   'cursor: ' + "url('../../assets/ui/cursor_big.png')"
-      // );
       const rect = this.canvas.getBoundingClientRect();
       this.mousePos = {
         x:
@@ -2914,6 +2912,56 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   getCultivateSpriteSheet() {
     switch (this.gameData.equippedTool) {
+      case 'shovel':
+        return {
+          right: this.spriteSheetDigRight,
+          left: this.spriteSheetDigLeft,
+          rightKey: 'spriteSheetDigRight',
+          leftKey: 'spriteSheetDigLeft',
+        };
+      case 'hammer':
+        return {
+          right: this.spriteSheetHammerRight,
+          left: this.spriteSheetHammerLeft,
+          rightKey: 'spriteSheetHammerRight',
+          leftKey: 'spriteSheetHammerLeft',
+        };
+      case 'pickaxe':
+        return {
+          right: this.spriteSheetPickaxeRight,
+          left: this.spriteSheetPickaxeLeft,
+          rightKey: 'spriteSheetMineRight',
+          leftKey: 'spriteSheetMineLeft',
+        };
+      case 'rod':
+        return {
+          right: this.spriteSheetFishRight,
+          left: this.spriteSheetFishLeft,
+          rightKey: 'spriteSheetFishRight',
+          leftKey: 'spriteSheetFishLeft',
+        };
+      case 'potato-seeds':
+      case 'carrot-seeds':
+      case 'wheat-seeds':
+      case 'cabbage-seeds':
+      case 'cauliflower-seeds':
+      case 'beet-seeds':
+      case 'radish-seeds':
+      case 'kale-seeds':
+      case 'sunflower-seeds':
+      case 'basket':
+        return {
+          right: this.spriteSheetPlantRight,
+          left: this.spriteSheetPlantLeft,
+          rightKey: 'spriteSheetPlantRight',
+          leftKey: 'spriteSheetPlantLeft',
+        };
+    }
+    return null;
+  }
+
+  getCultivateOthersSpriteSheet(player) {
+    switch (player.equippedTool) {
       case 'shovel':
         return {
           right: this.spriteSheetDigRight,

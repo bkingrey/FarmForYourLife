@@ -25,6 +25,9 @@ io.on("connection", (socket) => {
   socket.on("ChangeHoveredFarm", (farm) => {
     io.emit("changeHoveredFarm", farm)
   })
+  socket.on("CultivateOthers", player => {
+    io.emit('cultivateOther', player)
+  })
   socket.on("AddPlayerToLobby", (playerToServer) => {
     if (!rooms.length) {
       rooms.push([]);
