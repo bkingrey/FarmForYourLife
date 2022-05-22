@@ -48,10 +48,9 @@ export class AppComponent implements OnInit {
     });
     this.socket.on('move', (moveObj) => {
       this.facade.gameData$.pipe(take(1)).subscribe((data) => {
-        if (this.gameComponent && moveObj.player.name !== data.me) {
-          console.log(moveObj.player.name);
-          this.gameComponent.moveOtherPlayer(moveObj);
-        }
+        // if (this.gameComponent && moveObj.player.name !== data.me) {
+          this.gameComponent?.moveOtherPlayer(moveObj);
+        // }
       });
     });
     this.socket.on('updatePlayer', (updatedPlayer) => {

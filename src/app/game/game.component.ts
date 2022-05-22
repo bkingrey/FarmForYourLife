@@ -507,22 +507,22 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
   moveOthers(player, i) {
     if (player.moveup) {
-      if (player.moving) {
+      if (player.moving || player.canMoveVertical) {
         player.position.y -= this.gameData.velocity;
       }
     }
     if (player.movedown) {
-      if (player.moving) {
+      if (player.moving || player.canMoveVertical) {
         player.position.y += this.gameData.velocity;
       }
     }
     if (player.moveright) {
-      if (player.moving) {
+      if (player.moving || player.canMoveHorizontal) {
         player.position.x += this.gameData.velocity;
       }
     }
     if (player.moveleft) {
-      if (player.moving) {
+      if (player.moving || player.canMoveHorizontal) {
         player.position.x -= this.gameData.velocity;
       }
     }
@@ -910,7 +910,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         player.movedown = false;
         player.moveleft = false;
         player.moveright = false;
-        player.position = player.position;
       }
     }
   }
@@ -924,13 +923,13 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
     if (this.gameData.me === this.lobbyPlayers[0].name) {
       difference = {
-        x: 240,
-        y: -21
+        x: 242,
+        y: -25
       };
     } else if (this.gameData.me === this.lobbyPlayers[1].name) {
       difference = {
         x: -972,
-        y: -21,
+        y: -25,
       };
     } else if (
       this.lobbyPlayers[2] &&
@@ -987,13 +986,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           }
         }
       });
-      console.log(this.lobbyPlayers)
       this.updateLobbyPlayers()
       if (
         !this.lobbyPlayers[0] ||
-        !this.lobbyPlayers[0].loadedIn ||
-        !this.lobbyPlayers[1] ||
-        !this.lobbyPlayers[1].loadedIn
+        !this.lobbyPlayers[0].loadedIn
       ) {
         console.log('waiting for players');
       } else {
@@ -1014,7 +1010,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   createOtherPlayers() {
-    console.log("put other players in position")
+    console.log("Loading screen maybe?")
   }
 
   loadCanvas() {
@@ -1492,17 +1488,19 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
 
     // ***** SHOWING HIT BOX *****
-    // this.ctx.beginPath();
-    // this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
-    // this.ctx.stroke();
-    // this.ctx.beginPath();
-    // this.ctx.rect(
-    //   this.player.position.x,
-    //   this.player.position.y,
-    //   this.player.width * 4,
-    //   this.player.height * 4
-    // );
-    // this.ctx.stroke();
+    if(this.ctx && this.player.height && this.player.width && this.player.center) {
+      this.ctx.beginPath();
+      this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.rect(
+        this.player.position.x,
+        this.player.position.y,
+        this.player.width * 4,
+        this.player.height * 4
+      );
+      this.ctx.stroke();
+    }
     // ***** SHOWING HIT BOX *****
   }
 
@@ -1826,7 +1824,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   drawBoundary(boundary) {
     if (this.ctx) {
-      this.ctx.fillStyle = 'transparent';
+      this.ctx.fillStyle = 'red';
       this.ctx.fillRect(
         boundary.position.x,
         boundary.position.y,
@@ -2460,12 +2458,17 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   retangularCollision({ rectangle1, rectangle2 }) {
     // *4 is for width scale.
 
+    // if (this.framesDrawn > 7 && this.ctx) {
+    //   this.ctx.strokeStyle = 'purple'
+    //   this.ctx.rect(rectangle1.position.x, rectangle1.position.y, rectangle1.width * 4, rectangle1.height)
+    //   this.ctx.stroke()
+    // }
     return (
-      rectangle1.position.x - 1 + rectangle1.width * 4 >=
+      rectangle1.position.x + rectangle1.width * 4 >=
         rectangle2.position.x &&
-      rectangle1.position.x + 1 <= rectangle2.position.x + rectangle2.width &&
-      rectangle1.position.y + 15 <= rectangle2.position.y + rectangle2.height &&
-      rectangle1.position.y + 15 + rectangle1.height >= rectangle2.position.y
+      rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
+      rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
+      rectangle1.position.y + rectangle1.height >= rectangle2.position.y
     );
   }
 
@@ -2864,7 +2867,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   movement() {
     let player = this.lobbyPlayers.filter(
-      (player) => player.name === this.gameData.me
+      (p) => p.name === this.gameData.me
     )[0];
     let useRightAnims;
     if (this.mousePos.x > this.player.position.x) {
@@ -2953,6 +2956,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             },
           })
         ) {
+          canMoveVertical = true
           canMoveHorizontal = false;
           moving = false;
         }
@@ -3265,20 +3269,36 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       }
     }
-    const sendAPlayer = this.lobbyPlayers.filter(player => player.name === this.gameData.me)[0]
+
     player.moving = moving;
     player.canMoveHorizontal = canMoveHorizontal;
     player.canMoveVertical = canMoveVertical;
     player.useRightAnims = useRightAnims;
     player.equippedTool = this.gameData.equippedTool
+
     this.changePlayerState.emit({
-      ...sendAPlayer,
+      ...player,
       moving,
       canMoveHorizontal,
       canMoveVertical,
       useRightAnims,
       equippedTool: this.gameData.equippedTool
     })
+
+    if (this.player.position.x - player.position.x !== 0) {
+      if (player.position.x < this.player.position.x) {
+        player.position.x += this.gameData.velocity
+      } else {
+        player.position.x -= this.gameData.velocity
+      }
+    }
+    if (this.player.position.y - player.position.y !== 0) {
+        if (player.position.y < this.player.position.y) {
+          player.position.y += this.gameData.velocity
+        } else {
+          player.position.y -= this.gameData.velocity
+        }
+      }
   }
 
   targetNearestSquare(area) {
