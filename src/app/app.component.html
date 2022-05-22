@@ -31,6 +31,7 @@
     (canFillWater)="changeCanFillWater($event)"
     (canEnterHouse)="changeCanEnterHouse($event)"
     (isSleeping)="changeIsSleeping($event)"
+    (changePlayerState)="changePlayerState($event)"
   ></app-game>
   <app-game-ui
     *ngIf="gameData.scene === 'game'"

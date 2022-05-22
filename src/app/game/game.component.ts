@@ -6,6 +6,7 @@ import {
   Pickupable,
   PLANT_COSTS,
   PLANT_MULTIPLIER,
+  LobbyPlayer,
 } from './../_store/models';
 import {
   AfterViewInit,
@@ -15,6 +16,8 @@ import {
   Output,
 } from '@angular/core';
 import { intializeState } from '../_store/reducer';
+import { state } from '@angular/animations';
+import * as e from 'express';
 
 @Component({
   selector: 'app-game',
@@ -235,8 +238,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       pressed: false,
     },
   };
-  lobbyPlayers: any = [];
-
+  lobbyPlayers: Array<LobbyPlayer>  = [];
   mainFrameIndex = 0;
   mainFrameCount = 0;
   fpsInterval = 0;
@@ -506,14 +508,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.moveAllMovables(difference);
   }
   moveOthers(player, i) {
-    //  // if (this.mousePos.x > this.player.position.x) {
-    //  //   useRightAnims = true;
-    //  // } else {
-    //  //   useRightAnims = false;
-    //  // }
     if (player.moveup) {
       if (player.moving) {
-        console.log('MOVING!');
         player.position.y -= this.gameData.velocity;
       }
     }
@@ -984,12 +980,22 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   loadLobby() {
     const tickInterval = setInterval(() => {
-      this.lobbyPlayers = this.gameData.lobbyPlayers;
+      this.lobbyPlayers = this.gameData.lobbyPlayers.map(player => {
+        return {
+          ...player,
+          position: {
+            ...player.position,
+            writable: true
+          }
+        }
+      });
+      console.log(this.lobbyPlayers)
+      this.updateLobbyPlayers()
       if (
-        !this.gameData.lobbyPlayers[0] ||
-        !this.gameData.lobbyPlayers[0].loadedIn ||
-        !this.gameData.lobbyPlayers[1] ||
-        !this.gameData.lobbyPlayers[1].loadedIn
+        !this.lobbyPlayers[0] ||
+        !this.lobbyPlayers[0].loadedIn ||
+        !this.lobbyPlayers[1] ||
+        !this.lobbyPlayers[1].loadedIn
       ) {
         console.log('waiting for players');
       } else {
@@ -1002,42 +1008,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.createHouseArea(this.gameData.houseAreaMap);
         this.createWellArea(this.gameData.wellAreaMap);
         this.createTraders();
-        this.createOtherPlayers();
         this.createMovables();
         this.loadCanvas();
       }
     }, 3000);
-  }
-
-  createOtherPlayers() {
-    this.lobbyPlayers = this.gameData.lobbyPlayers.map((lp) => {
-      // add to remove multiplayer same character
-      if (lp.name !== this.gameData.me)
-        return {
-          ...lp,
-          position: {
-            ...lp.position,
-            writable: true,
-          },
-          canMoveVertical: true,
-          canMoveHorizontal: true,
-          moving: true,
-          useRightAnims: true,
-        };
-      else {
-        return {
-          ...lp,
-          position: {
-            ...lp.position,
-            writable: true,
-          },
-          canMoveVertical: true,
-          canMoveHorizontal: true,
-          moving: true,
-          useRightAnims: true,
-        };
-      }
-    });
   }
 
   loadCanvas() {
@@ -1448,10 +1422,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         : otherplayer.position.y;
       const dx = this.gameData.isCarrying ? 128 * 4 : 52;
       const dy = spriteSheet.height * 4;
-      otherplayer.center = {
-        x: otherplayer.position.x + this.player.width * 2,
-        y: otherplayer.position.y + this.player.height * 2,
-      };
       this.ctx.drawImage(
         spriteSheet,
         spriteWidth * this.otherPlayersFrameIndex[0] + 0.1,
@@ -3292,11 +3262,20 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       }
     }
-    console.log(player.moving);
+    const sendAPlayer = this.lobbyPlayers.filter(player => player.name === this.gameData.me)[0]
     player.moving = moving;
     player.canMoveHorizontal = canMoveHorizontal;
     player.canMoveVertical = canMoveVertical;
     player.useRightAnims = useRightAnims;
+    player.equippedTool = this.gameData.equippedTool
+    this.changePlayerState.emit({
+      ...sendAPlayer,
+      moving,
+      canMoveHorizontal,
+      canMoveVertical,
+      useRightAnims,
+      equippedTool: this.gameData.equippedTool
+    })
   }
 
   targetNearestSquare(area) {
@@ -3656,5 +3635,22 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.changeTool.emit('shovel');
       }
     }
+  }
+
+  updateLobbyPlayers() {
+    this.lobbyPlayers.forEach(player => {
+      this.changePlayerState.emit({...player})
+    })
+  }
+
+  changePlayerUpdate(updatedPlayer) {
+    this.lobbyPlayers.forEach(player => {
+      if (updatedPlayer.name ===  player.name) {
+        player.canMoveHorizontal = updatedPlayer.canMoveHorizontal;
+        player.canMoveVertical = updatedPlayer.canMoveVertical;
+        player.equippedTool = updatedPlayer.equippedTool;
+        player.useRightAnims = updatedPlayer.useRightAnims
+        player.moving = updatedPlayer.moving
+    }})
   }
 }

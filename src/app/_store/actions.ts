@@ -101,5 +101,9 @@ export const UpdatePlayer = createAction(
   '[GameData] Updated Player',
   props<{ payload: Array<LobbyPlayer> }>()
 );
+export const ChangePlayerState = createAction(
+  '[GameData] Change Player state',
+  props<{ payload: LobbyPlayer }>()
+);
 
 export const Me = createAction('[GameData] Me', props<{ payload: string }>());

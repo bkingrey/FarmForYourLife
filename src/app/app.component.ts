@@ -8,6 +8,7 @@ import {
   ChangeIsSleeping,
   ChangeKeyEvent,
   ChangeMoney,
+  ChangePlayerState,
   ChangeScene,
   ChangeTool,
   ChangeVelocity,
@@ -56,6 +57,10 @@ export class AppComponent implements OnInit {
     this.socket.on('updatePlayer', (updatedPlayer) => {
       this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));
     });
+    this.socket.on('changePlayerState', (player) => {
+      this.facade.dispatch(ChangePlayerState({ payload: player}))
+      this.gameComponent?.changePlayerUpdate(player)
+    })
   }
 
   keyChange(event: KeyWASD, me, lobbyPlayers) {
@@ -128,5 +133,8 @@ export class AppComponent implements OnInit {
   addPlayer(event) {
     this.facade.dispatch(Me({ payload: event }));
     this.socket.emit('AddPlayerToLobby', event);
+  }
+  changePlayerState(event) {
+    this.socket.emit('ChangePlayerState', event)
   }
 }

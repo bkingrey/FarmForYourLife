@@ -44,6 +44,9 @@ io.on("connection", (socket) => {
   socket.on("StartGame", (player) => {
     io.emit("updatePlayer", player);
   });
+  socket.on("ChangePlayerState", (player) => {
+    io.emit("changePlayerState", player)
+  })
   socket.on("keychange", (event) => {
     const player = event.player;
     const roomId = event.player.roomId;

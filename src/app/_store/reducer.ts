@@ -194,6 +194,12 @@ export const gameReducer = createReducer(
         moveleft: false,
         moveright: false,
         moving: true,
+        position: {
+          ...p.position,
+        },
+        canMoveVertical: true,
+        canMoveHorizontal: true,
+        useRightAnims: true,
       };
     });
     return { ...state, lobbyPlayers: newLobby };
@@ -429,5 +435,22 @@ export const gameReducer = createReducer(
       ...state,
       loadedPlayers: state.loadedPlayers.concat(payload),
     };
-  })
+  }),
+  on(GameActions.ChangePlayerState, (state, { payload }) => {
+    const newLobby = state.lobbyPlayers.map(player => {
+      if (payload.name === player.name) {
+        return {
+          ...payload,
+        }
+      } else {
+        return {
+          ...player
+        }
+      }
+    })
+    return {
+      ...state,
+      lobbyPlayers: newLobby
+    };
+  }),
 );

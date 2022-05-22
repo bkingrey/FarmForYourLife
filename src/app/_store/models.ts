@@ -57,6 +57,15 @@ export interface LobbyPlayer {
   width: number;
   height: number;
   roomId: number;
+  moveup: boolean;
+  movedown: boolean;
+  moveleft: boolean;
+  moveright: boolean;
+  useRightAnims: boolean;
+  canMoveHorizontal: boolean;
+  canMoveVertical: boolean;
+  moving: boolean;
+  equippedTool: string;
   position: {
     x: number;
     y: number;
