@@ -914,7 +914,7 @@ export const jsonData = {
     {
       name: 'Bargain III',
       description: 'Buy for 30% less costs. Sell for 30% more',
-      tier: 1,
+      tier: 3,
       target: "bargain",
       src: 'assets/ui/coins-big.png'
     },

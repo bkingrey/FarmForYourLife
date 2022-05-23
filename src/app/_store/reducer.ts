@@ -59,6 +59,7 @@ export const intializeState = (): GameState => {
     canFillWater: false,
     canOpenShop: false,
     openShop: false,
+    openUpgrades: false,
     collisions: [],
     farmableAreas: [],
     fishableAreas: [],
@@ -415,6 +416,12 @@ export const gameReducer = createReducer(
     return {
       ...state,
       openShop: payload,
+    };
+  }),
+  on(GameActions.OpenUpgrades, (state, { payload }) => {
+    return {
+      ...state,
+      openUpgrades: payload,
     };
   }),
   on(GameActions.ChangeCanOpenShop, (state, { payload }) => {

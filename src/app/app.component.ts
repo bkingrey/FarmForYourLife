@@ -16,6 +16,7 @@ import {
   getGameData,
   Me,
   OpenShop,
+  OpenUpgrades,
   PurchaseItem,
   ReduceSeedCount,
   UpdatePlayer,
@@ -35,7 +36,6 @@ import { take } from 'rxjs';
 export class AppComponent implements OnInit {
   title = 'FarmForYourLife';
   socket: Socket = io('http://localhost:3000');
-  showUpgradePopup: boolean = false;
   @ViewChild('gameComp') gameComponent: GameComponent | null = null;
   constructor(public facade: AppFacade) {}
 
@@ -58,7 +58,7 @@ export class AppComponent implements OnInit {
       this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));
     });
     this.socket.on('changePlayerState', (player) => {
-      this.facade.dispatch(ChangePlayerState({ payload: player}))
+     // this.facade.dispatch(ChangePlayerState({ payload: player}))
       this.gameComponent?.changePlayerUpdate(player)
     })
     this.socket.on('changePlayerTool', data => {
@@ -137,9 +137,7 @@ export class AppComponent implements OnInit {
   changeIsSleeping(event) {
     this.facade.dispatch(ChangeIsSleeping({ payload: event }));
   }
-  openShop(event) {
-    this.facade.dispatch(OpenShop({ payload: event }));
-  }
+
   purchaseItem(event) {
     this.facade.dispatch(PurchaseItem({ payload: event }));
   }
@@ -167,7 +165,10 @@ export class AppComponent implements OnInit {
   cultivateOthers(event) {
     this.socket.emit('CultivateOthers', event);
   }
+  openShop(event) {
+    this.facade.dispatch(OpenShop({ payload: event }));
+  }
   upgradePopUp(event: boolean) {
-    this.showUpgradePopup = event;
+    this.facade.dispatch(OpenUpgrades({ payload: event }))
   }
 }

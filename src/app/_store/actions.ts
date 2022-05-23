@@ -84,6 +84,10 @@ export const OpenShop = createAction(
   '[GameData] Open/Close Shop',
   props<{ payload: boolean }>()
 );
+export const OpenUpgrades = createAction(
+  '[GameData] Open/Close Upgrades',
+  props<{ payload: boolean }>()
+);
 export const PurchaseItem = createAction(
   '[GameData] Purchase Item',
   props<{ payload: { name; cost } }>()

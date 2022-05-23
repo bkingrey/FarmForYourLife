@@ -59,7 +59,6 @@ export class GameEffects {
               ? { ...lobbyPlayer, loadedIn: true }
               : lobbyPlayer;
           });
-          console.log(newLobby);
         }
         return AddPlayerToLobby({ payload: newLobby });
       })

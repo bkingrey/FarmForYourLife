@@ -20,6 +20,7 @@ export interface GameState {
   canEnterHouse: boolean;
   canOpenShop: boolean;
   openShop: boolean;
+  openUpgrades: boolean;
   canHarvest: boolean;
   canFillWater: boolean;
   collisionMap: any | [];

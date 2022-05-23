@@ -33,5 +33,6 @@ export class UpgradeComponent implements OnInit {
 
   showUpgradeDescription(description) {
     this.hoveredDescription = description
+    this.showDescription = true;
   }
 }

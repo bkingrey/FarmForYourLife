@@ -45,4 +45,16 @@ $fill-color: #ead4aa;
       width: 15px;
     }
   }
+  .upgrade-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 60px;
+    .upg-item {
+      font-size: 25px;
+      h6 {
+        margin: 0;
+      }
+    }
+  }
 }

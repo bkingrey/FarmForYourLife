@@ -24,6 +24,20 @@ export const selectUpgradeChoices = createSelector(
           upgradesToShow.push(newUp)
         }
       })
-    })
-    return upgradesToShow;
+    });
+    const shuffledArray = shuffle(upgradesToShow)
+    const threeUpgrades = [shuffledArray[0], shuffledArray[1], shuffledArray[2]]
+    return threeUpgrades
+  }
 );
+
+function shuffle(arr) {
+  var j, x, index;
+  for (index = arr.length -1; index > 0; index--) {
+    j= Math.floor(Math.random()*(index+1));
+    x= arr[index];
+    arr[index] = arr[j];
+    arr[j] = x;
+  }
+  return arr;
+}
