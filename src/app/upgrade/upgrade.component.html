@@ -1,0 +1,21 @@
+<div
+  id="upgrade-popup"
+  (contextmenu)="doRightClickOnMouse($event)"
+  [ngClass]="{
+    R1024x576: gameData.resolution.x === 1024
+  }"
+>
+  <div class="close-button" (click)="openUpgrades.emit(false)">
+    <img src="assets/ui/cancel.png" alt="" />
+  </div>
+  <h5 class="title">Choose an Upgrade</h5>
+  <ng-container *ngFor="let upgrade of gameData.upgrades">
+    <div class="merch-item" (click)="getUpgrade(upgrade.name)" (mouseover)="showUpgradeDescription(upgrade.description)" (mouseleave)="showDescription = false">
+      <img [src]="upgrade.src" />
+      <h6>{{ upgrade.name }}</h6>
+    </div>
+  </ng-container>
+  <span class="upgrade-description" ngIf="showUpgradeDescription"
+    >{{ hoveredDescription }}</span
+  >
+</div>

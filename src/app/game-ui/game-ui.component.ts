@@ -20,6 +20,7 @@ export class GameUiComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() changeTool = new EventEmitter();
   @Output() openBasket = new EventEmitter();
+  @Output() showUpgrades = new EventEmitter();
   @ViewChild('gameUI') gameUI: ElementRef | null = null;
   showSeeds = false;
   constructor() {}

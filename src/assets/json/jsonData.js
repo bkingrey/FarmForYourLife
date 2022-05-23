@@ -784,4 +784,181 @@ export const jsonData = {
       pressed: false,
     },
   },
+  upgrades: [
+    {
+      name: 'Dig I',
+      description: 'Dig a hole 1 step faster',
+      tier: 1,
+      target: "dig",
+      src: 'assets/ui/shovel-big.png'
+    },
+    {
+      name: 'Dig II',
+      description: 'Dig a hole 2 steps faster',
+      tier: 2,
+      target: "dig",
+      src: 'assets/ui/shovel-big.png'
+    },
+    {
+      name: 'Dig III',
+      description: 'Dig a full hole in with one dig action',
+      tier: 3,
+      target: "dig",
+      src: 'assets/ui/shovel-big.png'
+    },
+    {
+      name: 'Plow I',
+      description: 'Dig a 1x3 hole instead of a 1x1 hole',
+      tier: 1,
+      target: "plow",
+      src: 'assets/ui/shovel-x.png'
+    },
+    {
+      name: 'Plow II',
+      description: 'Dig a 3x3 hole',
+      tier: 2,
+      target: "plow",
+      src: 'assets/ui/shovel-x.png'
+    },
+    {
+      name: 'Water I',
+      description: 'Water can holds 25% more water',
+      tier: 1,
+      target: "water",
+      src: 'assets/ui/water-big.png'
+    },
+    {
+      name: 'Water II',
+      description: 'Water can holds 60% more water',
+      tier: 2,
+      target: "water",
+      src: 'assets/ui/water-big.png'
+    },
+    {
+      name: 'Water III',
+      description: 'Water can holds 100% more water',
+      tier: 3,
+      target: "water",
+      src: 'assets/ui/water-big.png'
+    },
+    {
+      name: 'Irrigate I',
+      description: 'Watering covers 1x3 tiles',
+      tier: 1,
+      target: "irrigate",
+      src: 'assets/ui/water-fill.png'
+    },
+    {
+      name: 'Irrigate II',
+      description: 'Watering covers 3x3 tiles',
+      tier: 2,
+      target: "irrigate",
+      src: 'assets/ui/water-fill.png'
+    },
+    {
+      name: 'Move I',
+      description: 'Move 25% faster',
+      tier: 1,
+      target: "move",
+      src: 'assets/ui/hammer-big.png'
+    },
+    {
+      name: 'Move II',
+      description: 'Move 50% faster',
+      tier: 2,
+      target: "move",
+      src: 'assets/ui/hammer-big.png'
+    },
+    {
+      name: 'Move III',
+      description: 'Move 75% faster',
+      tier: 3,
+      target: "move",
+      src: 'assets/ui/hammer-big.png'
+    },
+    {
+      name: 'Energy Up I',
+      description: 'Gain 25% more base energy',
+      tier: 1,
+      target: "energy",
+      src: 'assets/ui/plant-big.png'
+    },
+    {
+      name: 'Energy Up II',
+      description: 'Gain 60% more base energy',
+      tier: 2,
+      target: "energy",
+      src: 'assets/ui/plant-big.png'
+    },
+    {
+      name: 'Energy Up III',
+      description: 'Gain 100% more base energy',
+      tier: 3,
+      target: "energy",
+      src: 'assets/ui/plant-big.png'
+    },
+    {
+      name: 'Bargain I',
+      description: 'Buy for 10% less costs. Sell for 10% more',
+      tier: 1,
+      target: "bargain",
+      src: 'assets/ui/coins-big.png'
+    },
+    {
+      name: 'Bargain II',
+      description: 'Buy for 20% less costs. Sell for 20% more',
+      tier: 2,
+      target: "bargain",
+      src: 'assets/ui/coins-big.png'
+    },
+    {
+      name: 'Bargain III',
+      description: 'Buy for 30% less costs. Sell for 30% more',
+      tier: 1,
+      target: "bargain",
+      src: 'assets/ui/coins-big.png'
+    },
+    {
+      name: 'Miner I',
+      description: 'Double the chance to find gold in the mine',
+      tier: 1,
+      target: "miner",
+      src: 'assets/ui/pickaxe-big.png'
+    },
+    {
+      name: 'Miner II',
+      description: 'Triple the chance to find gold in the mine',
+      tier: 2,
+      target: "miner",
+      src: 'assets/ui/pickaxe-big.png'
+    },
+    {
+      name: 'Miner III',
+      description: 'Quadriple the chance to find gold in the mine',
+      tier: 3,
+      target: "miner",
+      src: 'assets/ui/pickaxe-big.png'
+    },
+    {
+      name: 'Fisherman I',
+      description: 'Double the chance to find huge fish',
+      tier: 1,
+      target: "fisher",
+      src: 'assets/ui/rod-big.png'
+    },
+    {
+      name: 'Fisherman II',
+      description: 'Triple the chance to find huge fish',
+      tier: 2,
+      target: "fisher",
+      src: 'assets/ui/rod-big.png'
+    },
+    {
+      name: 'Fisherman III',
+      description: 'Quadriple the chance to find huge fish',
+      tier: 3,
+      target: "fisher",
+      src: 'assets/ui/rod-big.png'
+    },
+  ]
 };

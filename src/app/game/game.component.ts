@@ -561,7 +561,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       !player.isSleeping
     ) {
       if(player.isCultivating) {
-        console.log("in isCultivating")
         this.cultivateOthers(player, i)
       }
      else if (player.equippedTool === 'beets') {
@@ -1640,7 +1639,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   changeStateOfHoveredFarmable(evt) {
-    console.log("made it")
     if (evt.isWatering) {
       if (
         this.farmableArea.filter((area) => area.id === evt.clickedFarmableArea.id)[0]
@@ -1893,13 +1891,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   farmAction(clickedFarmableArea, state0, state1, state2, state3) {
-    console.log("in farm action")
-    console.log(clickedFarmableArea)
     const clickedFarm = this.farmableArea.filter(
       (area) => area.id === clickedFarmableArea.id
     )[0];
-    console.log(clickedFarm)
-    // Unidentified because farm positions are different. need to give farms ids
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
         this.farmableArea.filter(
@@ -1927,7 +1921,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   drawBoundary(boundary) {
     if (this.ctx) {
-      this.ctx.fillStyle = 'red';
+      this.ctx.fillStyle = 'transparent';
       this.ctx.fillRect(
         boundary.position.x,
         boundary.position.y,

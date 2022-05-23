@@ -35,6 +35,7 @@ import { take } from 'rxjs';
 export class AppComponent implements OnInit {
   title = 'FarmForYourLife';
   socket: Socket = io('http://localhost:3000');
+  showUpgradePopup: boolean = false;
   @ViewChild('gameComp') gameComponent: GameComponent | null = null;
   constructor(public facade: AppFacade) {}
 
@@ -165,5 +166,8 @@ export class AppComponent implements OnInit {
   }
   cultivateOthers(event) {
     this.socket.emit('CultivateOthers', event);
+  }
+  upgradePopUp(event: boolean) {
+    this.showUpgradePopup = event;
   }
 }

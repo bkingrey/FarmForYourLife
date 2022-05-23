@@ -119,6 +119,72 @@ export const intializeState = (): GameState => {
       },
     },
     money: 1000,
+    upgrades: [],
+    learnedUpgrades: [
+      {
+        name: 'Dig',
+        description: 'Base Dig',
+        tier: 0,
+        target: "dig",
+        src: 'assets/ui/shovel-big.png'
+      },
+      {
+        name: 'Plow',
+        description: 'Base Plow',
+        tier: 0,
+        target: "plow",
+        src: 'assets/ui/shovel-x.png'
+      },
+  {
+        name: 'Water',
+        description: 'Base Water',
+        tier: 0,
+        target: "water",
+        src: 'assets/ui/water-big.png'
+      },
+  {
+        name: 'Irrigate',
+        description: 'Base Irrigate',
+        tier: 0,
+        target: "irrigate",
+        src: 'assets/ui/water-fill.png'
+      },
+  {
+        name: 'Move',
+        description: 'Base Irrigate',
+        tier: 0,
+        target: "move",
+        src: 'assets/ui/hammer-big.png'
+      },
+  {
+        name: 'Energy',
+        description: 'Base Energy',
+        tier: 0,
+        target: "energy",
+        src: 'assets/ui/plant-big.png'
+      },
+  {
+        name: 'Bargain',
+        description: 'Base Bargain',
+        tier: 0,
+        target: "bargain",
+        src: 'assets/ui/coins-big.png'
+      },
+  {
+        name: 'Miner',
+        description: 'Base Miner',
+        tier: 0,
+        target: "miner",
+        src: 'assets/ui/pickaxe-big.png'
+      },
+  {
+        name: 'Fisherman',
+        description: 'Base Fisherman',
+        tier: 0,
+        target: "fisher",
+        src: 'assets/ui/rod-big.png'
+      },
+    ],
     buyableItems: [
       {
         name: 'Potato Seeds',
@@ -254,6 +320,7 @@ export const gameReducer = createReducer(
       wellAreaMap: newWellArea,
       untargetableAreaMap: newUntargetableArea,
       player: payload.player,
+      upgrades: payload.upgrades
     };
   }),
   on(GameActions.ChangeKeyEvent, (state, { payload }) => {

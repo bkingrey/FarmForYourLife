@@ -39,7 +39,9 @@
     *ngIf="gameData.scene === 'game'"
     [gameData]="gameData"
     (changeTool)="changeTool($event)"
+    (showUpgrades)="upgradePopUp($event)"
   ></app-game-ui>
+  <app-upgrade *ngIf="showUpgradePopup" [upgrades]="facade.upgradeChoices$ | async"></app-upgrade>
   <app-merchant
     [gameData]="gameData"
     (purchase)="purchaseItem($event)"

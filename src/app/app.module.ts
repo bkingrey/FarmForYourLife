@@ -14,6 +14,7 @@ import { TitleScreenComponent } from './title-screen/title-screen.component';
 import { GameSelectComponent } from './game-select/game-select.component';
 import { PlayLobbyComponent } from './play-lobby/play-lobby.component';
 import { FormsModule } from '@angular/forms';
+import { UpgradeComponent } from './upgrade/upgrade.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { FormsModule } from '@angular/forms';
     TitleScreenComponent,
     GameSelectComponent,
     PlayLobbyComponent,
+    UpgradeComponent,
   ],
   imports: [
     BrowserModule,

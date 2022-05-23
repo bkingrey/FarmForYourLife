@@ -32,6 +32,8 @@ export interface GameState {
   spriteAnimations: SpriteAnimation;
   mapImage: SpriteMetrics;
   player: SpriteMetrics;
+  upgrades: Array<Upgrade>;
+  learnedUpgrades: Array<Upgrade>;
   energy: {
     current: number;
     max: number;
@@ -47,6 +49,14 @@ export interface GameState {
   seedsOwned: SeedKey;
   money: number;
   buyableItems: Array<MerchantItems>;
+}
+
+export interface Upgrade {
+  name: string;
+  description: string;
+  tier: number;
+  target: string;
+  src: string;
 }
 
 export interface LobbyPlayer {
