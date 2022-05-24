@@ -30,7 +30,7 @@ $fill-color: #ead4aa;
   pointer-events: auto !important;
 
   .title {
-    font-size: 40px;
+    font-size: 30px;
     margin: 16px;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
@@ -56,5 +56,12 @@ $fill-color: #ead4aa;
         margin: 0;
       }
     }
+  }
+  .description-container {
+    font-size: 25px;
+  }
+
+  .upgrade-description {
+    font-size: 14px;
   }
 }

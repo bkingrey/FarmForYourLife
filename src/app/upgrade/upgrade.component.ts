@@ -21,6 +21,10 @@ export class UpgradeComponent implements OnInit {
   }
   doRightClickOnMouse(evt) {
     evt.preventDefault();
+    this.closeUpgradeMenu()
+  }
+
+  closeUpgradeMenu() {
     this.openUpgrades.emit(false);
     setTimeout(() => {
       document.getElementById('game-canvas')?.focus();

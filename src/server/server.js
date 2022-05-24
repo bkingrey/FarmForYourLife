@@ -9,9 +9,9 @@ const io = require("socket.io")(httpServer, {
   },
 });
 
-app.get("/", (req, res) => {
-  res.send("<h1>Hello world</h1>");
-});
+// app.get("/", (req, res) => {
+//   res.send("<h1>Hello world</h1>");
+// });
 
 // GLOBALS
 var lobbyCount = 0;

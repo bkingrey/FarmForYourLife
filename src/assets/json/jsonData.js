@@ -790,49 +790,56 @@ export const jsonData = {
       description: 'Dig a hole 1 step faster',
       tier: 1,
       target: "dig",
-      src: 'assets/ui/shovel-big.png'
+      src: 'assets/ui/shovel-big.png',
+      value: 1
     },
     {
       name: 'Dig II',
       description: 'Dig a hole 2 steps faster',
       tier: 2,
       target: "dig",
-      src: 'assets/ui/shovel-big.png'
+      src: 'assets/ui/shovel-big.png',
+      value: 2
     },
     {
       name: 'Dig III',
       description: 'Dig a full hole in with one dig action',
       tier: 3,
       target: "dig",
-      src: 'assets/ui/shovel-big.png'
+      src: 'assets/ui/shovel-big.png',
+      value: 3
     },
     {
       name: 'Plow I',
       description: 'Dig a 1x3 hole instead of a 1x1 hole',
       tier: 1,
       target: "plow",
-      src: 'assets/ui/shovel-x.png'
+      src: 'assets/ui/shovel-x.png',
+      value: '1x3'
     },
     {
       name: 'Plow II',
       description: 'Dig a 3x3 hole',
       tier: 2,
       target: "plow",
-      src: 'assets/ui/shovel-x.png'
+      src: 'assets/ui/shovel-x.png',
+      value: '3x3'
     },
     {
       name: 'Water I',
       description: 'Water can holds 25% more water',
       tier: 1,
       target: "water",
-      src: 'assets/ui/water-big.png'
+      src: 'assets/ui/water-big.png',
+      value: 1.25
     },
     {
       name: 'Water II',
       description: 'Water can holds 60% more water',
       tier: 2,
       target: "water",
-      src: 'assets/ui/water-big.png'
+      src: 'assets/ui/water-big.png',
+      value: 1.6
     },
     {
       name: 'Water III',
@@ -840,125 +847,144 @@ export const jsonData = {
       tier: 3,
       target: "water",
       src: 'assets/ui/water-big.png'
+      ,
+      value: 2
     },
     {
       name: 'Irrigate I',
       description: 'Watering covers 1x3 tiles',
       tier: 1,
       target: "irrigate",
-      src: 'assets/ui/water-fill.png'
+      src: 'assets/ui/water-fill.png',
+      value: '1x3'
     },
     {
       name: 'Irrigate II',
       description: 'Watering covers 3x3 tiles',
       tier: 2,
       target: "irrigate",
-      src: 'assets/ui/water-fill.png'
+      src: 'assets/ui/water-fill.png',
+      value: '3x3'
     },
     {
       name: 'Move I',
       description: 'Move 25% faster',
       tier: 1,
       target: "move",
-      src: 'assets/ui/hammer-big.png'
+      src: 'assets/ui/hammer-big.png',
+      value: 1.25
     },
     {
       name: 'Move II',
       description: 'Move 50% faster',
       tier: 2,
       target: "move",
-      src: 'assets/ui/hammer-big.png'
+      src: 'assets/ui/hammer-big.png',
+      value: 1.5
     },
     {
       name: 'Move III',
       description: 'Move 75% faster',
       tier: 3,
       target: "move",
-      src: 'assets/ui/hammer-big.png'
+      src: 'assets/ui/hammer-big.png',
+      value: 1.75
     },
     {
       name: 'Energy Up I',
       description: 'Gain 25% more base energy',
       tier: 1,
       target: "energy",
-      src: 'assets/ui/plant-big.png'
+      src: 'assets/ui/plant-big.png',
+      value: 1.25
     },
     {
       name: 'Energy Up II',
       description: 'Gain 60% more base energy',
       tier: 2,
       target: "energy",
-      src: 'assets/ui/plant-big.png'
+      src: 'assets/ui/plant-big.png',
+      value: 1.6
     },
     {
       name: 'Energy Up III',
       description: 'Gain 100% more base energy',
       tier: 3,
       target: "energy",
-      src: 'assets/ui/plant-big.png'
+      src: 'assets/ui/plant-big.png',
+      value: 2
     },
     {
       name: 'Bargain I',
       description: 'Buy for 10% less costs. Sell for 10% more',
       tier: 1,
       target: "bargain",
-      src: 'assets/ui/coins-big.png'
+      src: 'assets/ui/coins-big.png',
+      value: 1.10
     },
     {
       name: 'Bargain II',
       description: 'Buy for 20% less costs. Sell for 20% more',
       tier: 2,
       target: "bargain",
-      src: 'assets/ui/coins-big.png'
+      src: 'assets/ui/coins-big.png',
+      value: 1.20
     },
     {
       name: 'Bargain III',
       description: 'Buy for 30% less costs. Sell for 30% more',
       tier: 3,
       target: "bargain",
-      src: 'assets/ui/coins-big.png'
+      src: 'assets/ui/coins-big.png',
+      value: 1.3
     },
     {
       name: 'Miner I',
       description: 'Double the chance to find gold in the mine',
       tier: 1,
       target: "miner",
-      src: 'assets/ui/pickaxe-big.png'
+      src: 'assets/ui/pickaxe-big.png',
+      value: 2
     },
     {
       name: 'Miner II',
       description: 'Triple the chance to find gold in the mine',
       tier: 2,
       target: "miner",
-      src: 'assets/ui/pickaxe-big.png'
+      src: 'assets/ui/pickaxe-big.png',
+      value: 3
     },
     {
       name: 'Miner III',
       description: 'Quadriple the chance to find gold in the mine',
       tier: 3,
       target: "miner",
-      src: 'assets/ui/pickaxe-big.png'
+      src: 'assets/ui/pickaxe-big.png',
+      value: 4
     },
     {
       name: 'Fisherman I',
       description: 'Double the chance to find huge fish',
       tier: 1,
       target: "fisher",
-      src: 'assets/ui/rod-big.png'
+      src: 'assets/ui/rod-big.png',
+      value: 2
     },
     {
       name: 'Fisherman II',
       description: 'Triple the chance to find huge fish',
       tier: 2,
       target: "fisher",
-      src: 'assets/ui/rod-big.png'
+      src: 'assets/ui/rod-big.png',
+      value: 3
     },
     {
       name: 'Fisherman III',
       description: 'Quadriple the chance to find huge fish',
       tier: 3,
       target: "fisher",
-      src: 'assets/ui/rod-big.png'
+      src: 'assets/ui/rod-big.png',
+      value: 4
     },
   ]
 };

@@ -1,4 +1,4 @@
-import { GameState } from './../_store/models';
+import { GameState, MerchantItems } from './../_store/models';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { intializeState } from '../_store/reducer';
 
@@ -9,6 +9,7 @@ import { intializeState } from '../_store/reducer';
 })
 export class MerchantComponent implements OnInit {
   @Input() gameData: GameState = intializeState();
+  @Input() merchantItems: Array<MerchantItems> | null = [];
   @Output() purchase = new EventEmitter();
   @Output() openShop = new EventEmitter();
   @Output() changeTool = new EventEmitter();

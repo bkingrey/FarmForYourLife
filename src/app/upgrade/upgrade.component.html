@@ -5,17 +5,19 @@
     R1024x576: gameData.resolution.x === 1024
   }"
 >
-  <div class="close-button" (click)="openUpgrades.emit(false)">
+  <div class="close-button" (click)="closeUpgradeMenu()">
     <img src="assets/ui/cancel.png" alt="" />
   </div>
   <h5 class="title">Choose an Upgrade</h5>
   <div class="upgrade-container">
-    <div  *ngFor="let upgrade of upgrades" class="upg-item" (click)="getUpgrade(upgrade.name)" (mouseover)="showUpgradeDescription(upgrade.description)" (mouseleave)="showDescription = false">
+    <div  *ngFor="let upgrade of upgrades" class="upg-item" (click)="getUpgrade(upgrade)" (mouseover)="showUpgradeDescription(upgrade.description)" (mouseleave)="showDescription = false">
       <img [src]="upgrade.src" />
       <h6>{{ upgrade.name }}</h6>
     </div>
   </div>
-  <span class="upgrade-description" *ngIf="showDescription"
+  <div class="description-container" *ngIf="showDescription">
+    <span class="upgrade-description"
     >{{ hoveredDescription }}</span
   >
+  </div>
 </div>

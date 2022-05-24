@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GameState } from './_store/models';
-import { selectGameData, selectUpgradeChoices } from './_store/selectors';
+import { selectGameData, selectItemCosts, selectUpgradeChoices } from './_store/selectors';
 
 @Injectable()
 export class AppFacade {
@@ -9,6 +9,7 @@ export class AppFacade {
 
   gameData$ = this.store.select(selectGameData);
   upgradeChoices$ = this.store.select(selectUpgradeChoices);
+  merchantItems$ = this.store.select(selectItemCosts);
 
   dispatch(action: any) {
     this.store.dispatch(action);

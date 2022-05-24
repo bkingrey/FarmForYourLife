@@ -111,6 +111,9 @@ export const intializeState = (): GameState => {
       current: 100,
       max: 100,
     },
+    minerValue: 0.01,
+    fisherValue: 5,
+    bargainValue: 1,
     player: {
       width: 0,
       height: 0,
@@ -127,63 +130,72 @@ export const intializeState = (): GameState => {
         description: 'Base Dig',
         tier: 0,
         target: "dig",
-        src: 'assets/ui/shovel-big.png'
+        src: 'assets/ui/shovel-big.png',
+        value: 0
       },
       {
         name: 'Plow',
         description: 'Base Plow',
         tier: 0,
         target: "plow",
-        src: 'assets/ui/shovel-x.png'
+        src: 'assets/ui/shovel-x.png',
+        value: '1x1'
       },
   {
         name: 'Water',
         description: 'Base Water',
         tier: 0,
         target: "water",
-        src: 'assets/ui/water-big.png'
+        src: 'assets/ui/water-big.png',
+        value: 1
       },
   {
         name: 'Irrigate',
         description: 'Base Irrigate',
         tier: 0,
         target: "irrigate",
-        src: 'assets/ui/water-fill.png'
+        src: 'assets/ui/water-fill.png',
+        value: '1x1'
       },
   {
         name: 'Move',
         description: 'Base Irrigate',
         tier: 0,
         target: "move",
-        src: 'assets/ui/hammer-big.png'
+        src: 'assets/ui/hammer-big.png',
+        value: 1
       },
   {
         name: 'Energy',
         description: 'Base Energy',
         tier: 0,
         target: "energy",
-        src: 'assets/ui/plant-big.png'
+        src: 'assets/ui/plant-big.png',
+        value: 1
       },
   {
         name: 'Bargain',
         description: 'Base Bargain',
         tier: 0,
         target: "bargain",
-        src: 'assets/ui/coins-big.png'
+        src: 'assets/ui/coins-big.png',
+        value: 1
       },
   {
         name: 'Miner',
         description: 'Base Miner',
         tier: 0,
         target: "miner",
-        src: 'assets/ui/pickaxe-big.png'
+        src: 'assets/ui/pickaxe-big.png',
+        value: 1
       },
   {
         name: 'Fisherman',
         description: 'Base Fisherman',
         tier: 0,
         target: "fisher",
-        src: 'assets/ui/rod-big.png'
+        src: 'assets/ui/rod-big.png',
+        value: 1
       },
     ],
     buyableItems: [
@@ -324,18 +336,18 @@ export const gameReducer = createReducer(
       upgrades: payload.upgrades
     };
   }),
-  on(GameActions.ChangeKeyEvent, (state, { payload }) => {
-    return {
-      ...state,
-      keys: {
-        ...state.keys,
-        w: payload.w ? payload.w : state.keys.w,
-        a: payload.a ? payload.a : state.keys.a,
-        s: payload.s ? payload.s : state.keys.s,
-        d: payload.d ? payload.d : state.keys.d,
-      },
-    };
-  }),
+  // on(GameActions.ChangeKeyEvent, (state, { payload }) => {
+  //   return {
+  //     ...state,
+  //     keys: {
+  //       ...state.keys,
+  //       w: payload.w ? payload.w : state.keys.w,
+  //       a: payload.a ? payload.a : state.keys.a,
+  //       s: payload.s ? payload.s : state.keys.s,
+  //       d: payload.d ? payload.d : state.keys.d,
+  //     },
+  //   };
+  // }),
   on(GameActions.ChangeTool, (state, { payload }) => {
     let carrying = false;
     if (
@@ -424,6 +436,23 @@ export const gameReducer = createReducer(
       openUpgrades: payload,
     };
   }),
+  on(GameActions.GetUpgrade, (state, { payload }) => {
+    const newUpgrades = state.learnedUpgrades.map(upg => {
+      if (upg.target === payload.target) {
+        return {
+          ...payload
+        }
+      }
+      return {
+        ...upg
+      }
+    })
+    return {
+      ...state,
+      learnedUpgrades: newUpgrades,
+    };
+  }),
+
   on(GameActions.ChangeCanOpenShop, (state, { payload }) => {
     return {
       ...state,
@@ -505,6 +534,43 @@ export const gameReducer = createReducer(
       },
     };
   }),
+  on(GameActions.ChangeWaterMax, (state, { payload }) => {
+    return {
+      ...state,
+      water: {
+        ...state.water,
+        max: 100 * payload
+      },
+    };
+  }),
+  on(GameActions.ChangeEnergyMax, (state, { payload }) => {
+    return {
+      ...state,
+      energy: {
+        ...state.energy,
+        max: 100 * payload
+      },
+    };
+  }),
+  on(GameActions.ChangeMinerValue, (state, { payload }) => {
+    return {
+      ...state,
+      minerValue: payload,
+    };
+  }),
+  on(GameActions.ChangeBargainValue, (state, { payload }) => {
+    return {
+      ...state,
+      bargainValue: payload,
+    };
+  }),
+  on(GameActions.ChangeFisherValue, (state, { payload }) => {
+    return {
+      ...state,
+      fisherValue: payload,
+    };
+  }),
+
   on(GameActions.UpdatePlayer, (state, { payload }) => {
     return {
       ...state,

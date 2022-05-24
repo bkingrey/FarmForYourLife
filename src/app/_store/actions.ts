@@ -5,6 +5,7 @@ import {
   SpriteMetrics,
   SeedsOwned,
   LobbyPlayer,
+  Upgrade,
 } from './models';
 
 // CONFIG ACTIONS
@@ -44,6 +45,26 @@ export const ChangeEnergy = createAction(
   props<{ payload: number }>()
 );
 
+export const ChangeEnergyMax = createAction(
+  '[GameData] Change Energy Maximum',
+  props<{ payload: number }>()
+);
+
+export const ChangeBargainValue = createAction(
+  '[GameData] Change Bargain Value',
+  props<{ payload: number }>()
+);
+
+export const ChangeMinerValue = createAction(
+  '[GameData] Change Miner Value',
+  props<{ payload: number }>()
+);
+
+export const ChangeFisherValue = createAction(
+  '[GameData] Change Fisher Value',
+  props<{ payload: number }>()
+);
+
 export const ChangeVelocity = createAction(
   '[GameData] Change Velocity',
   props<{ payload: number }>()
@@ -52,6 +73,11 @@ export const ChangeVelocity = createAction(
 export const ChangeWaterMeter = createAction(
   '[GameData] Fill Water Meter',
   props<{ payload: number | string }>()
+);
+
+export const ChangeWaterMax = createAction(
+  '[GameData] Change Water Can Maximum',
+  props<{ payload: number }>()
 );
 
 export const ChangeCanHarvest = createAction(
@@ -87,6 +113,10 @@ export const OpenShop = createAction(
 export const OpenUpgrades = createAction(
   '[GameData] Open/Close Upgrades',
   props<{ payload: boolean }>()
+);
+export const GetUpgrade = createAction(
+  '[GameData] Get Upgrade',
+  props<{ payload: Upgrade }>()
 );
 export const PurchaseItem = createAction(
   '[GameData] Purchase Item',

@@ -23,6 +23,9 @@ export interface GameState {
   openUpgrades: boolean;
   canHarvest: boolean;
   canFillWater: boolean;
+  minerValue: number;
+  fisherValue: number;
+  bargainValue: number;
   collisionMap: any | [];
   farmableAreaMap: any | [];
   fishableAreaMap: any | [];
@@ -58,6 +61,7 @@ export interface Upgrade {
   tier: number;
   target: string;
   src: string;
+  value: string | number;
 }
 
 export interface LobbyPlayer {

@@ -41,6 +41,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() changePlayerState = new EventEmitter();
   @Output() changeHoveredFarm = new EventEmitter();
   @Output() cultivateOther = new EventEmitter();
+  upg: any;
   isWatering = false;
   scale: number = 0.5;
   squareSize: number = 64;
@@ -80,6 +81,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   wellArea: any = [];
   untargetableArea: any = [];
   traders: any = [];
+
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
   spriteSheetWalkRight = new Image();
@@ -488,7 +490,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.goIntoHouse();
     } else {
       this.isSleeping.emit(false);
-      this.changeVelocity.emit(4);
+      this.changeVelocity.emit(4 * Number(this.gameData.learnedUpgrades.filter(upg => upg.target === 'move')[0].value));
       this.canClick = true;
     }
 
@@ -529,7 +531,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   moveOthers(player, i) {
     if (player.moveup) {
       if (player.moving || player.canMoveVertical) {
-        player.position.y -= this.gameData.velocity;
+        player.position.y -= this.gameData.velocity
       }
     }
     if (player.movedown) {
@@ -1016,9 +1018,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.updateLobbyPlayers()
       if (
         !this.lobbyPlayers[0] ||
-        !this.lobbyPlayers[0].loadedIn ||
-        !this.lobbyPlayers[1] ||
-        !this.lobbyPlayers[1].loadedIn
+        !this.lobbyPlayers[0].loadedIn
       ) {
         console.log('waiting for players');
       } else {
@@ -1034,6 +1034,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.createOtherPlayers();
         this.createMovables();
         this.loadCanvas();
+        this.upg = this.getUpgradeVaules(this.gameData.learnedUpgrades)
       }
     }, 3000);
   }
@@ -1675,19 +1676,20 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (evt.clickedFarmableArea.state === 'fishable' && evt.me === this.gameData.me) {
       const getRandom = Math.random() * 100;
-      if (getRandom < 75) {
+      if (getRandom < 80-this.gameData.fisherValue) {
         this.changeTool.emit('smallfish');
-      } else if (getRandom < 95) {
+      } else if (getRandom < 100-this.gameData.fisherValue) {
         this.changeTool.emit('mediumfish');
       } else {
         this.changeTool.emit('hugefish');
       }
     } else if (evt.clickedFarmableArea.state === 'minable' && evt.me === this.gameData.me) {
       const getRandom = Math.random() * 100;
-      if (getRandom > 99) this.changeTool.emit('nugget');
+      const chance = 100 - 100*this.gameData.minerValue
+      if (getRandom > chance) this.changeTool.emit('nugget');
     }
     if (evt.equippedTool === 'shovel') {
-      this.farmAction(evt.clickedFarmableArea, 'soil-0', 'soil-1', 'soil-2', 'soil-3');
+      this.farmAction(evt.clickedFarmableArea);
     }
     if (this.isAPlantSeed(evt.equippedTool)) {
       this.plantSeed(evt);
@@ -1890,31 +1892,82 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
   }
 
-  farmAction(clickedFarmableArea, state0, state1, state2, state3) {
+  farmAction(clickedFarmableArea) {
     const clickedFarm = this.farmableArea.filter(
       (area) => area.id === clickedFarmableArea.id
     )[0];
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
+        let soil;
+        switch (this.upg.dig) {
+         case 0:
+          soil = 'soil-0'
+          break;
+          case 1:
+          soil = 'soil-1'
+          break;
+          case 2:
+            soil = 'soil-2'
+          break;
+          case 3:
+          soil = 'soil-3'
+          break;
+          default:
+          break;
+        }
+     this.farmableArea.filter(
+      (area) => area.id === clickedFarmableArea.id
+      )[0].state = soil;
+     } else if (clickedFarm.state === 'soil-0') {
+      let soil;
+      switch (this.upg.dig) {
+       case 0:
+        soil = 'soil-1'
+        break;
+        case 1:
+        soil = 'soil-1'
+        break;
+        case 2:
+          soil = 'soil-2'
+        break;
+        case 3:
+        soil = 'soil-3'
+        break;
+        default:
+        break;
+      }
+        this.farmableArea.filter(
+        (area) => area.id === clickedFarmableArea.id
+        )[0].state = soil;
+      } else if (clickedFarm.state === 'soil-1') {
+        let soil;
+        switch (this.upg.dig) {
+         case 0:
+          soil = 'soil-2'
+          break;
+          case 1:
+          soil = 'soil-2'
+          break;
+          case 2:
+            soil = 'soil-3'
+          break;
+          case 3:
+          soil = 'soil-3'
+          break;
+          default:
+          break;
+        }
         this.farmableArea.filter(
           (area) => area.id === clickedFarmableArea.id
-        )[0].state = state0;
-      } else if (clickedFarm.state === state0) {
+        )[0].state = soil;
+      } else if (clickedFarm.state === 'soil-2') {
         this.farmableArea.filter(
           (area) => area.id === clickedFarmableArea.id
-        )[0].state = state1;
-      } else if (clickedFarm.state === state1) {
-        this.farmableArea.filter(
-          (area) => area.id === clickedFarmableArea.id
-        )[0].state = state2;
-      } else if (clickedFarm.state === state2) {
-        this.farmableArea.filter(
-          (area) => area.id === clickedFarmableArea.id
-        )[0].state = state3;
+        )[0].state = 'soil-3';
       } else {
         this.farmableArea.filter(
           (area) => area.id === clickedFarmableArea.id
-        )[0].state = state3;
+        )[0].state = 'soil-3';
       }
     }
   }
@@ -3018,7 +3071,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     let canMoveHorizontal = true;
     let canMoveVertical = true;
 
-    if (this.gameData.keys.w.pressed) {
+    if (this.memoryKeys.w.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
         if (
@@ -3049,7 +3102,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         });
       }
     }
-    if (this.gameData.keys.s.pressed) {
+    if (this.memoryKeys.s.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
         if (
@@ -3080,7 +3133,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         });
       }
     }
-    if (this.gameData.keys.d.pressed) {
+    if (this.memoryKeys.d.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
         if (
@@ -3111,7 +3164,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         });
       }
     }
-    if (this.gameData.keys.a.pressed) {
+    if (this.memoryKeys.a.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
         if (
@@ -3148,10 +3201,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
 
     if (
-      !this.gameData.keys.w.pressed &&
-      !this.gameData.keys.a.pressed &&
-      !this.gameData.keys.s.pressed &&
-      !this.gameData.keys.d.pressed &&
+      !this.memoryKeys.w.pressed &&
+      !this.memoryKeys.a.pressed &&
+      !this.memoryKeys.s.pressed &&
+      !this.memoryKeys.d.pressed &&
       !this.gameData.isSleeping
     ) {
       if (this.gameData.equippedTool === 'beets') {
@@ -3732,40 +3785,40 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.changeTool.emit('shovel');
       switch (this.gameData.equippedTool) {
         case 'potato':
-          this.tickMoney(PLANT_COSTS.POTATO * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.POTATO * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'carrot':
-          this.tickMoney(PLANT_COSTS.CARROT * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.CARROT * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'wheat':
-          this.tickMoney(PLANT_COSTS.WHEAT * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.WHEAT * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'cabbage':
-          this.tickMoney(PLANT_COSTS.CABBAGE * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.CABBAGE * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'cauliflower':
-          this.tickMoney(PLANT_COSTS.CAULIFLOWER * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.CAULIFLOWER * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'beets':
-          this.tickMoney(PLANT_COSTS.BEETS * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.BEETS * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'kale':
-          this.tickMoney(PLANT_COSTS.KALE * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.KALE * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'sunflower':
-          this.tickMoney(PLANT_COSTS.SUNFLOWER * PLANT_MULTIPLIER);
+          this.tickMoney(Math.round(PLANT_COSTS.SUNFLOWER * PLANT_MULTIPLIER * this.gameData.bargainValue));
           break;
         case 'smallfish':
-          this.tickMoney(PLANT_COSTS.SMALLFISH);
+          this.tickMoney(Math.round(PLANT_COSTS.SMALLFISH * this.gameData.bargainValue));
           break;
         case 'mediumfish':
-          this.tickMoney(PLANT_COSTS.MEDIUMFISH);
+          this.tickMoney(Math.round(PLANT_COSTS.MEDIUMFISH * this.gameData.bargainValue));
           break;
         case 'hugefish':
-          this.tickMoney(PLANT_COSTS.HUGEFISH);
+          this.tickMoney(Math.round(PLANT_COSTS.HUGEFISH * this.gameData.bargainValue));
           break;
         case 'nugget':
-          this.tickMoney(PLANT_COSTS.NUGGET);
+          this.tickMoney(Math.round(PLANT_COSTS.NUGGET * this.gameData.bargainValue));
           break;
 
         default:

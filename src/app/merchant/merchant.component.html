@@ -10,7 +10,7 @@
     <img src="assets/ui/cancel.png" alt="" />
   </div>
   <h5 class="title"><img src="assets/ui/shop-title.png" alt="" /></h5>
-  <ng-container *ngFor="let item of gameData.buyableItems">
+  <ng-container *ngFor="let item of merchantItems">
     <div class="merch-item" (click)="buyItem(item.name, item.cost)">
       <img [src]="item.img" />
       <h6>{{ item.name }}</h6>

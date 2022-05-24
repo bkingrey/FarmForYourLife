@@ -1,5 +1,6 @@
+import { state } from '@angular/animations';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { GameState, Upgrade } from './models';
+import { GameState, MerchantItems, Upgrade } from './models';
 import { intializeState } from './reducer';
 
 // GAME STATES
@@ -30,6 +31,18 @@ export const selectUpgradeChoices = createSelector(
     return threeUpgrades
   }
 );
+
+export const selectItemCosts = createSelector(
+  getGameData,
+  (gameData: GameState): Array<MerchantItems> => {
+    return gameData.buyableItems.map(item => {
+      return {
+        ...item,
+        cost: Math.round(item.cost / gameData.bargainValue)
+      }
+    })
+  }
+)
 
 function shuffle(arr) {
   var j, x, index;

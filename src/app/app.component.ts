@@ -14,6 +14,7 @@ import {
   ChangeVelocity,
   ChangeWaterMeter,
   getGameData,
+  GetUpgrade,
   Me,
   OpenShop,
   OpenUpgrades,
@@ -24,7 +25,7 @@ import {
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AppFacade } from './app.facade';
 import io, { Socket } from 'socket.io-client';
-import { KeyWASD } from './_store/models';
+import { KeyWASD, Upgrade } from './_store/models';
 import { GameComponent } from './game/game.component';
 import { take } from 'rxjs';
 
@@ -87,7 +88,6 @@ export class AppComponent implements OnInit {
       moveright: event.d && event.d.pressed,
     };
     this.socket.emit('keychange', moveChangeObject);
-    this.facade.dispatch(ChangeKeyEvent({ payload: event }));
   }
 
   changeTool(event) {
@@ -170,5 +170,15 @@ export class AppComponent implements OnInit {
   }
   upgradePopUp(event: boolean) {
     this.facade.dispatch(OpenUpgrades({ payload: event }))
+  }
+  getUpgrade(event: Upgrade) {
+    this.facade.dispatch(GetUpgrade({payload: event}))
+    this.facade.gameData$.pipe(take(1)).subscribe(data => {
+      if (this.gameComponent) {
+        this.gameComponent.upg = this.gameComponent.getUpgradeVaules(data.learnedUpgrades)
+      }
+    })
+
+    this.facade.dispatch(OpenUpgrades({payload: false}))
   }
 }

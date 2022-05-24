@@ -13,9 +13,16 @@ import {
 } from 'rxjs';
 import {
   AddPlayerToLobby,
+  ChangeBargainValue,
+  ChangeEnergyMax,
+  ChangeFisherValue,
+  ChangeMinerValue,
   ChangePlayerState,
+  ChangeVelocity,
+  ChangeWaterMax,
   ErrorGameDataAction,
   getGameData,
+  GetUpgrade,
   SuccessGetGameDataAction,
   UpdatePlayer,
 } from './actions';
@@ -61,6 +68,29 @@ export class GameEffects {
           });
         }
         return AddPlayerToLobby({ payload: newLobby });
+      })
+    )
+  );
+
+  UpgradeChanges$: Observable<Action> = createEffect(() =>
+    this.action$.pipe(
+      ofType(GetUpgrade),
+      withLatestFrom(this.store.pipe(select(selectGameData))),
+      map(([action, gameData]) => {
+        const newEnergyMaxValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'energy')[0].value)
+        const newMoveValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'move')[0].value)
+        const newWaterMaxValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'water')[0].value)
+        const newBargainValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'bargain')[0].value)
+        const newMinerValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'miner')[0].value)
+        const newFisherValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'fisher')[0].value)
+        this.store.dispatch(ChangeBargainValue({payload: 1*newBargainValue}))
+        this.store.dispatch(ChangeMinerValue({payload: 0.01*newMinerValue}))
+        this.store.dispatch(ChangeFisherValue({payload: 5*newFisherValue}))
+        this.store.dispatch(ChangeEnergyMax({payload: 1*newEnergyMaxValue}))
+        setTimeout(() => {
+          document.getElementById('game-canvas')?.focus();
+        });
+        return ChangeWaterMax({ payload: newWaterMaxValue });
       })
     )
   );
