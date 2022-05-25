@@ -3493,6 +3493,67 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       }
   }
 
+  get1x3Area(area) {
+    let area1 = {
+      ...area
+    }
+    let area2 = {
+      ...area,
+      position: {
+        x: area.position.x + area.width+1,
+        y: area.position.y + area.height+1
+      },
+      center: {
+        x: (area.x + area.width+1)+(area.width/2),
+        y: (area.y + area.height+1)+(area.height/2),
+      },
+    }
+    let area3 = {
+      ...area2,
+      position: {
+        x: area2.position.x + area2.width+1,
+        y: area2.position.y + area2.height+1
+      },
+      center: {
+        x: (area2.position.x + area2.width+1)+(area2.width/2),
+        y: (area2.position.y + area2.height+1)+(area2.height/2),
+      }
+    }
+    return [
+      area1,
+      area2,
+      area3
+    ]
+  }
+
+  plowAreasToGrab(area) {
+    if (this.upg.plow === '1x3') {
+      return (this.mousePos.y >= area.position.y &&
+        this.mousePos.y < area.position.y + area.height) &&
+        ((this.mousePos.x < area.position.x + area.width &&
+        this.mousePos.x >= area.position.x) ||
+        (this.mousePos.x > area.position.x + area.width &&
+          this.mousePos.x < area.position.x + area.width + area.width) ||
+          (this.mousePos.x < area.position.x &&
+            this.mousePos.x >= area.position.x - area.width))
+    } else if (this.upg.plow === '3x3') {
+      return (this.mousePos.y >= area.position.y &&
+        this.mousePos.y < area.position.y + area.height) &&
+        ((this.mousePos.x < area.position.x + area.width &&
+        this.mousePos.x >= area.position.x) ||
+        (this.mousePos.x > area.position.x + area.width &&
+          this.mousePos.x < area.position.x + area.width + area.width) ||
+          (this.mousePos.x < area.position.x &&
+            this.mousePos.x >= area.position.x - area.width))
+    } else {
+      return (this.mousePos.y >= area.position.y &&
+        this.mousePos.y < area.position.y + area.height) &&
+        (this.mousePos.x < area.position.x + area.width &&
+        this.mousePos.x >= area.position.x)
+    }
+
+  }
+
   targetNearestSquare(area) {
     if (
       this.ctx &&
@@ -3500,12 +3561,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.player.height &&
       this.player.center
     ) {
-      if (
-        this.mousePos.x >= area.position.x &&
-        this.mousePos.y >= area.position.y &&
-        this.mousePos.x < area.position.x + area.width &&
-        this.mousePos.y < area.position.y + area.height
-      ) {
+      if (this.plowAreasToGrab(area)) {
         this.ctx.beginPath();
         this.ctx.lineWidth = 6;
 
@@ -3515,7 +3571,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             !this.gameData.isCarrying &&
             this.canClick
           )
-            this.changeEquippedTool(area.state);
+          this.changeEquippedTool(area.state);
           this.hoveredFarmableArea = area;
           this.mayFarm = true;
           this.hoveredFarmableArea.center = {
@@ -3530,7 +3586,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.hoveredFarmableArea.state !== 'merchant' &&
             this.hoveredFarmableArea.state !== 'untargetable'
           )
-            this.drawBrokenSquare(area);
+              this.drawBrokenSquare(area);
         } else {
           this.mayFarm = false;
           this.hoveredFarmableArea = this.defaultFarmState;
