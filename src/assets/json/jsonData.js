@@ -819,8 +819,16 @@ export const jsonData = {
     },
     {
       name: 'Plow II',
-      description: 'Dig a 3x3 hole',
+      description: 'Dig a 2x3 hole',
       tier: 2,
+      target: "plow",
+      src: 'assets/ui/shovel-x.png',
+      value: '2x3'
+    },
+    {
+      name: 'Plow III',
+      description: 'Dig a 3x3 hole',
+      tier: 3,
       target: "plow",
       src: 'assets/ui/shovel-x.png',
       value: '3x3'
@@ -860,8 +868,16 @@ export const jsonData = {
     },
     {
       name: 'Irrigate II',
-      description: 'Watering covers 3x3 tiles',
+      description: 'Watering covers 2x3 tiles',
       tier: 2,
+      target: "irrigate",
+      src: 'assets/ui/water-fill.png',
+      value: '2x3'
+    },
+    {
+      name: 'Irrigate III',
+      description: 'Watering covers 3x3 tiles',
+      tier: 3,
       target: "irrigate",
       src: 'assets/ui/water-fill.png',
       value: '3x3'
