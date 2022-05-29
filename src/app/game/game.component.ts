@@ -154,13 +154,13 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   movables: Array<any> = [];
   animate: any;
   frameIndex = 0;
-  framesDrawn = [0,0,0,0,0,0,0,0,0,0,0,0];
+  framesDrawn = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   actionsDrawn = 0;
   otherPlayersFrameIndex = [0, 0, 0, 0];
   otherPlayersFramesDrawn = [0, 0, 0, 0];
   otherCultivateFrameIndex = [0, 0, 0, 0];
   otherCultivateFramesDrawn = [0, 0, 0, 0];
-  actionFrameIndex = [0,0,0,0,0,0,0,0,0,0,0,0];
+  actionFrameIndex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   pickupableFrameIndex: Array<number> = [];
 
   pickupableFramesDrawn: Array<number> = [];
@@ -213,7 +213,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     state: 'none',
     watered: false,
   };
-  canClick = true;
   pickupables: Array<Pickupable> = [];
   bubblesFramesDrawn: number = 0;
   bubblesFrameIndex: number = 0;
@@ -239,7 +238,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   then = 0;
   startTime = 0;
   elaspsed = 0;
-  canMove = true;
 
   constructor() {
     super();
@@ -326,21 +324,24 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.activatable();
       }
       // MOVEMENT
-      if (this.clickedFarmableArea.length && !this.isWatering) {
+      if (this.clickedFarmableArea.length) {
         this.clickedFarmableArea.forEach((area, i) => {
-          if (area.queuedCultivate && this.cultivatable(area, i)) {
+          if (
+            area.queuedCultivate &&
+            this.cultivatable(area, i) &&
+            !this.isWatering
+          ) {
             this.cultivate(area, i);
           } else if (this.isWatering) {
             this.waterAnimation(area, i);
           }
         });
-        if (!this.clickedFarmableArea[0].queuedCultivate) {
+        if (!this.clickedFarmableArea[0].queuedCultivate ) {
           this.movement(this.gameData.velocity);
         }
       } else {
         this.movement(this.gameData.velocity);
       }
-
 
       if (this.pickupables.length) {
         let removableItem;
@@ -371,7 +372,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           this.canHarvest.emit(false);
         }
         this.hoveredFarmableArea = this.defaultFarmState;
-        this.otherFarmableArea = []
+        this.otherFarmableArea = [];
+        this.removeMouseProperties()
       } else {
         if (
           this.gameData.canHarvest === false &&
@@ -446,10 +448,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       ) {
         return true;
       }
-      if (
-        area.state === 'fishable' &&
-        this.gameData.equippedTool === 'rod'
-      ) {
+      if (area.state === 'fishable' && this.gameData.equippedTool === 'rod') {
         return true;
       }
       if (
@@ -473,12 +472,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         return true;
       }
       area.queuedCultivate = false;
-      this.canClick = true;
       this.actionFrameIndex[i] = 0;
       return false;
     }
     area.queuedCultivate = false;
-    this.canClick = true;
     return false;
   }
 
@@ -497,7 +494,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             )[0].value
           )
       );
-      this.canClick = true;
     }
 
     this.queuedActivation = false;
@@ -1511,28 +1507,33 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
 
     // ***** SHOWING HIT BOX *****
-    if (
-      this.ctx &&
-      this.player.height &&
-      this.player.width &&
-      this.player.center
-    ) {
-      this.ctx.beginPath();
-      this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
-      this.ctx.stroke();
-      this.ctx.beginPath();
-      this.ctx.rect(
-        this.player.position.x,
-        this.player.position.y,
-        this.player.width * 4,
-        this.player.height * 4
-      );
-      this.ctx.stroke();
-    }
+    // if (
+    //   this.ctx &&
+    //   this.player.height &&
+    //   this.player.width &&
+    //   this.player.center
+    // ) {
+    //   this.ctx.beginPath();
+    //   this.ctx.rect(this.player.center.x, this.player.center.y, 4, 4);
+    //   this.ctx.stroke();
+    //   this.ctx.beginPath();
+    //   this.ctx.rect(
+    //     this.player.position.x,
+    //     this.player.position.y,
+    //     this.player.width * 4,
+    //     this.player.height * 4
+    //   );
+    //   this.ctx.stroke();
+    // }
     // ***** SHOWING HIT BOX *****
   }
 
-  drawCultivateAnimation(spriteSheet: HTMLImageElement, frames: number, area, i) {
+  drawCultivateAnimation(
+    spriteSheet: HTMLImageElement,
+    frames: number,
+    area,
+    i
+  ) {
     let width = 128;
     let height = 65;
     let clickedFarmEvent = {
@@ -1579,7 +1580,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
         this.actionFrameIndex[i] = 0;
         area.queuedCultivate = false;
-        this.canClick = true;
       }
       this.framesDrawn[i] = 0;
     } else {
@@ -1679,9 +1679,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       if (evt.me === this.gameData.me) {
         this.isWatering = false;
         evt.clickedFarmableArea.queuedCultivate = false;
-        this.canClick = true;
-        this.actionFrameIndex = [0,0,0,0,0,0,0,0,0,0,0]
-        this.framesDrawn = [0,0,0,0,0,0,0,0,0,0,0]
+        this.actionFrameIndex = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        this.framesDrawn = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         this.changeTool.emit('shovel');
       }
       return;
@@ -2785,7 +2784,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (!this.memoryKeys.d.pressed && e.key === 'd') {
       this.moveRight(true);
     }
-    if (this.canClick) {
       switch (e.key.toLowerCase()) {
         case 'b':
           this.changeTool.emit('basket');
@@ -2829,7 +2827,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         default:
           break;
       }
-    }
   }
   keyUpEvent(e: KeyboardEvent) {
     switch (e.key.toLowerCase()) {
@@ -2959,8 +2956,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.useRightAnims()
           ? this.gameData.spriteAnimations[spriteSheet.rightKey].frames
           : this.gameData.spriteAnimations[spriteSheet.leftKey].frames,
-          area,
-          i
+        area,
+        i
       );
     }
   }
@@ -3215,12 +3212,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       !this.memoryKeys.d.pressed &&
       !this.gameData.isSleeping
     ) {
-      this.drawSpriteBasedOnTool(false)
+      this.drawSpriteBasedOnTool(false);
     } else {
-      this.drawSpriteBasedOnTool(true)
+      this.drawSpriteBasedOnTool(true);
     }
-
-
 
     player.moving = moving;
     player.canMoveHorizontal = canMoveHorizontal;
@@ -3254,7 +3249,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   drawSpriteBasedOnTool(isMoving) {
-    let useRightAnims
+    let useRightAnims;
     if (this.mousePos.x > this.player.position.x) {
       useRightAnims = true;
     } else {
@@ -3262,9 +3257,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (this.gameData.equippedTool === 'beets') {
       this.drawSpriteAnimation(
-        useRightAnims
-          ? this.spriteCarryBeetsRight
-          : this.spriteCarryBeetsLeft,
+        useRightAnims ? this.spriteCarryBeetsRight : this.spriteCarryBeetsLeft,
         useRightAnims
           ? this.gameData.spriteAnimations['spriteCarryBeetsRight'].frames
           : this.gameData.spriteAnimations['spriteCarryBeetsLeft'].frames
@@ -3293,10 +3286,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           ? this.spriteCarryCauliflowerRight
           : this.spriteCarryCauliflowerLeft,
         useRightAnims
-          ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight']
-              .frames
-          : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft']
-              .frames
+          ? this.gameData.spriteAnimations['spriteCarryCauliflowerRight'].frames
+          : this.gameData.spriteAnimations['spriteCarryCauliflowerLeft'].frames
       );
     } else if (this.gameData.equippedTool === 'kale') {
       this.drawSpriteAnimation(
@@ -3334,9 +3325,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       );
     } else if (this.gameData.equippedTool === 'wheat') {
       this.drawSpriteAnimation(
-        useRightAnims
-          ? this.spriteCarryWheatRight
-          : this.spriteCarryWheatLeft,
+        useRightAnims ? this.spriteCarryWheatRight : this.spriteCarryWheatLeft,
         useRightAnims
           ? this.gameData.spriteAnimations['spriteCarryWheatRight'].frames
           : this.gameData.spriteAnimations['spriteCarryWheatLeft'].frames
@@ -3356,8 +3345,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           ? this.spriteCarryMediumFishRight
           : this.spriteCarryMediumFishLeft,
         useRightAnims
-          ? this.gameData.spriteAnimations['spriteCarryMediumFishRight']
-              .frames
+          ? this.gameData.spriteAnimations['spriteCarryMediumFishRight'].frames
           : this.gameData.spriteAnimations['spriteCarryMediumFishLeft'].frames
       );
     } else if (this.gameData.equippedTool === 'hugefish') {
@@ -3386,17 +3374,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             ? this.gameData.spriteAnimations['playerIdleRight'].frames
             : this.gameData.spriteAnimations['playerIdleLeft'].frames
         );
-      }
-      else {
-          this.drawSpriteAnimation(
-            useRightAnims ? this.spriteSheetWalkRight : this.spriteSheetWalkLeft,
-            useRightAnims
-              ? this.gameData.spriteAnimations['playerWalkRight'].frames
-              : this.gameData.spriteAnimations['playerWalkLeft'].frames
-          );
+      } else {
+        this.drawSpriteAnimation(
+          useRightAnims ? this.spriteSheetWalkRight : this.spriteSheetWalkLeft,
+          useRightAnims
+            ? this.gameData.spriteAnimations['playerWalkRight'].frames
+            : this.gameData.spriteAnimations['playerWalkLeft'].frames
+        );
       }
     }
-
   }
 
   get1x3Area(area) {
@@ -3428,8 +3414,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     return [area1, area2, area3];
   }
 
-  plowAreasToGrab(area) {
-    if (this.upg.plow === '1x3') {
+  areasByAreas(area, upgrade) {
+    if (upgrade === '1x3') {
       return (
         this.mousePos.y >= area.position.y &&
         this.mousePos.y < area.position.y + area.height &&
@@ -3440,7 +3426,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           (this.mousePos.x < area.position.x &&
             this.mousePos.x >= area.position.x - area.width))
       );
-    } else if (this.upg.plow === '2x3') {
+    } else if (upgrade === '2x3') {
       return (
         (this.mousePos.y >= area.position.y &&
           this.mousePos.y < area.position.y + area.height &&
@@ -3459,7 +3445,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             (this.mousePos.x < area.position.x &&
               this.mousePos.x >= area.position.x - area.width)))
       );
-    } else if (this.upg.plow === '3x3') {
+    } else if (upgrade === '3x3') {
       return (
         (this.mousePos.y >= area.position.y &&
           this.mousePos.y < area.position.y + area.height &&
@@ -3513,21 +3499,16 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.player.height &&
       this.player.center
     ) {
-      if (this.plowAreasToGrab(area)) {
-        this.ctx.beginPath();
-        this.ctx.lineWidth = 6;
+      if (this.areasByAreas(area, this.upg.plow)) {
         if (!this.otherFarmableArea.includes(area)) {
           this.otherFarmableArea.push(area);
         }
         if (this.isMouseCloseToPlayer(this.player, this.mousePos)) {
-          if (
-            !this.gameData.isCarrying &&
-            this.canClick
-          ) {
+          if (!this.gameData.isCarrying) {
             this.changeEquippedTool(area.state);
-            if (this.isMouseInArea(area) && area !== this.hoveredFarmableArea ) {
+            if (this.isMouseInArea(area)) {
               this.hoveredFarmableArea = area;
-              this.otherFarmableArea = [area]
+              this.otherFarmableArea = [area];
             }
           }
           this.mayFarm = true;
@@ -3535,8 +3516,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             x: area.position.x + 32,
             y: area.position.y + 32,
           };
-
-          this.ctx.strokeStyle = 'blue';
           if (
             this.hoveredFarmableArea.state !== 'house' &&
             this.hoveredFarmableArea.state !== 'well' &&
@@ -3544,23 +3523,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.hoveredFarmableArea.state !== 'untargetable'
           )
             this.drawBrokenSquare(area);
-        } else {
-          this.mayFarm = false;
-          this.hoveredFarmableArea = this.defaultFarmState;
-          this.otherFarmableArea = [];
-          this.ctx.strokeStyle = 'transparent';
-          this.ctx.rect(
-            area.position.x,
-            area.position.y,
-            area.width,
-            area.height
-          );
+           this.drawWaterSquare(area, 10);
         }
-
-        this.ctx.stroke();
-      }
-      else {
-        this.otherFarmableArea.filter(a => a.id !== area.id)
+      } else {
+        this.otherFarmableArea.filter((a) => a.id !== area.id);
       }
     }
   }
@@ -3569,10 +3535,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (state === this.hoveredFarmableArea.state) {
       return;
     }
-    if (state === 'fishable') {
+    if (state === 'fishable' && this.gameData.equippedTool !== 'rod') {
       this.changeTool.emit('rod');
       this.canHarvest.emit(true);
-    } else if (state === 'minable') {
+    } else if (state === 'minable' && this.gameData.equippedTool !== 'pickaxe') {
       this.changeTool.emit('pickaxe');
       this.canHarvest.emit(true);
     } else if (state === 'well') {
@@ -3587,7 +3553,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       !this.gameData.openShop
     ) {
       this.canHarvest.emit(false);
-      this.changeTool.emit('shovel');
+      //this.changeTool.emit('shovel');
     } else if (
       !this.isHoldingSeed(this.gameData.equippedTool) &&
       !this.gameData.openShop
@@ -3602,6 +3568,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   drawBrokenSquare(area) {
     if (this.ctx) {
+      this.ctx.beginPath();
+      this.ctx.lineWidth = 6;
+      this.ctx.strokeStyle = 'yellow';
       this.ctx.moveTo(area.position.x, area.position.y);
       this.ctx.lineTo(area.position.x + area.width / 4, area.position.y);
       this.ctx.moveTo(area.position.x, area.position.y);
@@ -3644,6 +3613,69 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         area.position.x + area.width,
         area.position.y + area.height / 4
       );
+      this.ctx.stroke();
+    }
+  }
+
+  drawWaterSquare(area, offset) {
+    if (this.ctx) {
+      this.ctx.beginPath();
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = 'blue';
+      //TOP LEFT CORNER
+      this.ctx.moveTo(area.position.x + offset, area.position.y + offset);
+      this.ctx.lineTo(
+        area.position.x + offset + area.width / 6,
+        area.position.y + offset
+      );
+      this.ctx.moveTo(area.position.x + offset, area.position.y + offset);
+      this.ctx.lineTo(
+        area.position.x + offset,
+        area.position.y + area.height / 6 + offset
+      );
+      //BOTTOM LEFT CORNER
+      this.ctx.moveTo(area.position.x + offset, area.position.y + area.height - offset);
+      this.ctx.lineTo(
+        area.position.x + offset,
+        area.position.y + area.height - offset - area.height / 6
+      );
+      this.ctx.moveTo(area.position.x + offset, area.position.y + area.height - offset);
+      this.ctx.lineTo(
+        area.position.x + offset + area.width / 6,
+        area.position.y + area.height - offset
+      );
+
+      //BOTTOM RIGHT CORNER
+      this.ctx.moveTo(
+        area.position.x + area.width - offset,
+        area.position.y + area.height - offset
+      );
+      this.ctx.lineTo(
+        area.position.x - offset + area.width - area.width / 6,
+        area.position.y - offset + area.height
+      );
+      this.ctx.moveTo(
+        area.position.x + area.width - offset,
+        area.position.y + area.height - offset
+      );
+      this.ctx.lineTo(
+        area.position.x + area.width - offset,
+        area.position.y + area.height - offset - area.height / 6
+      );
+
+      //TOP RIGHT CORNER
+      this.ctx.moveTo(area.position.x + area.width - offset, area.position.y + offset);
+      this.ctx.lineTo(
+        area.position.x + area.width - offset - area.width / 6,
+        area.position.y + offset
+      );
+      this.ctx.moveTo(area.position.x + area.width - offset, area.position.y + offset);
+      this.ctx.lineTo(
+        area.position.x + area.width - offset,
+        area.position.y + offset + area.height / 6
+      );
+      this.ctx.strokeStyle = 'blue';
+      this.ctx.stroke();
     }
   }
 
@@ -3664,20 +3696,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.player.center &&
       this.mayFarm &&
       this.ctx &&
-      this.canClick &&
       this.gameData.energy.current >= 3 &&
       this.gameData.canHarvest
     ) {
       this.clickedFarmableArea = this.otherFarmableArea;
       if (this.hoveredFarmableArea.state !== 'well') {
-        this.clickedFarmableArea.forEach(area => {
-          area.queuedCultivate = true
+        this.clickedFarmableArea.forEach((area) => {
+          area.queuedCultivate = true;
         });
-        if (this.clickedFarmableArea.length) {
-          this.canMove = false
-        }
       }
-      this.canClick = false;
     }
   }
 
@@ -3700,7 +3727,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.activatable();
         return;
       }
-      this.canClick = true;
       this.queuedActivation = true;
       this.activatedArea = this.hoveredFarmableArea;
       if (
@@ -3715,7 +3741,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       } else if (
         this.isShovelable(this.activatedArea.state, this.player, this.mousePos)
       ) {
-        this.canClick = false;
         this.waterArea(this.activatedArea);
       }
     }
@@ -3727,8 +3752,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   waterArea(clickedArea) {
     if (this.gameData.equippedTool === 'shovel') {
+      this.clickedFarmableArea = [];
       if (!this.clickedFarmableArea.includes(clickedArea)) {
-        this.clickedFarmableArea = clickedArea;
+        this.clickedFarmableArea.push(clickedArea);
         this.isWatering = true;
       }
     }
@@ -3747,47 +3773,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.useRightAnims()
           ? this.gameData.spriteAnimations[spriteSheet.rightKey].frames
           : this.gameData.spriteAnimations[spriteSheet.leftKey].frames,
-          area, i
+        area,
+        i
       );
-  }
-  doScrollOnMouse(evt) {
-    if (this.player.center && this.mayFarm && this.ctx && this.canClick) {
-      if (evt.wheelDelta < 0) {
-        switch (this.gameData.equippedTool) {
-          case 'rod':
-            break;
-          case 'shovel':
-            this.changeTool.emit('water');
-            break;
-          case 'water':
-            this.changeTool.emit('hammer');
-            break;
-          case 'hammer':
-            this.changeTool.emit('pickaxe');
-            break;
-          case 'pickaxe':
-            this.changeTool.emit('rod');
-            break;
-        }
-      } else if (evt.wheelDelta > 0) {
-        switch (this.gameData.equippedTool) {
-          case 'shovel':
-            break;
-          case 'water':
-            this.changeTool.emit('shovel');
-            break;
-          case 'hammer':
-            this.changeTool.emit('water');
-            break;
-          case 'pickaxe':
-            this.changeTool.emit('hammer');
-            break;
-          case 'rod':
-            this.changeTool.emit('pickaxe');
-            break;
-        }
-      }
-    }
   }
 
   tickMoney(number) {
