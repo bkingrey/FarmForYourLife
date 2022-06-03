@@ -119,6 +119,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   spriteReadyRadish = new Image();
   spriteReadySunflower = new Image();
   spriteReadyWheat = new Image();
+  spriteReadySmallFish = new Image();
+  spriteReadyMediumFish = new Image();
+  spriteReadyHugeFish = new Image();
+  spriteReadyNugget = new Image();
   spriteCarryBeetsLeft = new Image();
   spriteCarryBeetsRight = new Image();
   spriteCarryCabbageLeft = new Image();
@@ -1270,6 +1274,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.spriteReadyWheat.src =
       this.gameData.spriteAnimations['spriteReadyWheat'].src;
 
+    this.spriteReadySmallFish.src =
+      this.gameData.spriteAnimations['spriteReadySmallFish'].src;
+    this.spriteReadyMediumFish.src =
+      this.gameData.spriteAnimations['spriteReadyMediumFish'].src;
+    this.spriteReadyHugeFish.src =
+      this.gameData.spriteAnimations['spriteReadyHugeFish'].src;
+    this.spriteReadyNugget.src =
+      this.gameData.spriteAnimations['spriteReadyNugget'].src;
+
     this.spriteSheetSoil.onload = () => {
       this.startAnimating(60);
     };
@@ -1325,6 +1338,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         return this.spriteReadySunflower;
       case 'wheat':
         return this.spriteReadyWheat;
+      case 'smallfish':
+        return this.spriteReadySmallFish;
+      case 'mediumfish':
+        return this.spriteReadyMediumFish;
+      case 'hugefish':
+        return this.spriteReadyHugeFish;
+      case 'nugget':
+        return this.spriteReadyNugget;
       default:
         return '';
     }
@@ -3957,7 +3978,21 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         height: this.squareSize,
         plant: this.gameData.equippedTool,
       };
-      if (this.gameData.equippedTool === 'potato') {
+      if (
+        this.gameData.equippedTool === 'potato' ||
+        this.gameData.equippedTool === 'beets' ||
+        this.gameData.equippedTool === 'carrots' ||
+        this.gameData.equippedTool === 'cauliflower' ||
+        this.gameData.equippedTool === 'radish' ||
+        this.gameData.equippedTool === 'kale' ||
+        this.gameData.equippedTool === 'wheat' ||
+        this.gameData.equippedTool === 'cabbage' ||
+        this.gameData.equippedTool === 'sunflower' ||
+        this.gameData.equippedTool === 'smallfish' ||
+        this.gameData.equippedTool === 'mediumfish' ||
+        this.gameData.equippedTool === 'hugefish' ||
+        this.gameData.equippedTool === 'nugget'
+      ) {
         this.createPickupablePlantAtArea(
           carriedItem.plant,
           carriedItem.position,

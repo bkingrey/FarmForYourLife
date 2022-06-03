@@ -638,6 +638,22 @@ export const jsonData = {
       src: "assets/pickable/wheat-ready-sheet.png",
       frames: 16,
     },
+    spriteReadySmallFish: {
+      src: "assets/pickable/small-fish-ready-sheet.png",
+      frames: 16,
+    },
+    spriteReadyMediumFish: {
+      src: "assets/pickable/medium-fish-ready-sheet.png",
+      frames: 16,
+    },
+    spriteReadyHugeFish: {
+      src: "assets/pickable/huge-fish-ready-sheet.png",
+      frames: 16,
+    },
+    spriteReadyNuggett: {
+      src: "assets/pickable/nugget-fish-ready-sheet.png",
+      frames: 16,
+    },
     spriteCarryBeetsLeft: {
       src: "assets/carrying/carry-beets-left.png",
       frames: 8,
