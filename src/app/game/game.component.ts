@@ -336,7 +336,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.waterAnimation(area, i);
           }
         });
-        if (!this.clickedFarmableArea[0].queuedCultivate ) {
+        if (!this.clickedFarmableArea[0].queuedCultivate) {
           this.movement(this.gameData.velocity);
         }
       } else {
@@ -371,9 +371,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         if (this.gameData.canHarvest === true) {
           this.canHarvest.emit(false);
         }
-        this.hoveredFarmableArea = this.defaultFarmState;
-        this.otherFarmableArea = [];
-        this.removeMouseProperties()
+        // this.hoveredFarmableArea = this.defaultFarmState;
+        // this.otherFarmableArea = [];
+        // this.removeMouseProperties();
       } else {
         if (
           this.gameData.canHarvest === false &&
@@ -409,7 +409,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   startAnimating(fps) {
     setTimeout(() => {
       this.setPlayersInPosition();
-    }, 5000);
+    });
 
     this.fpsInterval = 1000 / fps;
     this.then = Date.now();
@@ -459,7 +459,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         area.state !== 'merchant-left' &&
         area.state !== 'merchant-right' &&
         (this.gameData.equippedTool === 'shovel' ||
-          this.gameData.equippedTool === 'beets-seeds' ||
+          this.gameData.equippedTool === 'beet-seeds' ||
           this.gameData.equippedTool === 'cabbage-seeds' ||
           this.gameData.equippedTool === 'carrot-seeds' ||
           this.gameData.equippedTool === 'cauliflower-seeds' ||
@@ -1033,7 +1033,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.loadCanvas();
         this.upg = this.getUpgradeVaules(this.gameData.learnedUpgrades);
       }
-    }, 3000);
+    }, 1000);
   }
 
   createOtherPlayers() {
@@ -1276,6 +1276,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   drawPickupableAnimation(item, frames: number, index: number) {
+    let spriteSheet;
+    if (item.plant) {
+      spriteSheet = this.getPickupabledSpriteSheet(item.plant);
+    }
     if (this.pickupableFramesDrawn[index] > 8) {
       if (this.pickupableFrameIndex[index] < frames - 1) {
         this.pickupableFrameIndex[index]++;
@@ -1288,7 +1292,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (this.canvas && this.ctx) {
       this.ctx.drawImage(
-        this.spriteReadyPotato,
+        spriteSheet,
         item.width * this.pickupableFrameIndex[index],
         0,
         item.width,
@@ -1298,6 +1302,31 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         50,
         50
       );
+    }
+  }
+
+  getPickupabledSpriteSheet(plant) {
+    switch (plant) {
+      case 'potato':
+        return this.spriteReadyPotato;
+      case 'beets':
+        return this.spriteReadyBeets;
+      case 'cabbage':
+        return this.spriteReadyCabbage;
+      case 'carrot':
+        return this.spriteReadyCarrot;
+      case 'cauliflower':
+        return this.spriteReadyCauliflower;
+      case 'kale':
+        return this.spriteReadyKale;
+      case 'radish':
+        return this.spriteReadyRadish;
+      case 'sunflower':
+        return this.spriteReadySunflower;
+      case 'wheat':
+        return this.spriteReadyWheat;
+      default:
+        return '';
     }
   }
 
@@ -1470,7 +1499,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     } else {
       this.actionsDrawn++;
     }
-    if (this.canvas && this.ctx) {
+    if (this.canvas && this.ctx && !this.isWatering) {
       this.player.width = 13;
       this.player.height = 18;
       const spriteWidth = this.gameData.isCarrying ? 128 : 13;
@@ -1717,17 +1746,35 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   startWaterTimer(area) {
     setTimeout(() => {
       area.watered = false;
-      if (area.state === 'potato-0') {
-        area.state = 'potato-1';
-      } else if (area.state === 'potato-1') {
-        area.state = 'potato-2';
-      } else if (area.state === 'potato-2') {
-        area.state = 'potato-3';
-      } else if (area.state === 'potato-3') {
-        area.state = 'potato-4';
-      } else if (area.state === 'potato-4') {
+      const isPlantSeed = (state) => {
+        return (
+          state === 'beets-0' ||
+          state === 'cabbage-0' ||
+          state === 'carrot-0' ||
+          state === 'cauliflower-0' ||
+          state === 'kale-0' ||
+          state === 'potato-0' ||
+          state === 'radish-0' ||
+          state === 'sunflower-0' ||
+          state === 'wheat-0'
+        );
+      };
+
+      if (isPlantSeed(area.state)) {
+        area.state = area.state.split('-')[0] + '-1';
+      } else if (area.state.split('-')[1] === '1') {
+        area.state = area.state.split('-')[0] + '-2';
+      } else if (area.state.split('-')[1] === '2') {
+        area.state = area.state.split('-')[0] + '-3';
+      } else if (area.state.split('-')[1] === '3') {
+        area.state = area.state.split('-')[0] + '-4';
+      } else if (area.state.split('-')[1] === '4') {
+        this.createPickupablePlantAtArea(
+          area.state.split('-')[0],
+          area.position,
+          false
+        );
         area.state = 'soil-1';
-        this.createPickupablePlantAtArea('potato', area.position, false);
       }
     }, 1000);
   }
@@ -2058,7 +2105,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'beets-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetBeets,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2070,7 +2117,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'beets-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetBeets,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2082,7 +2129,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'beets-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetBeets,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2094,7 +2141,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'beets-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetBeets,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2118,7 +2165,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cabbage-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCabbage,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2130,7 +2177,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cabbage-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCabbage,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2142,7 +2189,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cabbage-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCabbage,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2154,7 +2201,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cabbage-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCabbage,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2178,7 +2225,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'carrot-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCarrot,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2190,7 +2237,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'carrot-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCarrot,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2202,7 +2249,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'carrot-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCarrot,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2214,7 +2261,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'carrot-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCarrot,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2238,7 +2285,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cauliflower-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCauliflower,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2250,7 +2297,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cauliflower-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCauliflower,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2262,7 +2309,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cauliflower-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCauliflower,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2274,7 +2321,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'cauliflower-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetCauliflower,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2298,7 +2345,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'kale-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetKale,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2310,7 +2357,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'kale-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetKale,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2322,7 +2369,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'kale-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetKale,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2334,7 +2381,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'kale-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetKale,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2418,7 +2465,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'radish-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetRadish,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2430,7 +2477,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'radish-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetRadish,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2442,7 +2489,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'radish-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetRadish,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2454,7 +2501,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'radish-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetRadish,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2478,7 +2525,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'sunflower-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetSunflower,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2490,7 +2537,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'sunflower-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetSunflower,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2502,7 +2549,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'sunflower-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetSunflower,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2514,7 +2561,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'sunflower-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetSunflower,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2538,7 +2585,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'wheat-1') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetWheat,
           cropFrameSize.width * 1,
           0,
           cropFrameSize.width,
@@ -2550,7 +2597,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'wheat-2') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetWheat,
           cropFrameSize.width * 2,
           0,
           cropFrameSize.width,
@@ -2562,7 +2609,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'wheat-3') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetWheat,
           cropFrameSize.width * 3,
           0,
           cropFrameSize.width,
@@ -2574,7 +2621,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         );
       } else if (area.state === 'wheat-4') {
         this.ctx.drawImage(
-          this.spriteSheetPotato,
+          this.spriteSheetWheat,
           cropFrameSize.width * 4,
           0,
           cropFrameSize.width,
@@ -2784,49 +2831,49 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (!this.memoryKeys.d.pressed && e.key === 'd') {
       this.moveRight(true);
     }
-      switch (e.key.toLowerCase()) {
-        case 'b':
-          this.changeTool.emit('basket');
-          break;
-        case '1':
-          if (this.gameData.seedsOwned['potato'].count > 0)
-            this.changeTool.emit('potato-seeds');
-          break;
-        case '2':
-          if (this.gameData.seedsOwned['carrot'].count > 0)
-            this.changeTool.emit('carrot-seeds');
-          break;
-        case '3':
-          if (this.gameData.seedsOwned['wheat'].count > 0)
-            this.changeTool.emit('wheat-seeds');
-          break;
-        case '4':
-          if (this.gameData.seedsOwned['cabbage'].count > 0)
-            this.changeTool.emit('cabbage-seeds');
-          break;
-        case '5':
-          if (this.gameData.seedsOwned['cauliflower'].count > 0)
-            this.changeTool.emit('cauliflower-seeds');
-          break;
-        case '6':
-          if (this.gameData.seedsOwned['beets'].count > 0)
-            this.changeTool.emit('beet-seeds');
-          break;
-        case '7':
-          if (this.gameData.seedsOwned['radish'].count > 0)
-            this.changeTool.emit('radish-seeds');
-          break;
-        case '8':
-          if (this.gameData.seedsOwned['kale'].count > 0)
-            this.changeTool.emit('kale-seeds');
-          break;
-        case '9':
-          if (this.gameData.seedsOwned['sunflower'].count > 0)
-            this.changeTool.emit('sunflower-seeds');
-          break;
-        default:
-          break;
-      }
+    switch (e.key.toLowerCase()) {
+      case 'b':
+        this.changeTool.emit('basket');
+        break;
+      case '1':
+        if (this.gameData.seedsOwned['potato'].count > 0)
+          this.changeTool.emit('potato-seeds');
+        break;
+      case '2':
+        if (this.gameData.seedsOwned['carrot'].count > 0)
+          this.changeTool.emit('carrot-seeds');
+        break;
+      case '3':
+        if (this.gameData.seedsOwned['wheat'].count > 0)
+          this.changeTool.emit('wheat-seeds');
+        break;
+      case '4':
+        if (this.gameData.seedsOwned['cabbage'].count > 0)
+          this.changeTool.emit('cabbage-seeds');
+        break;
+      case '5':
+        if (this.gameData.seedsOwned['cauliflower'].count > 0)
+          this.changeTool.emit('cauliflower-seeds');
+        break;
+      case '6':
+        if (this.gameData.seedsOwned['beets'].count > 0)
+          this.changeTool.emit('beet-seeds');
+        break;
+      case '7':
+        if (this.gameData.seedsOwned['radish'].count > 0)
+          this.changeTool.emit('radish-seeds');
+        break;
+      case '8':
+        if (this.gameData.seedsOwned['kale'].count > 0)
+          this.changeTool.emit('kale-seeds');
+        break;
+      case '9':
+        if (this.gameData.seedsOwned['sunflower'].count > 0)
+          this.changeTool.emit('sunflower-seeds');
+        break;
+      default:
+        break;
+    }
   }
   keyUpEvent(e: KeyboardEvent) {
     switch (e.key.toLowerCase()) {
@@ -3504,12 +3551,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           this.otherFarmableArea.push(area);
         }
         if (this.isMouseCloseToPlayer(this.player, this.mousePos)) {
-          if (!this.gameData.isCarrying) {
-            this.changeEquippedTool(area.state);
-            if (this.isMouseInArea(area)) {
-              this.hoveredFarmableArea = area;
-              this.otherFarmableArea = [area];
-            }
+          this.changeEquippedTool(area.state);
+          if (this.isMouseInArea(area)) {
+            this.hoveredFarmableArea = area;
+            this.otherFarmableArea = [area];
           }
           this.mayFarm = true;
           this.hoveredFarmableArea.center = {
@@ -3523,7 +3568,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.hoveredFarmableArea.state !== 'untargetable'
           )
             this.drawBrokenSquare(area);
-           this.drawWaterSquare(area, 10);
+          this.drawWaterSquare(area, 10);
         }
       } else {
         this.otherFarmableArea.filter((a) => a.id !== area.id);
@@ -3535,10 +3580,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (state === this.hoveredFarmableArea.state) {
       return;
     }
-    if (state === 'fishable' && this.gameData.equippedTool !== 'rod') {
+    if (state === 'fishable') {
       this.changeTool.emit('rod');
       this.canHarvest.emit(true);
-    } else if (state === 'minable' && this.gameData.equippedTool !== 'pickaxe') {
+    } else if (state === 'minable') {
       this.changeTool.emit('pickaxe');
       this.canHarvest.emit(true);
     } else if (state === 'well') {
@@ -3634,12 +3679,18 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         area.position.y + area.height / 6 + offset
       );
       //BOTTOM LEFT CORNER
-      this.ctx.moveTo(area.position.x + offset, area.position.y + area.height - offset);
+      this.ctx.moveTo(
+        area.position.x + offset,
+        area.position.y + area.height - offset
+      );
       this.ctx.lineTo(
         area.position.x + offset,
         area.position.y + area.height - offset - area.height / 6
       );
-      this.ctx.moveTo(area.position.x + offset, area.position.y + area.height - offset);
+      this.ctx.moveTo(
+        area.position.x + offset,
+        area.position.y + area.height - offset
+      );
       this.ctx.lineTo(
         area.position.x + offset + area.width / 6,
         area.position.y + area.height - offset
@@ -3664,12 +3715,18 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       );
 
       //TOP RIGHT CORNER
-      this.ctx.moveTo(area.position.x + area.width - offset, area.position.y + offset);
+      this.ctx.moveTo(
+        area.position.x + area.width - offset,
+        area.position.y + offset
+      );
       this.ctx.lineTo(
         area.position.x + area.width - offset - area.width / 6,
         area.position.y + offset
       );
-      this.ctx.moveTo(area.position.x + area.width - offset, area.position.y + offset);
+      this.ctx.moveTo(
+        area.position.x + area.width - offset,
+        area.position.y + offset
+      );
       this.ctx.lineTo(
         area.position.x + area.width - offset,
         area.position.y + offset + area.height / 6

@@ -43,6 +43,9 @@ export class MerchantComponent implements OnInit {
   doRightClickOnMouse(evt) {
     evt.preventDefault();
     this.openShop.emit(false);
+    this.focusOnCanvas();
+  }
+  focusOnCanvas() {
     this.changeTool.emit('shovel');
     setTimeout(() => {
       document.getElementById('game-canvas')?.focus();

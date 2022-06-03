@@ -6,7 +6,7 @@
     makeClickThroughable: !gameData.openShop
   }"
 >
-  <div class="close-button" (click)="openShop.emit(false)">
+  <div class="close-button" (click)="openShop.emit(false); focusOnCanvas()">
     <img src="assets/ui/cancel.png" alt="" />
   </div>
   <h5 class="title"><img src="assets/ui/shop-title.png" alt="" /></h5>

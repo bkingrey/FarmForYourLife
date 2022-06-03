@@ -17,7 +17,7 @@ export const intializeState = (): GameState => {
     scene: 'title',
     seedsOwned: {
       beets: {
-        name: 'beets-seeds',
+        name: 'beet-seeds',
         count: 0,
       },
       cabbage: {
@@ -129,73 +129,73 @@ export const intializeState = (): GameState => {
         name: 'Dig',
         description: 'Base Dig',
         tier: 0,
-        target: "dig",
+        target: 'dig',
         src: 'assets/ui/shovel-big.png',
-        value: 0
+        value: 0,
       },
       {
         name: 'Plow',
         description: 'Base Plow',
         tier: 0,
-        target: "plow",
+        target: 'plow',
         src: 'assets/ui/shovel-x.png',
-        value: '1x1'
+        value: '1x1',
       },
-  {
+      {
         name: 'Water',
         description: 'Base Water',
         tier: 0,
-        target: "water",
+        target: 'water',
         src: 'assets/ui/water-big.png',
-        value: 1
+        value: 1,
       },
-  {
+      {
         name: 'Irrigate',
         description: 'Base Irrigate',
         tier: 0,
-        target: "irrigate",
+        target: 'irrigate',
         src: 'assets/ui/water-fill.png',
-        value: '1x1'
+        value: '1x1',
       },
-  {
+      {
         name: 'Move',
         description: 'Base Irrigate',
         tier: 0,
-        target: "move",
+        target: 'move',
         src: 'assets/ui/hammer-big.png',
-        value: 1
+        value: 1,
       },
-  {
+      {
         name: 'Energy',
         description: 'Base Energy',
         tier: 0,
-        target: "energy",
+        target: 'energy',
         src: 'assets/ui/plant-big.png',
-        value: 1
+        value: 1,
       },
-  {
+      {
         name: 'Bargain',
         description: 'Base Bargain',
         tier: 0,
-        target: "bargain",
+        target: 'bargain',
         src: 'assets/ui/coins-big.png',
-        value: 1
+        value: 1,
       },
-  {
+      {
         name: 'Miner',
         description: 'Base Miner',
         tier: 0,
-        target: "miner",
+        target: 'miner',
         src: 'assets/ui/pickaxe-big.png',
-        value: 1
+        value: 1,
       },
-  {
+      {
         name: 'Fisherman',
         description: 'Base Fisherman',
         tier: 0,
-        target: "fisher",
+        target: 'fisher',
         src: 'assets/ui/rod-big.png',
-        value: 1
+        value: 1,
       },
     ],
     buyableItems: [
@@ -279,7 +279,7 @@ export const gameReducer = createReducer(
         canMoveVertical: true,
         canMoveHorizontal: true,
         useRightAnims: true,
-        equippedTool: 'shovel'
+        equippedTool: 'shovel',
       };
     });
     return { ...state, lobbyPlayers: newLobby };
@@ -333,7 +333,7 @@ export const gameReducer = createReducer(
       wellAreaMap: newWellArea,
       untargetableAreaMap: newUntargetableArea,
       player: payload.player,
-      upgrades: payload.upgrades
+      upgrades: payload.upgrades,
     };
   }),
   // on(GameActions.ChangeKeyEvent, (state, { payload }) => {
@@ -437,16 +437,16 @@ export const gameReducer = createReducer(
     };
   }),
   on(GameActions.GetUpgrade, (state, { payload }) => {
-    const newUpgrades = state.learnedUpgrades.map(upg => {
+    const newUpgrades = state.learnedUpgrades.map((upg) => {
       if (upg.target === payload.target) {
         return {
-          ...payload
-        }
+          ...payload,
+        };
       }
       return {
-        ...upg
-      }
-    })
+        ...upg,
+      };
+    });
     return {
       ...state,
       learnedUpgrades: newUpgrades,
@@ -539,7 +539,7 @@ export const gameReducer = createReducer(
       ...state,
       water: {
         ...state.water,
-        max: 100 * payload
+        max: 100 * payload,
       },
     };
   }),
@@ -548,7 +548,7 @@ export const gameReducer = createReducer(
       ...state,
       energy: {
         ...state.energy,
-        max: 100 * payload
+        max: 100 * payload,
       },
     };
   }),
@@ -578,20 +578,20 @@ export const gameReducer = createReducer(
     };
   }),
   on(GameActions.ChangePlayerState, (state, { payload }) => {
-    const newLobby = state.lobbyPlayers.map(player => {
+    const newLobby = state.lobbyPlayers.map((player) => {
       if (payload.name === player.name) {
         return {
           ...payload,
-        }
+        };
       } else {
         return {
-          ...player
-        }
+          ...player,
+        };
       }
-    })
+    });
     return {
       ...state,
-      lobbyPlayers: newLobby
+      lobbyPlayers: newLobby,
     };
-  }),
+  })
 );

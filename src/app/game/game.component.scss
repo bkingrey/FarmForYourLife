@@ -22,22 +22,23 @@ canvas {
 }
 
 .house {
-  cursor: url("../../assets/ui/bed-big.png"),
+  cursor: url("../../assets/ui/bed-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
 }
 
 .mine {
-  cursor: url("../../assets/ui/pickaxe-big.png"),
+  cursor: url("../../assets/ui/pickaxe-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
 }
 
 .fish {
-  cursor: url("../../assets/ui/rod-big.png"),
+  cursor: url("../../assets/ui/rod-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
+  transform: translateY(-1);
 }
 
 .merch {
-  cursor: url("../../assets/ui/coins-big.png"),
+  cursor: url("../../assets/ui/coins-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
 }
 

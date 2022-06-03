@@ -1,4 +1,4 @@
-import { GameState, Upgrade } from "../_store/models";
+import { GameState, Upgrade } from '../_store/models';
 
 export class GameUtils {
   isShovelable(state, player, mousePos) {
@@ -31,7 +31,7 @@ export class GameUtils {
 
   isHoldingSeed(tool) {
     return (
-      tool === 'beets-seeds' ||
+      tool === 'beet-seeds' ||
       tool === 'cabbage-seeds' ||
       tool === 'carrot-seeds' ||
       tool === 'cauliflower-seed' ||
@@ -45,15 +45,15 @@ export class GameUtils {
 
   getUpgradeVaules(upgrades: Array<Upgrade>) {
     return {
-      dig: upgrades.filter(upg => upg.target === 'dig')[0].value,
-      plow: upgrades.filter(upg => upg.target === 'plow')[0].value,
-      water: upgrades.filter(upg => upg.target === 'water')[0].value,
-      irrigate: upgrades.filter(upg => upg.target === 'irrigate')[0].value,
-      move: upgrades.filter(upg => upg.target === 'move')[0].value,
-      energy: upgrades.filter(upg => upg.target === 'energy')[0].value,
-      bargain: upgrades.filter(upg => upg.target === 'bargain')[0].value,
-      miner: upgrades.filter(upg => upg.target === 'miner')[0].value,
-      fisher: upgrades.filter(upg => upg.target === 'fisher')[0].value,
-    }
+      dig: upgrades.filter((upg) => upg.target === 'dig')[0].value,
+      plow: upgrades.filter((upg) => upg.target === 'plow')[0].value,
+      water: upgrades.filter((upg) => upg.target === 'water')[0].value,
+      irrigate: upgrades.filter((upg) => upg.target === 'irrigate')[0].value,
+      move: upgrades.filter((upg) => upg.target === 'move')[0].value,
+      energy: upgrades.filter((upg) => upg.target === 'energy')[0].value,
+      bargain: upgrades.filter((upg) => upg.target === 'bargain')[0].value,
+      miner: upgrades.filter((upg) => upg.target === 'miner')[0].value,
+      fisher: upgrades.filter((upg) => upg.target === 'fisher')[0].value,
+    };
   }
 }
