@@ -530,6 +530,14 @@ export const jsonData = {
       src: "assets/characters/sprite-mine-left.png",
       frames: 10,
     },
+    spriteSheetBroomRight: {
+      src: "assets/characters/sprite-broom-right.png",
+      frames: 10,
+    },
+    spriteSheetBroomLeft: {
+      src: "assets/characters/sprite-broom-left.png",
+      frames: 10,
+    },
     spriteSheetFishRight: {
       src: "assets/characters/sprite-fish-right.png",
       frames: 42,
