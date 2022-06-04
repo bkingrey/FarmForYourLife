@@ -35,13 +35,23 @@
     (changePlayerState)="changePlayerState($event)"
     (cultivateOther)="cultivateOthers($event)"
   ></app-game>
+  <app-shade
+    *ngIf="gameData.scene === 'game'"
+    [gameData]="gameData"
+  ></app-shade>
   <app-game-ui
     *ngIf="gameData.scene === 'game'"
     [gameData]="gameData"
     (changeTool)="changeTool($event)"
     (showUpgrades)="upgradePopUp($event)"
   ></app-game-ui>
-  <app-upgrade *ngIf="gameData.openUpgrades" [gameData]="gameData" [upgrades]="facade.upgradeChoices$ | async" (upgrade)="getUpgrade($event)" (openUpgrades)="upgradePopUp($event)"></app-upgrade>
+  <app-upgrade
+    *ngIf="gameData.openUpgrades"
+    [gameData]="gameData"
+    [upgrades]="facade.upgradeChoices$ | async"
+    (upgrade)="getUpgrade($event)"
+    (openUpgrades)="upgradePopUp($event)"
+  ></app-upgrade>
   <app-merchant
     [gameData]="gameData"
     [merchantItems]="facade.merchantItems$ | async"

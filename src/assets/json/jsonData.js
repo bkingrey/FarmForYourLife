@@ -650,8 +650,8 @@ export const jsonData = {
       src: "assets/pickable/huge-fish-ready-sheet.png",
       frames: 16,
     },
-    spriteReadyNuggett: {
-      src: "assets/pickable/nugget-fish-ready-sheet.png",
+    spriteReadyNugget: {
+      src: "assets/pickable/nugget-ready-sheet.png",
       frames: 16,
     },
     spriteCarryBeetsLeft: {

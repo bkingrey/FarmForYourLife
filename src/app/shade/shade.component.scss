@@ -1,0 +1,9 @@
+.shade {
+  position: absolute;
+  transition-duration: 10000ms;
+  pointer-events: none;
+}
+.shadeStart {
+  transform: translateX(-4000px); /* 10px to left */
+  transition-duration: 30000ms;
+}
