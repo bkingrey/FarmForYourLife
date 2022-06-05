@@ -83,6 +83,7 @@ export interface LobbyPlayer {
   equippedTool: string;
   isCarrying: boolean;
   isCultivating: boolean;
+  isBeingHit: boolean;
   position: {
     x: number;
     y: number;

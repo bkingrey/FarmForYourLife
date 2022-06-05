@@ -19,15 +19,19 @@ var rooms = [];
 
 // IO
 io.on("connection", (socket) => {
-  socket.on("ChangePlayerTool", data => {
-    io.emit("changePlayerTool", data)
-  })
+  socket.on("ChangePlayerTool", (data) => {
+    io.emit("changePlayerTool", data);
+  });
   socket.on("ChangeHoveredFarm", (farm) => {
-    io.emit("changeHoveredFarm", farm)
-  })
-  socket.on("CultivateOthers", player => {
-    io.emit('cultivateOther', player)
-  })
+    io.emit("changeHoveredFarm", farm);
+  });
+  socket.on("CultivateOthers", (player) => {
+    io.emit("cultivateOther", player);
+  });
+  socket.on("HitPlayer", (player) => {
+    io.emit("hitPlayer", player);
+  });
+
   socket.on("AddPlayerToLobby", (playerToServer) => {
     if (!rooms.length) {
       rooms.push([]);
@@ -54,8 +58,8 @@ io.on("connection", (socket) => {
     io.emit("updatePlayer", player);
   });
   socket.on("ChangePlayerState", (player) => {
-    io.emit("changePlayerState", player)
-  })
+    io.emit("changePlayerState", player);
+  });
   socket.on("keychange", (event) => {
     const player = event.player;
     const roomId = event.player.roomId;

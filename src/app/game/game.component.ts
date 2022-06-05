@@ -41,6 +41,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() changePlayerState = new EventEmitter();
   @Output() changeHoveredFarm = new EventEmitter();
   @Output() cultivateOther = new EventEmitter();
+  @Output() hitPlayer = new EventEmitter();
   upg: any;
   isWatering = false;
   scale: number = 0.5;
@@ -263,6 +264,34 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     };
   }
 
+  movePlayerToCenter(player) {
+    console.log('moving player to center');
+    const traderX = this.traders[0].position.x;
+    const traderY = this.traders[0].position.y;
+    if (traderX < player.position.x) {
+      player.position.x -= 3;
+      if (this.gameData.me === player.name) {
+        this.movables.forEach((element) => {
+          element.position.x += 3;
+        });
+        this.pickupables.forEach((element) => {
+          if (element.dropped) {
+            element.position.x += 3;
+          }
+        });
+      }
+    }
+    if (traderX > player.position.x) {
+      player.position.x += 3;
+    }
+    if (traderY < player.position.y) {
+      player.position.y -= 3;
+    }
+    if (traderY > player.position.y) {
+      player.position.y += 3;
+    }
+  }
+
   drawingCode() {
     if (this.ctx && this.canvas) {
       this.ctx.save();
@@ -276,6 +305,24 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.boundaries.forEach((boundary) => {
         if (this.ctx) {
           this.drawBoundary(boundary);
+          if (this.lobbyPlayers.length) {
+            this.lobbyPlayers.forEach((player) => {
+              if (
+                this.rectangularHitCollision({
+                  rectangle1: {
+                    ...boundary,
+                    position: {
+                      x: boundary.position.x,
+                      y: boundary.position.y,
+                    },
+                  },
+                  rectangle2: player,
+                })
+              ) {
+                this.movePlayerToCenter(player);
+              }
+            });
+          }
         }
       });
       this.untargetableArea.forEach((untargetableArea) => {
@@ -311,19 +358,30 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.traders.forEach((trader) => {
         this.drawMerchant(trader);
       });
+      if (this.player.width && this.player.height) {
+        this.ctx.strokeStyle = 'red';
+        this.ctx.beginPath();
+        this.ctx.rect(
+          this.lobbyPlayers[1].position.x,
+          this.lobbyPlayers[1].position.y,
+          this.player.width * 4,
+          this.player.height * 4
+        );
+        this.ctx.stroke();
+      }
 
       this.lobbyPlayers.forEach((player, i) => {
-        if (player && player.name !== this.gameData.me) {
+        if (player) {
           if (this.ctx && this.player.width && this.player.height) {
-            this.ctx.strokeStyle = 'transparent';
-            this.ctx.beginPath();
-            this.ctx.rect(
-              player.position.x,
-              player.position.y,
-              this.player.width * 4,
-              this.player.height * 4
-            );
-            this.ctx.stroke();
+            // this.ctx.strokeStyle = 'white';
+            // this.ctx.beginPath();
+            // this.ctx.rect(
+            //   player.position.x,
+            //   player.position.y,
+            //   this.player.width * 4,
+            //   this.player.height * 4
+            // );
+            // this.ctx.stroke();
             this.getOtherPlayerSpriteSheet(player, i);
           }
         }
@@ -1034,6 +1092,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             ...player.position,
             writable: true,
           },
+          width: this.player.width ? this.player.width * 4 : 0,
+          height: this.player.height ? this.player.height * 4 : 0,
         };
       });
       this.updateLobbyPlayers();
@@ -1466,15 +1526,61 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   getOtherPlayerSpriteSheet(player, i) {
     const useRightAnims = player.useRightAnims;
-    // this.drawOtherSpriteAnimation(
-    //   useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
-    //   useRightAnims
-    //     ? this.gameData.spriteAnimations['playerIdleRight'].frames
-    //     : this.gameData.spriteAnimations['playerIdleLeft'].frames,
-    //   player,
-    //   i
-    // );
-    this.moveOthers(player, i);
+    this.drawOtherSpriteAnimation(
+      useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
+      useRightAnims
+        ? this.gameData.spriteAnimations['playerIdleRight'].frames
+        : this.gameData.spriteAnimations['playerIdleLeft'].frames,
+      player,
+      i
+    );
+    if (player.isBeingHit) {
+      this.playerHitRecoil(player, i);
+    } else {
+      this.moveOthers(player, i);
+    }
+  }
+
+  playerHitRecoil(player, i) {
+    let frames = 10;
+    let canMove = true;
+    if (this.otherPlayersFramesDrawn[i] > 3) {
+      if (this.otherPlayersFrameIndex[i] < frames) {
+        this.boundaries.forEach((boundary) => {
+          if (
+            this.retangularCollision({
+              rectangle1: player,
+              rectangle2: {
+                ...boundary,
+                position: {
+                  x: boundary.position.x - 9,
+                  y: boundary.position.y,
+                },
+              },
+            })
+          ) {
+            canMove = false;
+          }
+        });
+        if (canMove) player.position.x += 9;
+        if (this.gameData.me === player.name) {
+          console.log('move me back 9');
+          this.movables.forEach((element) => {
+            if (canMove) element.position.x -= 9;
+          });
+          this.pickupables.forEach((element) => {
+            if (canMove) element.position.x -= 9;
+          });
+        }
+        this.otherPlayersFrameIndex[i]++;
+      } else {
+        this.otherPlayersFrameIndex[i] = 0;
+        player.isBeingHit = false;
+      }
+      this.otherPlayersFramesDrawn[i] = 0;
+    } else {
+      this.otherPlayersFramesDrawn[i]++;
+    }
   }
 
   drawOtherSpriteAnimation(
@@ -1627,6 +1733,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       } else {
         this.attackAnimationFramesDrawn++;
       }
+      this.drawBroomHitbox(this.attackAnimationFrameIndex);
       this.ctx.drawImage(
         spriteSheet,
         width * this.attackAnimationFrameIndex,
@@ -1638,6 +1745,85 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         width * 4,
         height * 4
       );
+    }
+  }
+
+  drawBroomHitbox(frame) {
+    if (
+      this.ctx &&
+      this.player &&
+      this.player.width &&
+      this.player.height &&
+      this.player.center &&
+      frame > 1 &&
+      frame < 8
+    ) {
+      const xMult = this.useRightAnims() ? -1 : 1;
+      let hitbox = {
+        width: 0,
+        height: 0,
+        position: {
+          x: 0,
+          y: 0,
+        },
+      };
+      if (frame < 4) {
+        hitbox = {
+          width: 100 * xMult,
+          height: 40,
+          position: {
+            x: this.player.center.x,
+            y: this.player.center.y,
+          },
+        };
+      } else if (frame < 5) {
+        hitbox = {
+          width: 120,
+          height: -90,
+          position: {
+            x: this.player.center.x - 60,
+            y: this.player.center.y,
+          },
+        };
+      } else {
+        hitbox = {
+          width: -130 * xMult,
+          height: 40,
+          position: {
+            x: this.player.center.x,
+            y: this.player.center.y,
+          },
+        };
+      }
+
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = 'black';
+      this.ctx.rect(
+        hitbox.position.x,
+        hitbox.position.y,
+        hitbox.width,
+        hitbox.height
+      );
+      this.ctx.stroke();
+
+      this.ctx.beginPath();
+      this.ctx.rect(
+        this.lobbyPlayers[1].position.x,
+        this.lobbyPlayers[1].position.y,
+        this.player.width * 4,
+        this.player.height * 4
+      );
+      this.ctx.stroke();
+      this.lobbyPlayers.forEach((player) => {
+        if (
+          this.rectangularHitCollision({
+            rectangle1: hitbox,
+            rectangle2: player,
+          })
+        ) {
+          if (player.name !== this.gameData.me) this.hitPlayer.emit(player);
+        }
+      });
     }
   }
 
@@ -2750,6 +2936,17 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       rectangle1.position.x + rectangle1.width * 4 >= rectangle2.position.x &&
       rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
       rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
+      rectangle1.position.y + rectangle1.height >= rectangle2.position.y
+    );
+  }
+
+  rectangularHitCollision({ rectangle1, rectangle2 }) {
+    const rect2Width = this.player.width ? this.player.width * 4 : 0;
+    const rect2Height = this.player.height ? this.player.height * 4 : 0;
+    return (
+      rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
+      rectangle1.position.x <= rectangle2.position.x + rect2Width &&
+      rectangle1.position.y <= rectangle2.position.y + rect2Height &&
       rectangle1.position.y + rectangle1.height >= rectangle2.position.y
     );
   }

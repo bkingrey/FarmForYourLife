@@ -34,6 +34,7 @@
     (isSleeping)="changeIsSleeping($event)"
     (changePlayerState)="changePlayerState($event)"
     (cultivateOther)="cultivateOthers($event)"
+    (hitPlayer)="hitPlayer($event)"
   ></app-game>
   <app-shade
     *ngIf="gameData.scene === 'game'"

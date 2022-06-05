@@ -51,7 +51,7 @@ export class AppComponent implements OnInit {
     this.socket.on('move', (moveObj) => {
       this.facade.gameData$.pipe(take(1)).subscribe((data) => {
         // if (this.gameComponent && moveObj.player.name !== data.me) {
-          this.gameComponent?.moveOtherPlayer(moveObj);
+        this.gameComponent?.moveOtherPlayer(moveObj);
         // }
       });
     });
@@ -59,24 +59,41 @@ export class AppComponent implements OnInit {
       this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));
     });
     this.socket.on('changePlayerState', (player) => {
-     // this.facade.dispatch(ChangePlayerState({ payload: player}))
-      this.gameComponent?.changePlayerUpdate(player)
-    })
-    this.socket.on('changePlayerTool', data => {
-      const player = this.gameComponent?.lobbyPlayers.filter(player => player.name === data.player)[0]
+      // this.facade.dispatch(ChangePlayerState({ payload: player}))
+      this.gameComponent?.changePlayerUpdate(player);
+    });
+    this.socket.on('changePlayerTool', (data) => {
+      const player = this.gameComponent?.lobbyPlayers.filter(
+        (player) => player.name === data.player
+      )[0];
       if (player) {
-        player.equippedTool = data.tool
-        player.isCarrying = data.isCarrying
+        player.equippedTool = data.tool;
+        player.isCarrying = data.isCarrying;
       }
-    })
-    this.socket.on('changeHoveredFarm', farm => {
-      this.gameComponent?.changeStateOfHoveredFarmable(farm)
-    })
-    this.socket.on('cultivateOther', player => {
+    });
+    this.socket.on('changeHoveredFarm', (farm) => {
+      this.gameComponent?.changeStateOfHoveredFarmable(farm);
+    });
+    this.socket.on('cultivateOther', (player) => {
       if (this.gameComponent) {
-        this.gameComponent.lobbyPlayers.filter(p => p.name === player)[0].isCultivating = true
+        this.gameComponent.lobbyPlayers.filter(
+          (p) => p.name === player
+        )[0].isCultivating = true;
       }
-    })
+    });
+
+    this.socket.on('hitPlayer', (player) => {
+      if (this.gameComponent) {
+        console.log(
+          this.gameComponent.lobbyPlayers.filter(
+            (p) => p.name === player.name
+          )[0]
+        );
+        this.gameComponent.lobbyPlayers.filter(
+          (p) => p.name === player.name
+        )[0].isBeingHit = true;
+      }
+    });
   }
 
   keyChange(event: KeyWASD, me, lobbyPlayers) {
@@ -92,15 +109,14 @@ export class AppComponent implements OnInit {
 
   changeTool(event) {
     this.facade.dispatch(ChangeTool({ payload: event }));
-    this.facade.gameData$.pipe(take(1)).subscribe(data => {
+    this.facade.gameData$.pipe(take(1)).subscribe((data) => {
       const sendData = {
         player: data.me,
         tool: event,
-        isCarrying: data.isCarrying
-      }
-      this.socket.emit('ChangePlayerTool', sendData)
-    })
-
+        isCarrying: data.isCarrying,
+      };
+      this.socket.emit('ChangePlayerTool', sendData);
+    });
   }
 
   reduceSeedCount(event) {
@@ -157,28 +173,34 @@ export class AppComponent implements OnInit {
     this.socket.emit('AddPlayerToLobby', event);
   }
   changePlayerState(event) {
-    this.socket.emit('ChangePlayerState', event)
+    this.socket.emit('ChangePlayerState', event);
   }
   changeHoveredFarm(event) {
-    this.socket.emit('ChangeHoveredFarm', event)
+    this.socket.emit('ChangeHoveredFarm', event);
   }
   cultivateOthers(event) {
     this.socket.emit('CultivateOthers', event);
   }
+  hitPlayer(event) {
+    this.socket.emit('HitPlayer', event);
+  }
+
   openShop(event) {
     this.facade.dispatch(OpenShop({ payload: event }));
   }
   upgradePopUp(event: boolean) {
-    this.facade.dispatch(OpenUpgrades({ payload: event }))
+    this.facade.dispatch(OpenUpgrades({ payload: event }));
   }
   getUpgrade(event: Upgrade) {
-    this.facade.dispatch(GetUpgrade({payload: event}))
-    this.facade.gameData$.pipe(take(1)).subscribe(data => {
+    this.facade.dispatch(GetUpgrade({ payload: event }));
+    this.facade.gameData$.pipe(take(1)).subscribe((data) => {
       if (this.gameComponent) {
-        this.gameComponent.upg = this.gameComponent.getUpgradeVaules(data.learnedUpgrades)
+        this.gameComponent.upg = this.gameComponent.getUpgradeVaules(
+          data.learnedUpgrades
+        );
       }
-    })
+    });
 
-    this.facade.dispatch(OpenUpgrades({payload: false}))
+    this.facade.dispatch(OpenUpgrades({ payload: false }));
   }
 }
