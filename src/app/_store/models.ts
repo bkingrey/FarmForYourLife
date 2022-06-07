@@ -65,6 +65,7 @@ export interface Upgrade {
 }
 
 export interface LobbyPlayer {
+  hitdirection: SpriteMetrics;
   loadedIn: boolean;
   name: string;
   id: string;

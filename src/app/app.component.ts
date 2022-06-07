@@ -57,6 +57,20 @@ export class AppComponent implements OnInit {
     });
     this.socket.on('updatePlayer', (updatedPlayer) => {
       this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));
+      if (
+        this.gameComponent &&
+        this.gameComponent.lobbyPlayers.filter(
+          (p) => p.name === updatedPlayer.name
+        )[0].loadedIn
+      ) {
+        this.gameComponent.lobbyPlayers.filter(
+          (p) => p.name === updatedPlayer.name
+        )[0].isBeingHit = updatedPlayer.isBeingHit;
+        this.gameComponent.lobbyPlayers.filter(
+          (p) => p.name === updatedPlayer.name
+        )[0].hitdirection = updatedPlayer.hitdirection;
+        console.log(updatedPlayer);
+      }
     });
     this.socket.on('changePlayerState', (player) => {
       // this.facade.dispatch(ChangePlayerState({ payload: player}))
@@ -84,14 +98,17 @@ export class AppComponent implements OnInit {
 
     this.socket.on('hitPlayer', (player) => {
       if (this.gameComponent) {
-        console.log(
-          this.gameComponent.lobbyPlayers.filter(
-            (p) => p.name === player.name
-          )[0]
-        );
         this.gameComponent.lobbyPlayers.filter(
           (p) => p.name === player.name
         )[0].isBeingHit = true;
+      }
+    });
+
+    this.socket.on('stopHittingPlayer', (player) => {
+      if (this.gameComponent) {
+        this.gameComponent.lobbyPlayers.filter(
+          (p) => p.name === player.name
+        )[0].isBeingHit = false;
       }
     });
   }
@@ -181,10 +198,9 @@ export class AppComponent implements OnInit {
   cultivateOthers(event) {
     this.socket.emit('CultivateOthers', event);
   }
-  hitPlayer(event) {
-    this.socket.emit('HitPlayer', event);
+  updatePlayer(event) {
+    this.socket.emit('UpdatePlayer', event);
   }
-
   openShop(event) {
     this.facade.dispatch(OpenShop({ payload: event }));
   }

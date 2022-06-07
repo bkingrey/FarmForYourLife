@@ -41,7 +41,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() changePlayerState = new EventEmitter();
   @Output() changeHoveredFarm = new EventEmitter();
   @Output() cultivateOther = new EventEmitter();
-  @Output() hitPlayer = new EventEmitter();
+  @Output() updatePlayer = new EventEmitter();
+  defaultVelocity = 4;
   upg: any;
   isWatering = false;
   scale: number = 0.5;
@@ -264,34 +265,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     };
   }
 
-  movePlayerToCenter(player) {
-    console.log('moving player to center');
-    const traderX = this.traders[0].position.x;
-    const traderY = this.traders[0].position.y;
-    if (traderX < player.position.x) {
-      player.position.x -= 3;
-      if (this.gameData.me === player.name) {
-        this.movables.forEach((element) => {
-          element.position.x += 3;
-        });
-        this.pickupables.forEach((element) => {
-          if (element.dropped) {
-            element.position.x += 3;
-          }
-        });
-      }
-    }
-    if (traderX > player.position.x) {
-      player.position.x += 3;
-    }
-    if (traderY < player.position.y) {
-      player.position.y -= 3;
-    }
-    if (traderY > player.position.y) {
-      player.position.y += 3;
-    }
-  }
-
   drawingCode() {
     if (this.ctx && this.canvas) {
       this.ctx.save();
@@ -305,24 +278,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.boundaries.forEach((boundary) => {
         if (this.ctx) {
           this.drawBoundary(boundary);
-          if (this.lobbyPlayers.length) {
-            this.lobbyPlayers.forEach((player) => {
-              if (
-                this.rectangularHitCollision({
-                  rectangle1: {
-                    ...boundary,
-                    position: {
-                      x: boundary.position.x,
-                      y: boundary.position.y,
-                    },
-                  },
-                  rectangle2: player,
-                })
-              ) {
-                this.movePlayerToCenter(player);
-              }
-            });
-          }
         }
       });
       this.untargetableArea.forEach((untargetableArea) => {
@@ -566,7 +521,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     } else {
       this.isSleeping.emit(false);
       this.changeVelocity.emit(
-        4 *
+        this.defaultVelocity *
           Number(
             this.gameData.learnedUpgrades.filter(
               (upg) => upg.target === 'move'
@@ -1535,6 +1490,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       i
     );
     if (player.isBeingHit) {
+      console.log(player.name + ' is getting hit');
       this.playerHitRecoil(player, i);
     } else {
       this.moveOthers(player, i);
@@ -1542,44 +1498,51 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   playerHitRecoil(player, i) {
-    let frames = 10;
+    let frames = 8;
     let canMove = true;
-    if (this.otherPlayersFramesDrawn[i] > 3) {
-      if (this.otherPlayersFrameIndex[i] < frames) {
-        this.boundaries.forEach((boundary) => {
-          if (
-            this.retangularCollision({
-              rectangle1: player,
-              rectangle2: {
-                ...boundary,
-                position: {
-                  x: boundary.position.x - 9,
-                  y: boundary.position.y,
-                },
+    if (this.otherPlayersFrameIndex[i] < frames) {
+      this.boundaries.forEach((boundary) => {
+        if (
+          this.recoilHitCollision({
+            rectangle1: player,
+            rectangle2: {
+              ...boundary,
+              position: {
+                x: boundary.position.x,
+                y: boundary.position.y,
               },
-            })
-          ) {
-            canMove = false;
+            },
+          })
+        ) {
+          canMove = false;
+        }
+      });
+      if (canMove) {
+        player.position.x += player.hitdirection.position.x / 10;
+        player.position.y += player.hitdirection.position.y / 10;
+      }
+      if (this.gameData.me === player.name && canMove) {
+        this.movables.forEach((element) => {
+          if (canMove) {
+            element.position.y -= player.hitdirection.position.y / 10;
+            element.position.x -= player.hitdirection.position.x / 10;
           }
         });
-        if (canMove) player.position.x += 9;
-        if (this.gameData.me === player.name) {
-          console.log('move me back 9');
-          this.movables.forEach((element) => {
-            if (canMove) element.position.x -= 9;
-          });
-          this.pickupables.forEach((element) => {
-            if (canMove) element.position.x -= 9;
-          });
-        }
-        this.otherPlayersFrameIndex[i]++;
-      } else {
-        this.otherPlayersFrameIndex[i] = 0;
-        player.isBeingHit = false;
+        this.pickupables.forEach((element) => {
+          if (canMove) {
+            element.position.y -= player.hitdirection.position.y / 10;
+            element.position.x -= player.hitdirection.position.x / 10;
+          }
+        });
       }
-      this.otherPlayersFramesDrawn[i] = 0;
+      this.otherPlayersFrameIndex[i]++;
     } else {
-      this.otherPlayersFramesDrawn[i]++;
+      this.otherPlayersFrameIndex[i] = 0;
+      const updatedPlayer = {
+        ...player,
+        isBeingHit: false,
+      };
+      this.updatePlayer.emit(updatedPlayer);
     }
   }
 
@@ -1815,13 +1778,34 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       );
       this.ctx.stroke();
       this.lobbyPlayers.forEach((player) => {
-        if (
-          this.rectangularHitCollision({
-            rectangle1: hitbox,
-            rectangle2: player,
-          })
-        ) {
-          if (player.name !== this.gameData.me) this.hitPlayer.emit(player);
+        if (player.name === 'b' && !player.isBeingHit) {
+          console.log(
+            this.rectangularHitCollision({
+              rectangle1: hitbox,
+              rectangle2: player,
+            })
+          );
+          if (
+            this.rectangularHitCollision({
+              rectangle1: hitbox,
+              rectangle2: player,
+            })
+          ) {
+            console.log('IN');
+            const updatedPlayer = {
+              ...player,
+              isBeingHit: true,
+              hitdirection: {
+                ...player.hitdirection,
+                position: {
+                  x: player.position.x + player.width * 2 - hitbox.position.x,
+                  y: player.position.y + player.height * 2 - hitbox.position.y,
+                },
+              },
+            };
+            if (player.name !== this.gameData.me)
+              this.updatePlayer.emit(updatedPlayer);
+          }
         }
       });
     }
@@ -2940,14 +2924,43 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     );
   }
 
+  recoilHitCollision({ rectangle1, rectangle2 }) {
+    // *4 is for width scale.
+    const EXTRA_BOUNDS = 74;
+    return (
+      rectangle1.position.x + rectangle1.width * 4 >=
+        rectangle2.position.x - EXTRA_BOUNDS &&
+      rectangle1.position.x <=
+        rectangle2.position.x + rectangle2.width + EXTRA_BOUNDS &&
+      rectangle1.position.y <=
+        rectangle2.position.y + rectangle2.height + EXTRA_BOUNDS &&
+      rectangle1.position.y + rectangle1.height >=
+        rectangle2.position.y - EXTRA_BOUNDS
+    );
+  }
+
   rectangularHitCollision({ rectangle1, rectangle2 }) {
     const rect2Width = this.player.width ? this.player.width * 4 : 0;
     const rect2Height = this.player.height ? this.player.height * 4 : 0;
+    console.log('--------------------------');
+    console.log(
+      rectangle1.position.x + Math.abs(rectangle1.width) >=
+        rectangle2.position.x
+    );
+    console.log(rectangle1.position.x <= rectangle2.position.x + rect2Width);
+    console.log(rectangle1.position.y <= rectangle2.position.y + rect2Height);
+    console.log(
+      rectangle1.position.y + Math.abs(rectangle1.height) >=
+        rectangle2.position.y
+    );
+    console.log('--------------------------');
     return (
-      rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
+      rectangle1.position.x + Math.abs(rectangle1.width) >=
+        rectangle2.position.x &&
       rectangle1.position.x <= rectangle2.position.x + rect2Width &&
       rectangle1.position.y <= rectangle2.position.y + rect2Height &&
-      rectangle1.position.y + rectangle1.height >= rectangle2.position.y
+      rectangle1.position.y + Math.abs(rectangle1.height) >=
+        rectangle2.position.y
     );
   }
 

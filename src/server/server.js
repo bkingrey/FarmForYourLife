@@ -25,11 +25,11 @@ io.on("connection", (socket) => {
   socket.on("ChangeHoveredFarm", (farm) => {
     io.emit("changeHoveredFarm", farm);
   });
-  socket.on("CultivateOthers", (player) => {
+  socket.on("CultivateOthers", ({ player, hitbox }) => {
     io.emit("cultivateOther", player);
   });
-  socket.on("HitPlayer", (player) => {
-    io.emit("hitPlayer", player);
+  socket.on("UpdatePlayer", (player) => {
+    io.emit("updatePlayer", player);
   });
 
   socket.on("AddPlayerToLobby", (playerToServer) => {
