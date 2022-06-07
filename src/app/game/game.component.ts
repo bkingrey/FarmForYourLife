@@ -1490,7 +1490,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       i
     );
     if (player.isBeingHit) {
-      console.log(player.name + ' is getting hit');
       this.playerHitRecoil(player, i);
     } else {
       this.moveOthers(player, i);
@@ -1740,6 +1739,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           },
         };
       } else if (frame < 5) {
+        console.log('START');
         hitbox = {
           width: 120,
           height: -90,
@@ -1749,6 +1749,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           },
         };
       } else {
+        console.log('STOP');
         hitbox = {
           width: -130 * xMult,
           height: 40,
@@ -1779,19 +1780,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.ctx.stroke();
       this.lobbyPlayers.forEach((player) => {
         if (player.name === 'b' && !player.isBeingHit) {
-          console.log(
-            this.rectangularHitCollision({
-              rectangle1: hitbox,
-              rectangle2: player,
-            })
-          );
           if (
             this.rectangularHitCollision({
               rectangle1: hitbox,
               rectangle2: player,
             })
           ) {
-            console.log('IN');
             const updatedPlayer = {
               ...player,
               isBeingHit: true,
@@ -2942,25 +2936,31 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   rectangularHitCollision({ rectangle1, rectangle2 }) {
     const rect2Width = this.player.width ? this.player.width * 4 : 0;
     const rect2Height = this.player.height ? this.player.height * 4 : 0;
+
     console.log('--------------------------');
-    console.log(
-      rectangle1.position.x + Math.abs(rectangle1.width) >=
-        rectangle2.position.x
-    );
-    console.log(rectangle1.position.x <= rectangle2.position.x + rect2Width);
     console.log(rectangle1.position.y <= rectangle2.position.y + rect2Height);
-    console.log(
-      rectangle1.position.y + Math.abs(rectangle1.height) >=
-        rectangle2.position.y
-    );
+    console.log(rectangle1.position.y + rectangle1.height);
+    console.log(rectangle2.position.y);
     console.log('--------------------------');
+
     return (
-      rectangle1.position.x + Math.abs(rectangle1.width) >=
-        rectangle2.position.x &&
-      rectangle1.position.x <= rectangle2.position.x + rect2Width &&
-      rectangle1.position.y <= rectangle2.position.y + rect2Height &&
-      rectangle1.position.y + Math.abs(rectangle1.height) >=
-        rectangle2.position.y
+      (rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
+        rectangle1.position.x <= rectangle2.position.x + rect2Width &&
+        rectangle1.position.y <= rectangle2.position.y + rect2Height &&
+        rectangle1.position.y + rectangle1.height >= rectangle2.position.y) ||
+      (rectangle1.position.x + rectangle1.width <=
+        rectangle2.position.x + rect2Width &&
+        rectangle1.position.x >= rectangle2.position.x + rect2Width &&
+        rectangle1.position.y <= rectangle2.position.y + rect2Height &&
+        rectangle1.position.y + rectangle1.height >= rectangle2.position.y) ||
+      (rectangle1.position.x + rectangle1.width <= rectangle2.position.x &&
+        rectangle1.position.x >= rectangle2.position.x + rect2Width &&
+        rectangle1.position.y <= rectangle2.position.y + rect2Height &&
+        rectangle1.position.y + rectangle1.height >= rectangle2.position.y) ||
+      (rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
+        rectangle1.position.x <= rectangle2.position.x + rect2Width &&
+        rectangle1.position.y >= rectangle2.position.y + rect2Height &&
+        rectangle1.position.y + rectangle1.height >= rectangle2.position.y)
     );
   }
 
