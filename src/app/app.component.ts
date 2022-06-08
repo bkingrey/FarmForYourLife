@@ -57,19 +57,20 @@ export class AppComponent implements OnInit {
     });
     this.socket.on('updatePlayer', (updatedPlayer) => {
       this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));
-      if (
-        this.gameComponent &&
-        this.gameComponent.lobbyPlayers.filter(
-          (p) => p.name === updatedPlayer.name
-        )[0].loadedIn
-      ) {
-        this.gameComponent.lobbyPlayers.filter(
-          (p) => p.name === updatedPlayer.name
-        )[0].isBeingHit = updatedPlayer.isBeingHit;
-        this.gameComponent.lobbyPlayers.filter(
-          (p) => p.name === updatedPlayer.name
-        )[0].hitdirection = updatedPlayer.hitdirection;
-        console.log(updatedPlayer);
+      const player = this.gameComponent?.lobbyPlayers.filter(
+        (p) => p.name === updatedPlayer.name
+      )[0];
+      if (player?.loadedIn) {
+        this.facade.gameData$.pipe(take(1)).subscribe((data) => {
+          if (!player.isBeingHit && updatedPlayer.isBeingHit) {
+            if (data.me === player.name) {
+              this.changeEnergy(-10);
+            }
+          }
+          player.isBeingHit = updatedPlayer.isBeingHit;
+          player.hitdirection = updatedPlayer.hitdirection;
+          player.isCarrying = updatedPlayer.isCarrying;
+        });
       }
     });
     this.socket.on('changePlayerState', (player) => {

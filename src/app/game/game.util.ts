@@ -56,4 +56,17 @@ export class GameUtils {
       fisher: upgrades.filter((upg) => upg.target === 'fisher')[0].value,
     };
   }
+
+  getHitPos(player, hitbox, coordinate) {
+    const RECOIL = 40;
+    let pos;
+    if (coordinate === 'x')
+      pos = player.position.x + player.width * 2 - hitbox.position.x;
+    if (coordinate === 'y')
+      pos = player.position.y + player.height * 2 - hitbox.position.y;
+    pos = pos > RECOIL ? RECOIL : pos;
+    pos = pos < -RECOIL ? -RECOIL : pos;
+    console.log(pos);
+    return pos;
+  }
 }

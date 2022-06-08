@@ -347,7 +347,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.activatable();
       }
       // MOVEMENT
-      if (this.attackInitiated) {
+      if (this.attackInitiated && this.gameData.energy.current >= 10) {
         const spriteSheet = this.getCultivateSpriteSheet();
         if (spriteSheet) {
           this.drawAttackAnimation(
@@ -1739,7 +1739,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           },
         };
       } else if (frame < 5) {
-        console.log('START');
         hitbox = {
           width: 120,
           height: -90,
@@ -1749,7 +1748,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           },
         };
       } else {
-        console.log('STOP');
         hitbox = {
           width: -130 * xMult,
           height: 40,
@@ -1779,7 +1777,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       );
       this.ctx.stroke();
       this.lobbyPlayers.forEach((player) => {
-        if (player.name === 'b' && !player.isBeingHit) {
+        if (!player.isBeingHit) {
           if (
             this.rectangularHitCollision({
               rectangle1: hitbox,
@@ -1789,11 +1787,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             const updatedPlayer = {
               ...player,
               isBeingHit: true,
+              isCarrying: false,
               hitdirection: {
                 ...player.hitdirection,
                 position: {
-                  x: player.position.x + player.width * 2 - hitbox.position.x,
-                  y: player.position.y + player.height * 2 - hitbox.position.y,
+                  x: this.getHitPos(player, hitbox, 'x'),
+                  y: this.getHitPos(player, hitbox, 'y'),
                 },
               },
             };
@@ -2920,10 +2919,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   recoilHitCollision({ rectangle1, rectangle2 }) {
     // *4 is for width scale.
-    const EXTRA_BOUNDS = 74;
+    const EXTRA_BOUNDS = 30;
     return (
       rectangle1.position.x + rectangle1.width * 4 >=
-        rectangle2.position.x - EXTRA_BOUNDS &&
+        rectangle2.position.x - 60 &&
       rectangle1.position.x <=
         rectangle2.position.x + rectangle2.width + EXTRA_BOUNDS &&
       rectangle1.position.y <=
@@ -2936,13 +2935,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   rectangularHitCollision({ rectangle1, rectangle2 }) {
     const rect2Width = this.player.width ? this.player.width * 4 : 0;
     const rect2Height = this.player.height ? this.player.height * 4 : 0;
-
-    console.log('--------------------------');
-    console.log(rectangle1.position.y <= rectangle2.position.y + rect2Height);
-    console.log(rectangle1.position.y + rectangle1.height);
-    console.log(rectangle2.position.y);
-    console.log('--------------------------');
-
     return (
       (rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
         rectangle1.position.x <= rectangle2.position.x + rect2Width &&
@@ -4091,6 +4083,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (this.isShiftDown) {
       this.attackInitiated = true;
+      if (this.gameData.energy.current >= 10) {
+        this.changeEnergy.emit(-10);
+      }
       return;
     }
     if (this.gameData.isCarrying) {
