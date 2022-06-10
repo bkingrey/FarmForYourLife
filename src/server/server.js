@@ -19,6 +19,9 @@ var rooms = [];
 
 // IO
 io.on("connection", (socket) => {
+  socket.on("PlayerFromMiddle", (data) => {
+    io.emit("playerFromMiddle", data);
+  });
   socket.on("ChangePlayerTool", (data) => {
     io.emit("changePlayerTool", data);
   });

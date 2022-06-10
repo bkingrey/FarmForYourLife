@@ -42,6 +42,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() changeHoveredFarm = new EventEmitter();
   @Output() cultivateOther = new EventEmitter();
   @Output() updatePlayer = new EventEmitter();
+  @Output() playerFromMiddle = new EventEmitter();
   defaultVelocity = 4;
   upg: any;
   isWatering = false;
@@ -313,21 +314,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.traders.forEach((trader) => {
         this.drawMerchant(trader);
       });
-      if (this.player.width && this.player.height) {
-        this.ctx.strokeStyle = 'red';
-        this.ctx.beginPath();
-        this.ctx.rect(
-          this.lobbyPlayers[1].position.x,
-          this.lobbyPlayers[1].position.y,
-          this.player.width * 4,
-          this.player.height * 4
-        );
-        this.ctx.stroke();
-      }
 
       this.lobbyPlayers.forEach((player, i) => {
         if (player) {
-          if (this.ctx && this.player.width && this.player.height) {
+          if (
+            this.ctx &&
+            this.player.width &&
+            this.player.height &&
+            player.name !== this.gameData.me
+          ) {
             // this.ctx.strokeStyle = 'white';
             // this.ctx.beginPath();
             // this.ctx.rect(
@@ -341,6 +336,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           }
         }
       });
+
+      this.getPlayerAndMultiplayerPositions();
 
       // SLEEP
       if (this.queuedActivation) {
@@ -923,6 +920,27 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       }
     }
   }
+
+  fixOtherPlayerPosition(playerFromMiddle) {
+    const player = this.lobbyPlayers.filter(
+      (player) => player.name === playerFromMiddle.name
+    )[0];
+    const localPlayerFromTraderX =
+      player.position.x - this.traders[0].position.x;
+    const localPlayerFromTraderY =
+      player.position.y - this.traders[0].position.y;
+    if (localPlayerFromTraderX < playerFromMiddle.distanceFromMiddle.x) {
+      player.position.x += 1;
+    } else if (localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.x) {
+      player.position.x -= 1;
+    }
+    if (localPlayerFromTraderY < playerFromMiddle.distanceFromMiddle.y) {
+      player.position.y += 1;
+    } else if (localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.y) {
+      player.position.y -= 1;
+    }
+  }
+
   moveOtherPlayer(event) {
     const player = this.lobbyPlayers.filter(
       (player) => player.name === event.player.name
@@ -1481,14 +1499,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   getOtherPlayerSpriteSheet(player, i) {
     const useRightAnims = player.useRightAnims;
-    this.drawOtherSpriteAnimation(
-      useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
-      useRightAnims
-        ? this.gameData.spriteAnimations['playerIdleRight'].frames
-        : this.gameData.spriteAnimations['playerIdleLeft'].frames,
-      player,
-      i
-    );
+    // this.drawOtherSpriteAnimation(
+    //   useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
+    //   useRightAnims
+    //     ? this.gameData.spriteAnimations['playerIdleRight'].frames
+    //     : this.gameData.spriteAnimations['playerIdleLeft'].frames,
+    //   player,
+    //   i
+    // );
     if (player.isBeingHit) {
       this.playerHitRecoil(player, i);
     } else {
@@ -1768,14 +1786,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       );
       this.ctx.stroke();
 
-      this.ctx.beginPath();
-      this.ctx.rect(
-        this.lobbyPlayers[1].position.x,
-        this.lobbyPlayers[1].position.y,
-        this.player.width * 4,
-        this.player.height * 4
-      );
-      this.ctx.stroke();
       this.lobbyPlayers.forEach((player) => {
         if (!player.isBeingHit) {
           if (
@@ -3908,8 +3918,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (this.isShiftDown || this.attackInitiated) {
       this.changeTool.emit('broom');
       return;
-    } else {
-      this.changeTool.emit('shovel');
     }
     if (state === this.hoveredFarmableArea.state) {
       return;
@@ -4104,6 +4112,21 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         });
       }
     }
+  }
+
+  getPlayerAndMultiplayerPositions() {
+    const player = this.lobbyPlayers.filter(
+      (player) => player.name === this.gameData.me
+    )[0];
+    const playerFromMiddle = {
+      name: player.name,
+      position: player.position,
+      distanceFromMiddle: {
+        x: player.position.x - this.traders[0].position.x,
+        y: player.position.y - this.traders[0].position.y,
+      },
+    };
+    this.playerFromMiddle.emit(playerFromMiddle);
   }
 
   doRightClickOnMouse(evt) {

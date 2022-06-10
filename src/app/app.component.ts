@@ -45,14 +45,21 @@ export class AppComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
+    this.socket.on('playerFromMiddle', (playerFromMiddle) => {
+      this.facade.gameData$.pipe(take(1)).subscribe((data) => {
+        if (this.gameComponent && playerFromMiddle.name !== data.me) {
+          this.gameComponent?.fixOtherPlayerPosition(playerFromMiddle);
+        }
+      });
+    });
     this.socket.on('lobbyPlayers', (lobbyPlayers) => {
       this.facade.dispatch(AddPlayerToLobby({ payload: lobbyPlayers }));
     });
     this.socket.on('move', (moveObj) => {
       this.facade.gameData$.pipe(take(1)).subscribe((data) => {
-        // if (this.gameComponent && moveObj.player.name !== data.me) {
-        this.gameComponent?.moveOtherPlayer(moveObj);
-        // }
+        if (this.gameComponent && moveObj.player.name !== data.me) {
+          this.gameComponent?.moveOtherPlayer(moveObj);
+        }
       });
     });
     this.socket.on('updatePlayer', (updatedPlayer) => {
@@ -217,7 +224,10 @@ export class AppComponent implements OnInit {
         );
       }
     });
-
     this.facade.dispatch(OpenUpgrades({ payload: false }));
+  }
+
+  playerFromMiddle(event) {
+    this.socket.emit('PlayerFromMiddle', event);
   }
 }

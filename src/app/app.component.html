@@ -35,6 +35,7 @@
     (changePlayerState)="changePlayerState($event)"
     (cultivateOther)="cultivateOthers($event)"
     (updatePlayer)="updatePlayer($event)"
+    (playerFromMiddle)="playerFromMiddle($event)"
   ></app-game>
   <app-shade
     *ngIf="gameData.scene === 'game'"
