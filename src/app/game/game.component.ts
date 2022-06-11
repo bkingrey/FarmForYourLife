@@ -925,19 +925,25 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     const player = this.lobbyPlayers.filter(
       (player) => player.name === playerFromMiddle.name
     )[0];
-    const localPlayerFromTraderX =
-      player.position.x - this.traders[0].position.x;
-    const localPlayerFromTraderY =
-      player.position.y - this.traders[0].position.y;
-    if (localPlayerFromTraderX < playerFromMiddle.distanceFromMiddle.x) {
-      player.position.x += 1;
-    } else if (localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.x) {
-      player.position.x -= 1;
-    }
-    if (localPlayerFromTraderY < playerFromMiddle.distanceFromMiddle.y) {
-      player.position.y += 1;
-    } else if (localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.y) {
-      player.position.y -= 1;
+    if (player) {
+      const localPlayerFromTraderX =
+        player.position.x - this.traders[0].position.x;
+      const localPlayerFromTraderY =
+        player.position.y - this.traders[0].position.y;
+      if (localPlayerFromTraderX < playerFromMiddle.distanceFromMiddle.x) {
+        player.position.x += 1;
+      } else if (
+        localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.x
+      ) {
+        player.position.x -= 1;
+      }
+      if (localPlayerFromTraderY < playerFromMiddle.distanceFromMiddle.y) {
+        player.position.y += 1;
+      } else if (
+        localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.y
+      ) {
+        player.position.y -= 1;
+      }
     }
   }
 
@@ -2064,10 +2070,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     const clickedFarm = this.farmableArea.filter(
       (area) => area.id === evt.clickedFarmableArea.id
     )[0];
-    if (
-      clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'potato-seeds'
-    ) {
+    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'potato-seeds') {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'potato-0';
@@ -2080,10 +2083,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.reduceSeedCount.emit(payload);
       }
     }
-    if (
-      clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'carrot-seeds'
-    ) {
+    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'carrot-seeds') {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'carrot-0';
@@ -2097,10 +2097,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.reduceSeedCount.emit(payload);
       }
     }
-    if (
-      clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'wheat-seeds'
-    ) {
+    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'wheat-seeds') {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'wheat-0';
@@ -2116,7 +2113,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (
       clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'cabbage-seeds'
+      evt.equippedTool === 'cabbage-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
@@ -2132,7 +2129,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (
       clickedFarm.state === 'soil-3' &&
-      this.gameData.equippedTool === 'cauliflower-seeds'
+      evt.equippedTool === 'cauliflower-seeds'
     ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
@@ -4361,6 +4358,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         player.equippedTool = updatedPlayer.equippedTool;
         player.useRightAnims = updatedPlayer.useRightAnims;
         player.moving = updatedPlayer.moving;
+        player.isCultivating = false;
       }
     });
   }

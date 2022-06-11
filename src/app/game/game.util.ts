@@ -66,7 +66,6 @@ export class GameUtils {
       pos = player.position.y + player.height * 2 - hitbox.position.y;
     pos = pos > RECOIL ? RECOIL : pos;
     pos = pos < -RECOIL ? -RECOIL : pos;
-    console.log(pos);
     return pos;
   }
 }

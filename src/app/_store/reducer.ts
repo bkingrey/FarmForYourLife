@@ -281,6 +281,7 @@ export const gameReducer = createReducer(
         useRightAnims: true,
         equippedTool: 'shovel',
         isBeingHit: false,
+        isCultivating: false,
       };
     });
     return { ...state, lobbyPlayers: newLobby };

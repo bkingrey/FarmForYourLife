@@ -97,7 +97,7 @@ export class AppComponent implements OnInit {
       this.gameComponent?.changeStateOfHoveredFarmable(farm);
     });
     this.socket.on('cultivateOther', (player) => {
-      if (this.gameComponent) {
+      if (this.gameComponent && player) {
         this.gameComponent.lobbyPlayers.filter(
           (p) => p.name === player
         )[0].isCultivating = true;
