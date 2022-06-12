@@ -36,6 +36,8 @@
     (cultivateOther)="cultivateOthers($event)"
     (updatePlayer)="updatePlayer($event)"
     (playerFromMiddle)="playerFromMiddle($event)"
+    (dropPickupable)="dropPickupable($event)"
+    (removePickupable)="removePickupable($event)"
   ></app-game>
   <app-shade
     *ngIf="gameData.scene === 'game'"

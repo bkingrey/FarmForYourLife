@@ -43,6 +43,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() cultivateOther = new EventEmitter();
   @Output() updatePlayer = new EventEmitter();
   @Output() playerFromMiddle = new EventEmitter();
+  @Output() dropPickupable = new EventEmitter();
+  @Output() removePickupable = new EventEmitter();
   defaultVelocity = 4;
   upg: any;
   isWatering = false;
@@ -197,6 +199,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     height: -1,
     state: 'none',
     watered: false,
+    id: ''
   };
   clickedFarmableArea: any = [];
   activatedArea = {
@@ -211,6 +214,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     width: -1,
     height: -1,
     state: 'none',
+    id: ''
   };
   defaultFarmState = {
     position: {
@@ -225,6 +229,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     height: -1,
     state: 'none',
     watered: false,
+    id: ''
   };
   pickupables: Array<Pickupable> = [];
   bubblesFramesDrawn: number = 0;
@@ -382,15 +387,13 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             item.height = this.squareSize;
             if (this.playerIsPickingUpItem(item)) {
               removableItem = item;
+              this.removePickupable.emit(removableItem)
             }
             if (this.ctx) {
               this.drawPickupableAnimation(item, 16, i);
             }
           }
         });
-        this.pickupables = this.pickupables.filter(
-          (pickupable) => pickupable !== removableItem
-        );
       }
       this.ctx.drawImage(
         this.foregroundMap,
@@ -446,6 +449,13 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.then = Date.now();
     this.startTime = this.then;
     this.animate();
+  }
+
+  removePickupableFromArray(data) {
+    this.pickupables
+    this.pickupables = this.pickupables.filter(
+      (pickupable) => pickupable.id !== data.id
+    );
   }
 
   playerIsPickingUpItem(item: Pickupable) {
@@ -2036,18 +2046,18 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.createPickupablePlantAtArea(
           area.state.split('-')[0],
           area.position,
-          false
+          area.id
         );
         area.state = 'soil-1';
       }
     }, 1000);
   }
 
-  createPickupablePlantAtArea(plant, position, droppedFromPlayer) {
+  createPickupablePlantAtArea(plant, position, id) {
     this.pickupables.push({
       plant: plant,
       position: position,
-      dropped: droppedFromPlayer,
+      id: id
     });
     this.pickupableFramesDrawn[this.pickupables.length - 1] = 0;
     this.pickupableFrameIndex[this.pickupables.length - 1] = 0;
@@ -4334,11 +4344,16 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.gameData.equippedTool === 'hugefish' ||
         this.gameData.equippedTool === 'nugget'
       ) {
-        this.createPickupablePlantAtArea(
-          carriedItem.plant,
-          carriedItem.position,
-          true
-        );
+        this.dropPickupable.emit({
+          plant: carriedItem.plant,
+          positionId: this.hoveredFarmableArea.id,
+          id: Date.now()
+        })
+        // this.createPickupablePlantAtArea(
+        //   carriedItem.plant,
+        //   carriedItem.position,
+        //   true
+        // );
         this.changeTool.emit('shovel');
       }
     }

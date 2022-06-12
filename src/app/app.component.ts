@@ -45,6 +45,19 @@ export class AppComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
+    this.socket.on('removePickupable', data => {
+      if (this.gameComponent) {
+        this.gameComponent.removePickupableFromArray(data);
+      }
+
+    })
+    this.socket.on('dropPickupable', (data) => {
+      this.facade.gameData$.pipe(take(1)).subscribe(gameData => {
+        const position = this.gameComponent?.farmableArea.filter(area => area.id === data.positionId)[0].position
+        this.gameComponent?.createPickupablePlantAtArea(data.plant, position, data.id)
+      })
+
+    })
     this.socket.on('playerFromMiddle', (playerFromMiddle) => {
       this.facade.gameData$.pipe(take(1)).subscribe((data) => {
         if (this.gameComponent && playerFromMiddle.name !== data.me) {
@@ -229,5 +242,11 @@ export class AppComponent implements OnInit {
 
   playerFromMiddle(event) {
     this.socket.emit('PlayerFromMiddle', event);
+  }
+  dropPickupable(event) {
+    this.socket.emit('DropPickupable', event);
+  }
+  removePickupable(event) {
+    this.socket.emit('RemovePickupable', event)
   }
 }

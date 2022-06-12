@@ -137,6 +137,7 @@ export interface Pickupable {
   center?: number;
   plant: string;
   dropped?: boolean;
+  id: number | string;
 }
 export interface KeyWASD {
   w: {
