@@ -199,7 +199,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     height: -1,
     state: 'none',
     watered: false,
-    id: ''
+    id: '',
   };
   clickedFarmableArea: any = [];
   activatedArea = {
@@ -214,7 +214,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     width: -1,
     height: -1,
     state: 'none',
-    id: ''
+    id: '',
   };
   defaultFarmState = {
     position: {
@@ -229,7 +229,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     height: -1,
     state: 'none',
     watered: false,
-    id: ''
+    id: '',
   };
   pickupables: Array<Pickupable> = [];
   bubblesFramesDrawn: number = 0;
@@ -387,7 +387,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             item.height = this.squareSize;
             if (this.playerIsPickingUpItem(item)) {
               removableItem = item;
-              this.removePickupable.emit(removableItem)
+              this.removePickupable.emit(removableItem);
             }
             if (this.ctx) {
               this.drawPickupableAnimation(item, 16, i);
@@ -452,7 +452,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   removePickupableFromArray(data) {
-    this.pickupables
+    this.pickupables;
     this.pickupables = this.pickupables.filter(
       (pickupable) => pickupable.id !== data.id
     );
@@ -932,25 +932,34 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   fixOtherPlayerPosition(playerFromMiddle) {
+    const latencyFix = 2;
     const player = this.lobbyPlayers.filter(
       (player) => player.name === playerFromMiddle.name
     )[0];
-    if (player) {
+    if (player && this.traders[0]) {
       const localPlayerFromTraderX =
         player.position.x - this.traders[0].position.x;
       const localPlayerFromTraderY =
         player.position.y - this.traders[0].position.y;
-      if (localPlayerFromTraderX < playerFromMiddle.distanceFromMiddle.x) {
+      if (
+        localPlayerFromTraderX <
+        playerFromMiddle.distanceFromMiddle.x - latencyFix
+      ) {
         player.position.x += 1;
       } else if (
-        localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.x
+        localPlayerFromTraderX >
+        playerFromMiddle.distanceFromMiddle.x + latencyFix
       ) {
         player.position.x -= 1;
       }
-      if (localPlayerFromTraderY < playerFromMiddle.distanceFromMiddle.y) {
+      if (
+        localPlayerFromTraderY <
+        playerFromMiddle.distanceFromMiddle.y - latencyFix
+      ) {
         player.position.y += 1;
       } else if (
-        localPlayerFromTraderX > playerFromMiddle.distanceFromMiddle.y
+        localPlayerFromTraderY >
+        playerFromMiddle.distanceFromMiddle.y + latencyFix
       ) {
         player.position.y -= 1;
       }
@@ -1033,16 +1042,16 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.gameData.me === this.lobbyPlayers[2].name
     ) {
       difference = {
-        x: this.lobbyPlayers[2].position.x - 278 - map.x,
-        y: this.lobbyPlayers[2].position.y - 630 - map.y,
+        x: -972,
+        y: -862,
       };
     } else if (
       this.lobbyPlayers[3] &&
       this.gameData.me === this.lobbyPlayers[3].name
     ) {
       difference = {
-        x: this.lobbyPlayers[3].position.x - 278 - map.x,
-        y: this.lobbyPlayers[3].position.y - 630 - map.y,
+        x: 242,
+        y: -862,
       };
     }
 
@@ -1086,7 +1095,16 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         };
       });
       this.updateLobbyPlayers();
-      if (!this.lobbyPlayers[0] || !this.lobbyPlayers[0].loadedIn) {
+      if (
+        !this.lobbyPlayers[0] ||
+        !this.lobbyPlayers[0].loadedIn ||
+        !this.lobbyPlayers[1] ||
+        !this.lobbyPlayers[1].loadedIn ||
+        !this.lobbyPlayers[2] ||
+        !this.lobbyPlayers[2].loadedIn ||
+        !this.lobbyPlayers[3] ||
+        !this.lobbyPlayers[3].loadedIn
+      ) {
         console.log('waiting for players');
       } else {
         clearInterval(tickInterval);
@@ -1953,6 +1971,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   changeStateOfHoveredFarmable(evt) {
+    console.log(evt);
     if (evt.isWatering) {
       if (
         this.farmableArea.filter(
@@ -1967,7 +1986,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           this.farmableArea.filter(
             (area) => area.id === evt.clickedFarmableArea.id
           )[0].watered = true;
-          this.changeWaterMeter.emit(-8);
+          if (evt.me === this.gameData.me) this.changeWaterMeter.emit(-8);
           this.startWaterTimer(
             this.farmableArea.filter(
               (area) => area.id === evt.clickedFarmableArea.id
@@ -2014,7 +2033,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (this.isAPlantSeed(evt.equippedTool)) {
       this.plantSeed(evt);
     }
-    this.changeEnergy.emit(-3);
+    if (evt.me === this.gameData.me) this.changeEnergy.emit(-3);
   }
 
   startWaterTimer(area) {
@@ -2057,7 +2076,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.pickupables.push({
       plant: plant,
       position: position,
-      id: id
+      id: id,
     });
     this.pickupableFramesDrawn[this.pickupables.length - 1] = 0;
     this.pickupableFrameIndex[this.pickupables.length - 1] = 0;
@@ -4347,8 +4366,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.dropPickupable.emit({
           plant: carriedItem.plant,
           positionId: this.hoveredFarmableArea.id,
-          id: Date.now()
-        })
+          id: Date.now(),
+        });
         // this.createPickupablePlantAtArea(
         //   carriedItem.plant,
         //   carriedItem.position,
