@@ -37,6 +37,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   @Output() canFillWater = new EventEmitter();
   @Output() canEnterHouse = new EventEmitter();
   @Output() isSleeping = new EventEmitter();
+  @Output() goInHouse = new EventEmitter();
   @Output() openShop = new EventEmitter();
   @Output() changePlayerState = new EventEmitter();
   @Output() changeHoveredFarm = new EventEmitter();
@@ -335,7 +336,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             //   this.player.height * 4
             // );
             // this.ctx.stroke();
-            this.getOtherPlayerSpriteSheet(player, i);
+            if (player.name !== this.gameData.me)
+              this.getOtherPlayerSpriteSheet(player, i);
           }
         }
       });
@@ -527,9 +529,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   activatable() {
     if (this.activatedArea.state === 'house' && !this.gameData.isSleeping) {
-      this.isSleeping.emit(true);
-      this.changeVelocity.emit(0);
-      this.goIntoHouse();
+      this.goInHouse.emit(this.gameData.me);
     } else {
       this.isSleeping.emit(false);
       this.changeVelocity.emit(
@@ -546,18 +546,87 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     this.activatedArea = this.defaultFarmState;
   }
 
-  goIntoHouse() {
+  goIntoHouse(playerName) {
+    const lobbyPlayer = this.lobbyPlayers.filter(
+      (p) => p.name === playerName
+    )[0];
     const map = this.mapImage.position;
-    const house = {
-      x: 735,
-      y: 287,
-    };
-    const difference = {
-      x: house.x - map.x,
-      y: house.y - map.y,
-    };
-
-    this.moveAllMovables(difference);
+    let house;
+    if (lobbyPlayer.name === this.gameData.me && this.traders) {
+      if (
+        lobbyPlayer.name === this.lobbyPlayers[0].name &&
+        this.traders[0].position.x > 0 &&
+        this.traders[0].position.y > 0
+      ) {
+        house = {
+          x: 735,
+          y: 287,
+        };
+        if (house) {
+          const difference = {
+            x: house.x - map.x,
+            y: house.y - map.y,
+          };
+          this.isSleeping.emit(true);
+          this.changeVelocity.emit(0);
+          this.moveAllMovables(difference);
+        }
+      } else if (
+        lobbyPlayer.name === this.lobbyPlayers[1].name &&
+        this.traders[0].position.x < 0 &&
+        this.traders[0].position.y > 0
+      ) {
+        house = {
+          x: -990,
+          y: 287,
+        };
+        if (house) {
+          const difference = {
+            x: house.x - map.x,
+            y: house.y - map.y,
+          };
+          this.isSleeping.emit(true);
+          this.changeVelocity.emit(0);
+          this.moveAllMovables(difference);
+        }
+      } else if (
+        lobbyPlayer.name === this.lobbyPlayers[2].name &&
+        this.traders[0].position.x < 0 &&
+        this.traders[0].position.y < 0
+      ) {
+        house = {
+          x: -990,
+          y: -1350,
+        };
+        if (house) {
+          const difference = {
+            x: house.x - map.x,
+            y: house.y - map.y,
+          };
+          this.isSleeping.emit(true);
+          this.changeVelocity.emit(0);
+          this.moveAllMovables(difference);
+        }
+      } else if (
+        lobbyPlayer.name === this.lobbyPlayers[3].name &&
+        this.traders[0].position.x > 0 &&
+        this.traders[0].position.y < 0
+      ) {
+        house = {
+          x: 735,
+          y: -1350,
+        };
+        if (house) {
+          const difference = {
+            x: house.x - map.x,
+            y: house.y - map.y,
+          };
+          this.isSleeping.emit(true);
+          this.changeVelocity.emit(0);
+          this.moveAllMovables(difference);
+        }
+      }
+    }
   }
 
   cultivateOthers(play, i) {
@@ -1665,11 +1734,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         dy
       );
       // ***** SHOWING HIT BOX *****
-      if (this.ctx && this.player.height && this.player.width) {
-        this.ctx.beginPath();
-        this.ctx.rect(positionX, positionY, dx, dy);
-        this.ctx.stroke();
-      }
+      // if (this.ctx && this.player.height && this.player.width) {
+      //   this.ctx.beginPath();
+      //   this.ctx.rect(positionX, positionY, dx, dy);
+      //   this.ctx.stroke();
+      // }
       // ***** SHOWING HIT BOX *****
     }
   }
@@ -3201,6 +3270,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   }
 
   keyDownEvent(e: KeyboardEvent) {
+    if (e.key === 'CapsLock') {
+      e.preventDefault();
+      return;
+    }
     if (e.key === 'Shift' && !this.isShiftDown && !this.gameData.isCarrying) {
       this.isShiftDown = true;
       this.changeEquippedTool('broom');
@@ -4290,7 +4363,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (this.gameData.equippedTool === 'shovel') {
       if (!this.clickedFarmableArea.includes(clickedArea)) {
         this.clickedFarmableArea.push(clickedArea);
-        console.log(this.clickedFarmableArea);
         this.isWatering = true;
       }
     }

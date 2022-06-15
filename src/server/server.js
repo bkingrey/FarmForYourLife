@@ -19,6 +19,9 @@ var rooms = [];
 
 // IO
 io.on("connection", (socket) => {
+  socket.on("GoInHouse", (data) => {
+    io.emit("goInHouse", data);
+  });
   socket.on("RemovePickupable", (data) => {
     io.emit("removePickupable", data);
   });

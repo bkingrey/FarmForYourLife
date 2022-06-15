@@ -50,6 +50,11 @@ export class AppComponent implements OnInit {
         this.gameComponent.removePickupableFromArray(data);
       }
     });
+    this.socket.on('goInHouse', (data) => {
+      if (this.gameComponent) {
+        this.gameComponent.goIntoHouse(data);
+      }
+    });
     this.socket.on('playerCultivate', (cultivator) => {
       if (this.gameComponent) {
         this.gameComponent.lobbyPlayers.filter(
@@ -279,5 +284,8 @@ export class AppComponent implements OnInit {
   }
   playerIsWatering(event) {
     this.socket.emit('PlayerIsWatering', event);
+  }
+  goInHouse(event) {
+    this.socket.emit('GoInHouse', event);
   }
 }
