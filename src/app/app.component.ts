@@ -45,19 +45,43 @@ export class AppComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    this.socket.on('removePickupable', data => {
+    this.socket.on('removePickupable', (data) => {
       if (this.gameComponent) {
         this.gameComponent.removePickupableFromArray(data);
       }
-
-    })
+    });
+    this.socket.on('playerCultivate', (cultivator) => {
+      if (this.gameComponent) {
+        this.gameComponent.lobbyPlayers.filter(
+          (player) => player.name === cultivator
+        )[0].isCultivating = true;
+        if (
+          this.gameComponent.lobbyPlayers.filter(
+            (player) => player.name === cultivator
+          )[0].isCultivating === true
+        ) {
+        }
+      }
+    });
+    // this.socket.on('playerIsWatering', (waterer) => {
+    //   if (this.gameComponent) {
+    //     this.gameComponent.updateOtherPlayerIsWatering(waterer);
+    //   }
+    // });
     this.socket.on('dropPickupable', (data) => {
-      this.facade.gameData$.pipe(take(1)).subscribe(gameData => {
-        const position = this.gameComponent?.farmableArea.filter(area => area.id === data.positionId)[0].position
-        this.gameComponent?.createPickupablePlantAtArea(data.plant, position, data.id)
-      })
-
-    })
+      this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
+        const position = this.gameComponent?.farmableArea.filter(
+          (area) => area.id === data.positionId
+        )[0]?.position;
+        this.gameComponent?.createPickupablePlantAtArea(
+          data.plant,
+          position,
+          data.id,
+          data.playerName,
+          true
+        );
+      });
+    });
     this.socket.on('playerFromMiddle', (playerFromMiddle) => {
       this.facade.gameData$.pipe(take(1)).subscribe((data) => {
         if (this.gameComponent && playerFromMiddle.name !== data.me) {
@@ -83,8 +107,9 @@ export class AppComponent implements OnInit {
       if (player?.loadedIn) {
         this.facade.gameData$.pipe(take(1)).subscribe((data) => {
           if (!player.isBeingHit && updatedPlayer.isBeingHit) {
-            if (data.me === player.name) {
+            if (data.me === player.name && this.gameComponent) {
               this.changeEnergy(-10);
+              this.gameComponent.dropCarriedItem();
             }
           }
           player.isBeingHit = updatedPlayer.isBeingHit;
@@ -247,6 +272,12 @@ export class AppComponent implements OnInit {
     this.socket.emit('DropPickupable', event);
   }
   removePickupable(event) {
-    this.socket.emit('RemovePickupable', event)
+    this.socket.emit('RemovePickupable', event);
+  }
+  playerCultivate(event) {
+    this.socket.emit('PlayerCultivate', event);
+  }
+  playerIsWatering(event) {
+    this.socket.emit('PlayerIsWatering', event);
   }
 }

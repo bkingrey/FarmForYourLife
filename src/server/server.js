@@ -19,9 +19,15 @@ var rooms = [];
 
 // IO
 io.on("connection", (socket) => {
-  socket.on("RemovePickupable", data => {
+  socket.on("RemovePickupable", (data) => {
     io.emit("removePickupable", data);
-  })
+  });
+  socket.on("PlayerIsWatering", (data) => {
+    io.emit("playerIsWatering", data);
+  });
+  socket.on("PlayerCultivate", (data) => {
+    io.emit("playerCultivate", data);
+  });
   socket.on("PlayerFromMiddle", (data) => {
     io.emit("playerFromMiddle", data);
   });
