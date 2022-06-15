@@ -188,6 +188,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   queuedActivation = false;
   mayFarm = false;
   otherFarmableArea: any = [];
+  waterableArea: any = [];
   hoveredFarmableArea = {
     position: {
       x: -1,
@@ -1876,6 +1877,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       isWatering: this.isWatering,
       equippedTool: this.gameData.equippedTool,
       me: this.gameData.me,
+      upg: this.upg,
     };
     if (this.framesDrawn[i] > 3) {
       if (this.actionFrameIndex[i] < frames - 1) {
@@ -2000,7 +2002,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           this.farmableArea.filter(
             (area) => area.id === evt.clickedFarmableArea.id
           )[0].watered = true;
-          if (evt.me === this.gameData.me) this.changeWaterMeter.emit(-8);
+          if (evt.me === this.gameData.me) {
+            this.changeEnergy.emit(-3);
+            this.changeWaterMeter.emit(-8);
+          }
           this.startWaterTimer(
             this.farmableArea.filter(
               (area) => area.id === evt.clickedFarmableArea.id
@@ -2043,7 +2048,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       if (getRandom > chance) this.changeTool.emit('nugget');
     }
     if (evt.equippedTool === 'shovel') {
-      this.farmAction(evt.clickedFarmableArea);
+      this.farmAction(evt.clickedFarmableArea, evt.upg);
     }
     if (this.isAPlantSeed(evt.equippedTool)) {
       this.plantSeed(evt);
@@ -2293,14 +2298,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
   }
 
-  farmAction(clickedFarmableArea) {
+  farmAction(clickedFarmableArea, upg) {
     const clickedFarm = this.farmableArea.filter(
       (area) => area.id === clickedFarmableArea.id
     )[0];
     if (clickedFarm) {
       if (clickedFarm.state === 'none') {
         let soil;
-        switch (this.upg.dig) {
+        switch (upg.dig) {
           case 0:
             soil = 'soil-0';
             break;
@@ -2319,7 +2324,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         clickedFarm.state = soil;
       } else if (clickedFarm.state === 'soil-0') {
         let soil;
-        switch (this.upg.dig) {
+        switch (upg.dig) {
           case 0:
             soil = 'soil-1';
             break;
@@ -2338,7 +2343,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         clickedFarm.state = soil;
       } else if (clickedFarm.state === 'soil-1') {
         let soil;
-        switch (this.upg.dig) {
+        switch (upg.dig) {
           case 0:
             soil = 'soil-2';
             break;
@@ -3965,19 +3970,22 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.player.height &&
       this.player.center
     ) {
+      this.otherFarmableArea = this.otherFarmableArea.filter((a) =>
+        this.areasByAreas(a, this.upg.plow)
+      );
+      this.waterableArea = this.waterableArea.filter((a) =>
+        this.areasByAreas(a, this.upg.irrigate)
+      );
       if (this.areasByAreas(area, this.upg.plow)) {
-        if (!this.otherFarmableArea.includes(area)) {
-          this.otherFarmableArea.push(area);
-        }
         if (
           this.isMouseCloseToPlayer(this.player, this.mousePos) &&
           !this.isShiftDown
         ) {
           this.changeEquippedTool(area.state);
-          if (this.isMouseInArea(area)) {
-            this.hoveredFarmableArea = area;
-            this.otherFarmableArea = [area];
-          }
+          this.hoveredFarmableArea = area;
+          if (!this.otherFarmableArea.includes(area))
+            this.otherFarmableArea.push(area);
+
           this.mayFarm = true;
           this.hoveredFarmableArea.center = {
             x: area.position.x + 32,
@@ -3990,10 +3998,22 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             this.hoveredFarmableArea.state !== 'untargetable'
           )
             this.drawBrokenSquare(area);
-          this.drawWaterSquare(area, 10);
         }
-      } else {
-        this.otherFarmableArea.filter((a) => a.id !== area.id);
+      }
+      if (this.areasByAreas(area, this.upg.irrigate)) {
+        if (
+          this.isMouseCloseToPlayer(this.player, this.mousePos) &&
+          !this.isShiftDown
+        ) {
+          if (!this.waterableArea.includes(area)) this.waterableArea.push(area);
+          if (
+            this.hoveredFarmableArea.state !== 'house' &&
+            this.hoveredFarmableArea.state !== 'well' &&
+            this.hoveredFarmableArea.state !== 'merchant' &&
+            this.hoveredFarmableArea.state !== 'untargetable'
+          )
+            this.drawWaterSquare(area, 10);
+        }
       }
     }
   }
@@ -4250,9 +4270,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       if (this.activatedArea.state === 'well') {
         this.refillWaterCan();
       } else if (
+        this.gameData.water.current > 7 &&
+        this.gameData.energy.current > 2 &&
         this.isShovelable(this.activatedArea.state, this.player, this.mousePos)
       ) {
-        this.waterArea(this.activatedArea);
+        this.clickedFarmableArea = [];
+        this.waterableArea.forEach((area) => {
+          this.waterArea(area);
+        });
       }
     }
   }
@@ -4263,9 +4288,9 @@ export class GameComponent extends GameUtils implements AfterViewInit {
 
   waterArea(clickedArea) {
     if (this.gameData.equippedTool === 'shovel') {
-      this.clickedFarmableArea = [];
       if (!this.clickedFarmableArea.includes(clickedArea)) {
         this.clickedFarmableArea.push(clickedArea);
+        console.log(this.clickedFarmableArea);
         this.isWatering = true;
       }
     }
