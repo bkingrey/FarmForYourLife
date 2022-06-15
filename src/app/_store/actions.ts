@@ -139,5 +139,10 @@ export const ChangePlayerState = createAction(
   '[GameData] Change Player state',
   props<{ payload: LobbyPlayer }>()
 );
+export const AddBadgeToLobbyPlayer = createAction(
+  '[GameData] Add Badge To Lobby Player',
+  props<{ payload: string }>()
+);
+export const ShowWinScreen = createAction('[GameData] Show Win Screen');
 
 export const Me = createAction('[GameData] Me', props<{ payload: string }>());

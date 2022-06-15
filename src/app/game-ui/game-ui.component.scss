@@ -277,9 +277,28 @@
   }
 }
 
-.upgrade-button {
+.badge-count {
+  div {
+    h6 {
+      margin-top: 3px;
+      margin-bottom: 12px;
+    }
+    div {
+      display: flex;
+      justify-content: center;
+      img {
+        width: 20px;
+      }
+    }
+  }
+
   position: absolute;
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: auto !important;
+  display: flex;
+  column-gap: 40px;
+  color: white;
+  text-shadow: -1px -1px 1px rgb(255 255 255 / 10%),
+    1px 1px 1px rgb(0 0 0 / 50%), 1px 0px 3px #000000;
 }

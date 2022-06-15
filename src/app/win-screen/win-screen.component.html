@@ -1,0 +1,17 @@
+<div
+  id="win-screen"
+  [ngClass]="{
+    R1024x576: gameData.resolution.x === 1024,
+    makeClickThroughable: !gameData.openShop
+  }"
+>
+  <!-- <div class="close-button" (click)="openShop.emit(false); focusOnCanvas()">
+    <img src="assets/ui/cancel.png" alt="" />
+  </div> -->
+  <h5 class="title">{{ gameData.fareWell }}</h5>
+  <ng-container *ngFor="let player of gameData.lobbyPlayers">
+    <div class="player">
+      <span>{{ player.name }} earned {{ player.badgeCount }} Badges!</span>
+    </div>
+  </ng-container>
+</div>

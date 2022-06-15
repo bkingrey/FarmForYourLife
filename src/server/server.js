@@ -19,6 +19,9 @@ var rooms = [];
 
 // IO
 io.on("connection", (socket) => {
+  socket.on("ChangeBadgeCount", (data) => {
+    io.emit("changeBadgeCount", data);
+  });
   socket.on("GoInHouse", (data) => {
     io.emit("goInHouse", data);
   });

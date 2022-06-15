@@ -16,39 +16,55 @@ export const selectGameData = createSelector(
 export const selectUpgradeChoices = createSelector(
   getGameData,
   (gameData: GameState): Array<Upgrade> => {
-    const learned = gameData.learnedUpgrades
-    const unlearned = gameData.upgrades
+    const learned = gameData.learnedUpgrades;
+    const unlearned = gameData.upgrades;
     const upgradesToShow: Array<Upgrade> = [];
-    learned.forEach(upgrade => {
-      unlearned.forEach(newUp => {
-        if (newUp.target === upgrade.target && newUp.tier === upgrade.tier + 1) {
-          upgradesToShow.push(newUp)
+    learned.forEach((upgrade) => {
+      unlearned.forEach((newUp) => {
+        if (
+          newUp.target === upgrade.target &&
+          newUp.tier === upgrade.tier + 1
+        ) {
+          upgradesToShow.push(newUp);
         }
-      })
+      });
     });
-    const shuffledArray = shuffle(upgradesToShow)
-    const threeUpgrades = [shuffledArray[0], shuffledArray[1], shuffledArray[2]]
-    return threeUpgrades
+    const shuffledArray = shuffle(upgradesToShow);
+    const threeUpgrades = [
+      shuffledArray[0],
+      shuffledArray[1],
+      shuffledArray[2],
+    ];
+    return threeUpgrades;
   }
 );
 
 export const selectItemCosts = createSelector(
   getGameData,
   (gameData: GameState): Array<MerchantItems> => {
-    return gameData.buyableItems.map(item => {
+    return gameData.buyableItems.map((item) => {
+      let newCost = item.cost;
+      if (item.name === 'Progress Badge') {
+        newCost =
+          item.cost *
+          (gameData.lobbyPlayers.filter(
+            (player) => player.name === gameData.me
+          )[0].badgeCount +
+            1);
+      }
       return {
         ...item,
-        cost: Math.round(item.cost / gameData.bargainValue)
-      }
-    })
+        cost: Math.round(newCost / gameData.bargainValue),
+      };
+    });
   }
-)
+);
 
 function shuffle(arr) {
   var j, x, index;
-  for (index = arr.length -1; index > 0; index--) {
-    j= Math.floor(Math.random()*(index+1));
-    x= arr[index];
+  for (index = arr.length - 1; index > 0; index--) {
+    j = Math.floor(Math.random() * (index + 1));
+    x = arr[index];
     arr[index] = arr[j];
     arr[j] = x;
   }

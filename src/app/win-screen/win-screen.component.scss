@@ -1,10 +1,14 @@
 $dash-size: 5px;
 $theme-color: #d77643;
 $fill-color: #ead4aa;
-#upgrade-popup {
+.player {
+  font-size: 10px;
+  padding: 10px;
+}
+#win-screen {
   pointer-events: none;
   width: 900px;
-  height: 200px;
+  height: 500px;
   border: 1px solid black;
   display: block;
   position: absolute;
@@ -30,8 +34,9 @@ $fill-color: #ead4aa;
   pointer-events: auto !important;
 
   .title {
-    font-size: 30px;
-    margin: 22px;
+    font-size: 40px;
+    font-family: "Tangerine", cursive;
+    margin: 16px;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
@@ -44,26 +49,5 @@ $fill-color: #ead4aa;
     img {
       width: 15px;
     }
-  }
-  .upgrade-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    column-gap: 60px;
-    .upg-item {
-      font-size: 25px;
-      h6 {
-        font-size: 13px;
-        margin-top: 6px;
-      }
-    }
-  }
-  .description-container {
-    margin-top: 0;
-    font-size: 25px;
-  }
-
-  .upgrade-description {
-    font-size: 14px;
   }
 }

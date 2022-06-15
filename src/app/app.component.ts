@@ -1,4 +1,5 @@
 import {
+  AddBadgeToLobbyPlayer,
   AddPlayerToLobby,
   ChangeCanEnterHouse,
   ChangeCanFillWater,
@@ -20,6 +21,7 @@ import {
   OpenUpgrades,
   PurchaseItem,
   ReduceSeedCount,
+  ShowWinScreen,
   UpdatePlayer,
 } from './_store/actions';
 import { Component, OnInit, ViewChild } from '@angular/core';
@@ -45,6 +47,16 @@ export class AppComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
+    this.socket.on('changeBadgeCount', (data) => {
+      this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
+        this.facade.dispatch(AddBadgeToLobbyPlayer({ payload: data }));
+        gameData.lobbyPlayers.forEach((player) => {
+          if (player.name === data && player.badgeCount >= 0) {
+            this.facade.dispatch(ShowWinScreen());
+          }
+        });
+      });
+    });
     this.socket.on('removePickupable', (data) => {
       if (this.gameComponent) {
         this.gameComponent.removePickupableFromArray(data);
@@ -224,6 +236,11 @@ export class AppComponent implements OnInit {
 
   purchaseItem(event) {
     this.facade.dispatch(PurchaseItem({ payload: event }));
+    if (event.name === 'Progress Badge') {
+      this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
+        this.socket.emit('ChangeBadgeCount', gameData.me);
+      });
+    }
   }
   changeScene(event) {
     if (event === 'game') {

@@ -1,5 +1,5 @@
 <div id="game-ui" [ngClass]="{ R1024x576: gameData.resolution.x === 1024 }">
-  <div class="energy-bar" [style.width.%]="2* gameData.energy.max/10">
+  <div class="energy-bar" [style.width.%]="(2 * gameData.energy.max) / 10">
     <div
       class="bar"
       [style.width.%]="(gameData.energy.current / gameData.energy.max) * 100"
@@ -11,8 +11,13 @@
       gameData.money
     }}</span>
   </div>
-  <div class="upgrade-button">
-    <button (click)="showUpgrades.emit(true)">UPGRADE</button>
+  <div class="badge-count">
+    <div *ngFor="let player of gameData.lobbyPlayers">
+      <h6>{{ player.name }}</h6>
+      <div>
+        {{ player.badgeCount }} <img src="../../assets/ui/progress-medal.png" />
+      </div>
+    </div>
   </div>
   <div class="tool-ui">
     <div

@@ -91,6 +91,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
   traders: any = [];
   isShiftDown = false;
   attackInitiated = false;
+  headText = '';
 
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
@@ -336,8 +337,17 @@ export class GameComponent extends GameUtils implements AfterViewInit {
             //   this.player.height * 4
             // );
             // this.ctx.stroke();
-            if (player.name !== this.gameData.me)
+            if (player.name !== this.gameData.me) {
+              this.ctx.font = '20px "Press Start 2P", cursive';
+              this.ctx.fillStyle = 'white';
+              this.ctx.textAlign = 'center';
+              this.ctx.fillText(
+                player.name,
+                player.position.x + 26,
+                player.position.y
+              );
               this.getOtherPlayerSpriteSheet(player, i);
+            }
           }
         }
       });
@@ -403,6 +413,14 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.foregroundMap,
         this.mapImage.position.x,
         this.mapImage.position.y
+      );
+      this.ctx.font = '20px "Press Start 2P", cursive';
+      this.ctx.fillStyle = 'white';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText(
+        this.headText,
+        this.player.position.x + 26,
+        this.player.position.y
       );
       this.ctx.restore();
       if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
@@ -2073,7 +2091,6 @@ export class GameComponent extends GameUtils implements AfterViewInit {
           )[0].watered = true;
           if (evt.me === this.gameData.me) {
             this.changeEnergy.emit(-3);
-            this.changeWaterMeter.emit(-8);
           }
           this.startWaterTimer(
             this.farmableArea.filter(
@@ -2163,7 +2180,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       } else {
         area.state = area.state;
       }
-    }, 1000);
+    }, 30000);
   }
 
   createPickupablePlantAtArea(plant, position, id, playerName, dropped) {
@@ -4274,11 +4291,15 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       this.attackInitiated = true;
       if (this.gameData.energy.current >= 10) {
         this.changeEnergy.emit(-10);
+      } else {
+        this.setHeadText('Too tired...');
       }
       return;
     }
     if (this.gameData.isCarrying) {
       this.dropCarriedItem();
+    } else if (this.gameData.energy.current < 3) {
+      this.setHeadText('Too tired...');
     } else if (
       this.player.center &&
       this.mayFarm &&
@@ -4342,6 +4363,10 @@ export class GameComponent extends GameUtils implements AfterViewInit {
       }
       if (this.activatedArea.state === 'well') {
         this.refillWaterCan();
+      } else if (this.gameData.water.current <= 7) {
+        this.setHeadText('Need Water!');
+      } else if (this.gameData.energy.current <= 2) {
+        this.setHeadText('Too tired...');
       } else if (
         this.gameData.water.current > 7 &&
         this.gameData.energy.current > 2 &&
@@ -4355,6 +4380,12 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
   }
 
+  setHeadText(string: string) {
+    this.headText = string;
+    setTimeout(() => {
+      this.headText = '';
+    }, 1500);
+  }
   refillWaterCan() {
     this.changeWaterMeter.emit('max');
   }
@@ -4363,6 +4394,7 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     if (this.gameData.equippedTool === 'shovel') {
       if (!this.clickedFarmableArea.includes(clickedArea)) {
         this.clickedFarmableArea.push(clickedArea);
+        this.changeWaterMeter.emit(-8);
         this.isWatering = true;
       }
     }

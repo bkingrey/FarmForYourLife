@@ -13,6 +13,7 @@ export class MerchantComponent implements OnInit {
   @Output() purchase = new EventEmitter();
   @Output() openShop = new EventEmitter();
   @Output() changeTool = new EventEmitter();
+  @Output() showUpgrades = new EventEmitter();
   showError = false;
 
   constructor() {}
@@ -28,6 +29,11 @@ export class MerchantComponent implements OnInit {
     };
     if (this.gameData.money >= cost) {
       this.purchase.emit(payload);
+      if (name === 'Progress Badge') {
+        this.openShop.emit(false);
+        this.showUpgrades.emit(true);
+        this.focusOnCanvas();
+      }
     } else {
       this.showNotEnoughCoinsError();
     }

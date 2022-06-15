@@ -38,6 +38,8 @@ export interface GameState {
   player: SpriteMetrics;
   upgrades: Array<Upgrade>;
   learnedUpgrades: Array<Upgrade>;
+  showWinScreen: boolean;
+  fareWell: string;
   energy: {
     current: number;
     max: number;
@@ -87,6 +89,7 @@ export interface LobbyPlayer {
   isWatering: boolean;
   isBeingHit: boolean;
   canCarry: boolean;
+  badgeCount: number;
   position: {
     x: number;
     y: number;

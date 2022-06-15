@@ -76,6 +76,8 @@ export const intializeState = (): GameState => {
     untargetableAreaMap: [],
     isCarrying: false,
     equippedTool: 'shovel',
+    showWinScreen: false,
+    fareWell: 'At least you tried!',
     spriteAnimations: {
       playerIdleLeftSrc: {
         src: 'assets/characters/sprite-idle-left.png',
@@ -282,6 +284,7 @@ export const gameReducer = createReducer(
         equippedTool: 'shovel',
         isBeingHit: false,
         isCultivating: false,
+        badgeCount: 0,
       };
     });
     return { ...state, lobbyPlayers: newLobby };
@@ -463,6 +466,7 @@ export const gameReducer = createReducer(
   }),
   on(GameActions.PurchaseItem, (state, { payload }) => {
     let boughtPlant;
+    let newLobby;
     switch (payload.name) {
       case 'Potato Seeds':
         boughtPlant = 'potato';
@@ -491,19 +495,46 @@ export const gameReducer = createReducer(
       case 'Wheat Seeds':
         boughtPlant = 'wheat';
         break;
+      case 'Progress Badge':
+        boughtPlant = 'progressBadge';
+        break;
       default:
         break;
     }
     return {
       ...state,
       money: state.money - payload.cost,
-      seedsOwned: {
-        ...state.seedsOwned,
-        [boughtPlant]: {
-          ...state.seedsOwned[boughtPlant],
-          count: state.seedsOwned[boughtPlant].count + 1,
-        },
-      },
+      seedsOwned:
+        boughtPlant !== 'progressBadge'
+          ? {
+              ...state.seedsOwned,
+              [boughtPlant]: {
+                ...state.seedsOwned[boughtPlant],
+                count: state.seedsOwned[boughtPlant].count + 1,
+              },
+            }
+          : {
+              ...state.seedsOwned,
+            },
+    };
+  }),
+  on(GameActions.AddBadgeToLobbyPlayer, (state, { payload }) => {
+    let newLobby = state.lobbyPlayers.map((player) => {
+      if (player.name === payload) {
+        return {
+          ...player,
+          badgeCount: player.badgeCount + 10,
+        };
+      } else {
+        return {
+          ...player,
+        };
+      }
+    });
+
+    return {
+      ...state,
+      lobbyPlayers: newLobby,
     };
   }),
   on(GameActions.ChangeCanEnterHouse, (state, { payload }) => {
@@ -570,6 +601,17 @@ export const gameReducer = createReducer(
     return {
       ...state,
       fisherValue: payload,
+    };
+  }),
+  on(GameActions.ShowWinScreen, (state) => {
+    let winner;
+    state.lobbyPlayers.forEach((player) => {
+      if (player.badgeCount > 9) winner = player.name;
+    });
+    return {
+      ...state,
+      showWinScreen: true,
+      fareWell: winner === state.me ? 'You won!' : state.fareWell,
     };
   }),
 

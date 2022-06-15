@@ -50,7 +50,6 @@
     *ngIf="gameData.scene === 'game'"
     [gameData]="gameData"
     (changeTool)="changeTool($event)"
-    (showUpgrades)="upgradePopUp($event)"
   ></app-game-ui>
   <app-upgrade
     *ngIf="gameData.openUpgrades"
@@ -65,6 +64,11 @@
     (purchase)="purchaseItem($event)"
     (openShop)="openShop($event)"
     (changeTool)="changeTool($event)"
+    (showUpgrades)="upgradePopUp($event)"
     *ngIf="gameData.openShop"
   ></app-merchant>
+  <app-win-screen
+    *ngIf="gameData.showWinScreen"
+    [gameData]="gameData"
+  ></app-win-screen>
 </ng-container>

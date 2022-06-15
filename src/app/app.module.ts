@@ -16,6 +16,7 @@ import { PlayLobbyComponent } from './play-lobby/play-lobby.component';
 import { FormsModule } from '@angular/forms';
 import { UpgradeComponent } from './upgrade/upgrade.component';
 import { ShadeComponent } from './shade/shade.component';
+import { WinScreenComponent } from './win-screen/win-screen.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { ShadeComponent } from './shade/shade.component';
     PlayLobbyComponent,
     UpgradeComponent,
     ShadeComponent,
+    WinScreenComponent,
   ],
   imports: [
     BrowserModule,
