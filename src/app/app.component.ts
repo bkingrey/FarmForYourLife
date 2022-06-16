@@ -37,8 +37,8 @@ import { take } from 'rxjs';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  title = 'FarmForYourLife';
-  socket: Socket = io('http://localhost:3000');
+  title = 'Hops Farm Game';
+  socket: Socket = io('http://localhost:5000');
   @ViewChild('gameComp') gameComponent: GameComponent | null = null;
   constructor(public facade: AppFacade) {}
 
