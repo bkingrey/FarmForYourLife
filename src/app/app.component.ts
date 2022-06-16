@@ -51,7 +51,7 @@ export class AppComponent implements OnInit {
       this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
         this.facade.dispatch(AddBadgeToLobbyPlayer({ payload: data }));
         gameData.lobbyPlayers.forEach((player) => {
-          if (player.name === data && player.badgeCount >= 0) {
+          if (player.name === data && player.badgeCount >= 9) {
             this.facade.dispatch(ShowWinScreen());
           }
         });
