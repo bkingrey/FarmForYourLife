@@ -38,7 +38,7 @@ import { take } from 'rxjs';
 })
 export class AppComponent implements OnInit {
   title = 'Hops Farm Game';
-  socket: Socket = io('http://localhost:5000');
+  socket: Socket = io('https://hopsfarmgame.herokuapp.com/');
   @ViewChild('gameComp') gameComponent: GameComponent | null = null;
   constructor(public facade: AppFacade) {}
 
