@@ -2254,7 +2254,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     const clickedFarm = this.farmableArea.filter(
       (area) => area.id === evt.clickedFarmableArea.id
     )[0];
-    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'potato-seeds') {
+    if (
+      clickedFarm.state === 'soil-3' &&
+      evt.equippedTool === 'potato-seeds' &&
+      this.gameData.seedsOwned['potato'].count > 0
+    ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'potato-0';
@@ -2267,7 +2271,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.reduceSeedCount.emit(payload);
       }
     }
-    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'carrot-seeds') {
+    if (
+      clickedFarm.state === 'soil-3' &&
+      evt.equippedTool === 'carrot-seeds' &&
+      this.gameData.seedsOwned['carrot'].count > 0
+    ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'carrot-0';
@@ -2281,7 +2289,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.reduceSeedCount.emit(payload);
       }
     }
-    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'wheat-seeds') {
+    if (
+      clickedFarm.state === 'soil-3' &&
+      evt.equippedTool === 'wheat-seeds' &&
+      this.gameData.seedsOwned['wheat'].count > 0
+    ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'wheat-0';
@@ -2297,7 +2309,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (
       clickedFarm.state === 'soil-3' &&
-      evt.equippedTool === 'cabbage-seeds'
+      evt.equippedTool === 'cabbage-seeds' &&
+      this.gameData.seedsOwned['cabbage'].count > 0
     ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
@@ -2313,7 +2326,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (
       clickedFarm.state === 'soil-3' &&
-      evt.equippedTool === 'cauliflower-seeds'
+      evt.equippedTool === 'cauliflower-seeds' &&
+      this.gameData.seedsOwned['cauliflower'].count > 0
     ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
@@ -2327,7 +2341,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.reduceSeedCount.emit(payload);
       }
     }
-    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'beet-seeds') {
+    if (
+      clickedFarm.state === 'soil-3' &&
+      evt.equippedTool === 'beet-seeds' &&
+      this.gameData.seedsOwned['beets'].count > 0
+    ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'beets-0';
@@ -2340,7 +2358,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.reduceSeedCount.emit(payload);
       }
     }
-    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'radish-seeds') {
+    if (
+      clickedFarm.state === 'soil-3' &&
+      evt.equippedTool === 'radish-seeds' &&
+      this.gameData.seedsOwned['radish'].count > 0
+    ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'radish-0';
@@ -2353,7 +2375,11 @@ export class GameComponent extends GameUtils implements AfterViewInit {
         this.reduceSeedCount.emit(payload);
       }
     }
-    if (clickedFarm.state === 'soil-3' && evt.equippedTool === 'kale-seeds') {
+    if (
+      clickedFarm.state === 'soil-3' &&
+      evt.equippedTool === 'kale-seeds' &&
+      this.gameData.seedsOwned['kale'].count > 0
+    ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id
       )[0].state = 'kale-0';
@@ -2368,7 +2394,8 @@ export class GameComponent extends GameUtils implements AfterViewInit {
     }
     if (
       clickedFarm.state === 'soil-3' &&
-      evt.equippedTool === 'sunflower-seeds'
+      evt.equippedTool === 'sunflower-seeds' &&
+      this.gameData.seedsOwned['sunflower'].count > 0
     ) {
       this.farmableArea.filter(
         (area) => area.id === evt.clickedFarmableArea.id

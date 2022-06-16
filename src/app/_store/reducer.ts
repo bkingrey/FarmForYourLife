@@ -523,7 +523,7 @@ export const gameReducer = createReducer(
       if (player.name === payload) {
         return {
           ...player,
-          badgeCount: player.badgeCount + 10,
+          badgeCount: player.badgeCount + 1,
         };
       } else {
         return {
