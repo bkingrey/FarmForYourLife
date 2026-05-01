@@ -1,6 +1,6 @@
 import { state } from '@angular/animations';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { GameState, MerchantItems, Upgrade } from './models';
+import { GameState, MerchantItems, RhythmState, Upgrade } from './models';
 import { intializeState } from './reducer';
 
 // GAME STATES
@@ -11,7 +11,7 @@ export const selectGameData = createSelector(
   getGameData,
   (gameData: GameState): GameState => {
     return gameData ? gameData : intializeState();
-  }
+  },
 );
 export const selectUpgradeChoices = createSelector(
   getGameData,
@@ -36,7 +36,7 @@ export const selectUpgradeChoices = createSelector(
       shuffledArray[2],
     ];
     return threeUpgrades;
-  }
+  },
 );
 
 export const selectItemCosts = createSelector(
@@ -48,7 +48,7 @@ export const selectItemCosts = createSelector(
         newCost =
           item.cost *
           (gameData.lobbyPlayers.filter(
-            (player) => player.name === gameData.me
+            (player) => player.name === gameData.me,
           )[0].badgeCount +
             1);
       }
@@ -57,7 +57,12 @@ export const selectItemCosts = createSelector(
         cost: Math.round(newCost / gameData.bargainValue),
       };
     });
-  }
+  },
+);
+
+export const selectRhythm = createSelector(
+  getGameData,
+  (gameData: GameState): RhythmState => gameData.rhythm,
 );
 
 function shuffle(arr) {

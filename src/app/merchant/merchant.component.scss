@@ -10,7 +10,7 @@ $fill-color: #ead4aa;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(var(--game-scale, 1));
   z-index: 5000;
   background-color: #f8dd99;
   opacity: 1;
@@ -19,14 +19,19 @@ $fill-color: #ead4aa;
   max-width: 650px;
   background: lighten($theme-color, 20%);
   border: $dash-size dashed #ca774b;
-  box-shadow: 0 0 0 2.5px #ca774b, 0 0 0 2.5px #fff, inset 0 0 0 2.5px #ca774b,
-    0 5px 10px 15px rgb(0 0 0 / 50%), inset 0 0 0 2px #fff,
+  box-shadow:
+    0 0 0 2.5px #ca774b,
+    0 0 0 2.5px #fff,
+    inset 0 0 0 2.5px #ca774b,
+    0 5px 10px 15px rgb(0 0 0 / 50%),
+    inset 0 0 0 2px #fff,
     inset 0 0 100vw 100vw #ead4aa;
   color: darken($theme-color, 20%);
   font-size: 3em;
   text-align: center;
-  cursor: url("../../assets/ui/cursor_big.png"),
-    url("../../assets/ui/cursor_03.cur"), default;
+  cursor:
+    url("../../assets/ui/cursor_big.png"), url("../../assets/ui/cursor_03.cur"),
+    default;
   pointer-events: auto !important;
 
   .title {

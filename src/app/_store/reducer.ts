@@ -15,6 +15,8 @@ export const intializeState = (): GameState => {
     lobbyPlayers: [],
     loadedPlayers: [],
     scene: 'title',
+    displayScale: 1,
+    mapLoaded: false,
     seedsOwned: {
       beets: {
         name: 'beet-seeds',
@@ -253,6 +255,16 @@ export const intializeState = (): GameState => {
         img: 'assets/ui/progress-medal.png',
       },
     ],
+    rhythm: {
+      enabled: true,
+      track: 'assets/music/Quacks-120.wav',
+      bpm: 120,
+      beatOffsetMs: 0,
+      lastJudgement: null,
+      score: 0,
+      combo: 0,
+      bestCombo: 0,
+    },
   };
 };
 export const gameReducer = createReducer(
@@ -637,5 +649,50 @@ export const gameReducer = createReducer(
       ...state,
       lobbyPlayers: newLobby,
     };
-  })
+  }),
+  on(GameActions.AddRhythmJudgement, (state, { payload }) => {
+    const isHit = payload.score > 0;
+    const newCombo = isHit ? state.rhythm.combo + 1 : 0;
+    return {
+      ...state,
+      rhythm: {
+        ...state.rhythm,
+        lastJudgement: payload,
+        score: state.rhythm.score + payload.score,
+        combo: newCombo,
+        bestCombo: Math.max(state.rhythm.bestCombo, newCombo),
+      },
+    };
+  }),
+  on(GameActions.ResetRhythm, (state) => ({
+    ...state,
+    rhythm: {
+      ...state.rhythm,
+      lastJudgement: null,
+      score: 0,
+      combo: 0,
+      bestCombo: 0,
+    },
+  })),
+  on(GameActions.SetRhythmTrack, (state, { payload }) => ({
+    ...state,
+    rhythm: {
+      ...state.rhythm,
+      track: payload.track,
+      bpm: payload.bpm,
+      beatOffsetMs: payload.beatOffsetMs,
+    },
+  })),
+  on(GameActions.SetRhythmEnabled, (state, { payload }) => ({
+    ...state,
+    rhythm: { ...state.rhythm, enabled: payload },
+  })),
+  on(GameActions.ChangeDisplayScale, (state, { payload }) => ({
+    ...state,
+    displayScale: payload,
+  })),
+  on(GameActions.MapLoaded, (state, { payload }) => ({
+    ...state,
+    mapLoaded: payload,
+  })),
 );

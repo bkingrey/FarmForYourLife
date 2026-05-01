@@ -3,6 +3,13 @@
   <button (click)="setPlayer(playerName)">
     {{ playerName.length > 0 ? "Let's Play!" : "Enter Name" }}
   </button>
+  <button
+    class="solo"
+    [disabled]="playerName.length === 0"
+    (click)="setPlayerSolo(playerName)"
+  >
+    Play Solo (Offline)
+  </button>
 </div>
 <div class="hello" *ngIf="nameSet">Hi, {{ playerName }}!</div>
 <div class="games-container">

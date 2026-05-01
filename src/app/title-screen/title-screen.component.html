@@ -1,3 +1,19 @@
-<h1 style="color: white">HOPS v0.0.1</h1>
+<div class="title-shell">
+  <h1>HOPS v0.0.1</h1>
 
-<button (click)="changeScene.emit('game-select')">START</button>
+  <div class="scale-picker">
+    <span class="scale-label">Display Scale</span>
+    <div class="scale-options">
+      <button
+        *ngFor="let opt of options"
+        type="button"
+        [class.active]="opt.value === selected"
+        (click)="pick(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    </div>
+  </div>
+
+  <button class="start" (click)="changeScene.emit('game-select')">START</button>
+</div>

@@ -20,4 +20,11 @@ export class GameSelectComponent implements OnInit {
     this.setPlayerName.emit(name);
     this.changeScene.emit('play-lobby');
   }
+
+  setPlayerSolo(name: string) {
+    if (!name) return;
+    this.nameSet = true;
+    this.setPlayerName.emit(name);
+    this.changeScene.emit('solo');
+  }
 }

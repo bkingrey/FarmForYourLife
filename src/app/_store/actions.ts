@@ -6,142 +6,167 @@ import {
   SeedsOwned,
   LobbyPlayer,
   Upgrade,
+  RhythmJudgement,
 } from './models';
+
+// RHYTHM ACTIONS
+export const AddRhythmJudgement = createAction(
+  '[Rhythm] Add Judgement',
+  props<{ payload: RhythmJudgement }>(),
+);
+export const ResetRhythm = createAction('[Rhythm] Reset');
+export const SetRhythmTrack = createAction(
+  '[Rhythm] Set Track',
+  props<{ payload: { track: string; bpm: number; beatOffsetMs: number } }>(),
+);
+export const SetRhythmEnabled = createAction(
+  '[Rhythm] Set Enabled',
+  props<{ payload: boolean }>(),
+);
+
+export const ChangeDisplayScale = createAction(
+  '[GameData] Change Display Scale',
+  props<{ payload: number }>(),
+);
+export const MapLoaded = createAction(
+  '[GameData] Map Loaded',
+  props<{ payload: boolean }>(),
+);
 
 // CONFIG ACTIONS
 export const getGameData = createAction('[GameData] Get Game Data');
 
 export const SuccessGetGameDataAction = createAction(
   '[GameData] - Success Get Game Data',
-  props<{ payload: GameState }>()
+  props<{ payload: GameState }>(),
 );
 export const ErrorGameDataAction = createAction(
   '[GameData] - Error',
-  props<Error>()
+  props<Error>(),
 );
 export const GameStart = createAction('[GameData] Start Game');
 
 export const ChangeKeyEvent = createAction(
   '[GameData] Change Key Event',
-  props<{ payload: KeyWASD }>()
+  props<{ payload: KeyWASD }>(),
 );
 
 export const RemoveKeyDown = createAction(
   '[GameData] Key Up Event',
-  props<{ payload: string }>()
+  props<{ payload: string }>(),
 );
 
 export const ChangeTool = createAction(
   '[GameData] Change Tool Event',
-  props<{ payload: string }>()
+  props<{ payload: string }>(),
 );
 export const ReduceSeedCount = createAction(
   '[GameData] Reduce Seed Count',
-  props<{ payload: SeedsOwned }>()
+  props<{ payload: SeedsOwned }>(),
 );
 
 export const ChangeEnergy = createAction(
   '[GameData] Change Energy',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 
 export const ChangeEnergyMax = createAction(
   '[GameData] Change Energy Maximum',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 
 export const ChangeBargainValue = createAction(
   '[GameData] Change Bargain Value',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 
 export const ChangeMinerValue = createAction(
   '[GameData] Change Miner Value',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 
 export const ChangeFisherValue = createAction(
   '[GameData] Change Fisher Value',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 
 export const ChangeVelocity = createAction(
   '[GameData] Change Velocity',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 
 export const ChangeWaterMeter = createAction(
   '[GameData] Fill Water Meter',
-  props<{ payload: number | string }>()
+  props<{ payload: number | string }>(),
 );
 
 export const ChangeWaterMax = createAction(
   '[GameData] Change Water Can Maximum',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 
 export const ChangeCanHarvest = createAction(
   '[GameData] Change Can Harvest',
-  props<{ payload: boolean }>()
+  props<{ payload: boolean }>(),
 );
 
 export const ChangeCanFillWater = createAction(
   '[GameData] Change Can Fill Water',
-  props<{ payload: boolean }>()
+  props<{ payload: boolean }>(),
 );
 
 export const ChangeMoney = createAction(
   '[GameData] Change Money',
-  props<{ payload: number }>()
+  props<{ payload: number }>(),
 );
 export const ChangeCanOpenShop = createAction(
   '[GameData] Change Can Open Shop',
-  props<{ payload: boolean }>()
+  props<{ payload: boolean }>(),
 );
 export const ChangeCanEnterHouse = createAction(
   '[GameData] Change Can Enter House',
-  props<{ payload: boolean }>()
+  props<{ payload: boolean }>(),
 );
 export const ChangeIsSleeping = createAction(
   '[GameData] Change Is Sleeping',
-  props<{ payload: boolean }>()
+  props<{ payload: boolean }>(),
 );
 export const OpenShop = createAction(
   '[GameData] Open/Close Shop',
-  props<{ payload: boolean }>()
+  props<{ payload: boolean }>(),
 );
 export const OpenUpgrades = createAction(
   '[GameData] Open/Close Upgrades',
-  props<{ payload: boolean }>()
+  props<{ payload: boolean }>(),
 );
 export const GetUpgrade = createAction(
   '[GameData] Get Upgrade',
-  props<{ payload: Upgrade }>()
+  props<{ payload: Upgrade }>(),
 );
 export const PurchaseItem = createAction(
   '[GameData] Purchase Item',
-  props<{ payload: { name; cost } }>()
+  props<{ payload: { name; cost } }>(),
 );
 export const ChangeScene = createAction(
   '[GameData] Change Scene',
-  props<{ payload: string }>()
+  props<{ payload: string }>(),
 );
 export const AddPlayerToLobby = createAction(
   '[GameData] Add Player to Lobby',
-  props<{ payload: Array<LobbyPlayer> }>()
+  props<{ payload: Array<LobbyPlayer> }>(),
 );
 
 export const UpdatePlayer = createAction(
   '[GameData] Updated Player',
-  props<{ payload: Array<LobbyPlayer> }>()
+  props<{ payload: Array<LobbyPlayer> }>(),
 );
 export const ChangePlayerState = createAction(
   '[GameData] Change Player state',
-  props<{ payload: LobbyPlayer }>()
+  props<{ payload: LobbyPlayer }>(),
 );
 export const AddBadgeToLobbyPlayer = createAction(
   '[GameData] Add Badge To Lobby Player',
-  props<{ payload: string }>()
+  props<{ payload: string }>(),
 );
 export const ShowWinScreen = createAction('[GameData] Show Win Screen');
 

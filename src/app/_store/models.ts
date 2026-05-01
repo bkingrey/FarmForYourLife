@@ -55,6 +55,48 @@ export interface GameState {
   seedsOwned: SeedKey;
   money: number;
   buyableItems: Array<MerchantItems>;
+  rhythm: RhythmState;
+  displayScale: number;
+  mapLoaded: boolean;
+}
+
+export type RhythmJudgementLabel =
+  | 'Poor'
+  | 'Okay'
+  | 'Good'
+  | 'Great'
+  | 'Perfect';
+export type FarmActionType =
+  | 'dig'
+  | 'water'
+  | 'plant'
+  | 'harvest'
+  | 'mine'
+  | 'fish'
+  | 'drop'
+  | 'sell'
+  | 'open-shop'
+  | 'buy-item'
+  | 'sleep'
+  | 'fill-water';
+
+export interface RhythmJudgement {
+  label: RhythmJudgementLabel;
+  score: number;
+  timingErrorMs: number;
+  action: FarmActionType;
+  createdAt: number;
+}
+
+export interface RhythmState {
+  enabled: boolean;
+  track: string;
+  bpm: number;
+  beatOffsetMs: number;
+  lastJudgement: RhythmJudgement | null;
+  score: number;
+  combo: number;
+  bestCombo: number;
 }
 
 export interface Upgrade {

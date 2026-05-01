@@ -1,4 +1,11 @@
 <ng-container *ngIf="facade.gameData$ | async as gameData">
+  <div
+    class="game-loading"
+    *ngIf="gameData.scene === 'game' && !gameData.mapLoaded"
+  >
+    <div class="loading-text">Loading map…</div>
+    <div class="loading-bar"><div class="loading-fill"></div></div>
+  </div>
   <app-title-screen
     (changeScene)="changeScene($event)"
     *ngIf="gameData.scene === 'title'"

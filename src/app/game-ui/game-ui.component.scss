@@ -2,11 +2,67 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(var(--game-scale, 1));
   pointer-events: none;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  z-index: 5;
+}
+
+.rhythm-hud {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: "Press Start 2P", monospace, sans-serif;
+  text-shadow:
+    2px 2px 0 #000,
+    -2px 2px 0 #000,
+    2px -2px 0 #000,
+    -2px -2px 0 #000;
+  pointer-events: none;
+  z-index: 10;
+
+  .rhythm-score {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: #fff;
+    .rhythm-label {
+      font-size: 10px;
+      color: #ffd34d;
+    }
+    .rhythm-value {
+      font-size: 20px;
+    }
+  }
+  .rhythm-combo {
+    font-size: 10px;
+    color: #5dafff;
+  }
+  .rhythm-judgement {
+    font-size: 12px;
+    &[data-label="Perfect"] {
+      color: #ffd34d;
+    }
+    &[data-label="Great"] {
+      color: #5dafff;
+    }
+    &[data-label="Good"] {
+      color: #5dd66a;
+    }
+    &[data-label="Okay"] {
+      color: #ffffff;
+    }
+    &[data-label="Poor"] {
+      color: #9aa3ad;
+    }
+  }
 }
 
 .carrying-ui {
@@ -23,8 +79,14 @@
     span {
       margin-left: 5px;
       letter-spacing: 0.5px;
-      text-shadow: 2px 2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
-        -2px -2px 0 #000, 2px 0px 0 #000, 0px 2px 0 #000, -2px 0px 0 #000,
+      text-shadow:
+        2px 2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        -2px -2px 0 #000,
+        2px 0px 0 #000,
+        0px 2px 0 #000,
+        -2px 0px 0 #000,
         0px -2px 0 #000;
     }
   }
@@ -61,7 +123,8 @@
       left: 2px;
       width: 15px;
     }
-    cursor: url("../../assets/ui/cursor_big.png"),
+    cursor:
+      url("../../assets/ui/cursor_big.png"),
       url("../../assets/ui/cursor_03.cur"), default;
     pointer-events: auto !important;
   }
@@ -91,7 +154,8 @@
       width: 20px;
       height: 20px;
     }
-    cursor: url("../../assets/ui/cursor_big.png"),
+    cursor:
+      url("../../assets/ui/cursor_big.png"),
       url("../../assets/ui/cursor_03.cur"), default;
     pointer-events: auto !important;
   }
@@ -196,7 +260,9 @@
 }
 
 .active {
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px, rgb(51, 51, 51) 0px 0px 0px 3px !important;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 1px 4px,
+    rgb(51, 51, 51) 0px 0px 0px 3px !important;
   transform: scale(0.92);
   transition-duration: 100ms;
   transform-origin: center;
@@ -270,8 +336,14 @@
   span {
     color: white;
     letter-spacing: 0.5px;
-    text-shadow: 2px 2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
-      -2px -2px 0 #000, 2px 0px 0 #000, 0px 2px 0 #000, -2px 0px 0 #000,
+    text-shadow:
+      2px 2px 0 #000,
+      2px -2px 0 #000,
+      -2px 2px 0 #000,
+      -2px -2px 0 #000,
+      2px 0px 0 #000,
+      0px 2px 0 #000,
+      -2px 0px 0 #000,
       0px -2px 0 #000;
     font-size: 12px;
   }
@@ -299,6 +371,8 @@
   display: flex;
   column-gap: 40px;
   color: white;
-  text-shadow: -1px -1px 1px rgb(255 255 255 / 10%),
-    1px 1px 1px rgb(0 0 0 / 50%), 1px 0px 3px #000000;
+  text-shadow:
+    -1px -1px 1px rgb(255 255 255 / 10%),
+    1px 1px 1px rgb(0 0 0 / 50%),
+    1px 0px 3px #000000;
 }

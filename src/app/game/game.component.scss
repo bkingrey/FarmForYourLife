@@ -1,52 +1,85 @@
-canvas {
+canvas#game-canvas {
   display: block;
   background-color: #5fc14c;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(var(--game-scale, 1));
   margin: 0;
   padding: 0;
   outline: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
-  cursor: url("../../assets/ui/cursor_big.png"),
-    url("../../assets/ui/cursor_03.cur"), pointer;
+  cursor:
+    url("../../assets/ui/cursor_big.png"), url("../../assets/ui/cursor_03.cur"),
+    pointer;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  z-index: 1;
+}
+
+.phaser-host {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(var(--game-scale, 1));
+  pointer-events: none;
+  z-index: 2;
+  background: transparent;
+  overflow: hidden;
+}
+
+.phaser-host canvas {
+  display: block;
+  background: transparent !important;
+  background-color: transparent !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
 }
 
 .water {
-  cursor: url("../../assets/ui/water-big.png"),
-    url("../../assets/ui/cursor_03.cur"), pointer;
+  cursor:
+    url("../../assets/ui/water-big.png"), url("../../assets/ui/cursor_03.cur"),
+    pointer;
 }
 
 .house {
-  cursor: url("../../assets/ui/bed-cursor.png"),
-    url("../../assets/ui/cursor_03.cur"), pointer;
+  cursor:
+    url("../../assets/ui/bed-cursor.png"), url("../../assets/ui/cursor_03.cur"),
+    pointer;
 }
 
 .mine {
-  cursor: url("../../assets/ui/pickaxe-cursor.png"),
+  cursor:
+    url("../../assets/ui/pickaxe-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
 }
 
 .fish {
-  cursor: url("../../assets/ui/rod-cursor.png"),
-    url("../../assets/ui/cursor_03.cur"), pointer;
+  cursor:
+    url("../../assets/ui/rod-cursor.png"), url("../../assets/ui/cursor_03.cur"),
+    pointer;
   transform: translateY(-1);
 }
 
 .merch {
-  cursor: url("../../assets/ui/coins-cursor.png"),
+  cursor:
+    url("../../assets/ui/coins-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
 }
 
 .shovel {
-  cursor: url("../../assets/ui/shovel-water-cursor.png"),
+  cursor:
+    url("../../assets/ui/shovel-water-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
 }
 .seed {
-  cursor: url("../../assets/ui/plant-cursor.png"),
+  cursor:
+    url("../../assets/ui/plant-cursor.png"),
     url("../../assets/ui/cursor_03.cur"), pointer;
 }

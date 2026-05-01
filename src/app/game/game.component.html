@@ -7,7 +7,7 @@
     fish: hoveredFarmableArea.state === 'fishable',
     merch: hoveredFarmableArea.state === 'merchant',
     shovel: isShovelable(hoveredFarmableArea.state, player, mousePos),
-    seed: isHoldingSeed(gameData.equippedTool)
+    seed: isHoldingSeed(gameData.equippedTool),
   }"
   tabindex="0"
   (keydown)="keyDownEvent($event)"
@@ -17,3 +17,9 @@
   (contextmenu)="doRightClickOnMouse($event)"
   (click)="doLeftClickOnMouse($event)"
 ></canvas>
+<div
+  #phaserHost
+  class="phaser-host"
+  [style.width.px]="gameData.resolution.x"
+  [style.height.px]="gameData.resolution.y"
+></div>

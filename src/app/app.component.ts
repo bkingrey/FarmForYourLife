@@ -25,6 +25,7 @@ import {
   UpdatePlayer,
 } from './_store/actions';
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { environment } from '../environments/environment';
 import { AppFacade } from './app.facade';
 import io, { Socket } from 'socket.io-client';
 import { KeyWASD, Upgrade } from './_store/models';
@@ -38,12 +39,17 @@ import { take } from 'rxjs';
 })
 export class AppComponent implements OnInit {
   title = 'Hops Farm Game';
-  socket: Socket = io('https://hopsfarmgame.herokuapp.com/');
+  socket: Socket = io(environment.socketUrl);
   @ViewChild('gameComp') gameComponent: GameComponent | null = null;
   constructor(public facade: AppFacade) {}
 
   ngOnInit() {
     this.facade.dispatch(getGameData());
+    this.facade.gameData$.subscribe((g) => {
+      if (g && typeof g.displayScale === 'number') {
+        document.body.style.setProperty('--game-scale', String(g.displayScale));
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -70,11 +76,11 @@ export class AppComponent implements OnInit {
     this.socket.on('playerCultivate', (cultivator) => {
       if (this.gameComponent) {
         this.gameComponent.lobbyPlayers.filter(
-          (player) => player.name === cultivator
+          (player) => player.name === cultivator,
         )[0].isCultivating = true;
         if (
           this.gameComponent.lobbyPlayers.filter(
-            (player) => player.name === cultivator
+            (player) => player.name === cultivator,
           )[0].isCultivating === true
         ) {
         }
@@ -88,14 +94,14 @@ export class AppComponent implements OnInit {
     this.socket.on('dropPickupable', (data) => {
       this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
         const position = this.gameComponent?.farmableArea.filter(
-          (area) => area.id === data.positionId
+          (area) => area.id === data.positionId,
         )[0]?.position;
         this.gameComponent?.createPickupablePlantAtArea(
           data.plant,
           position,
           data.id,
           data.playerName,
-          true
+          true,
         );
       });
     });
@@ -119,7 +125,7 @@ export class AppComponent implements OnInit {
     this.socket.on('updatePlayer', (updatedPlayer) => {
       this.facade.dispatch(UpdatePlayer({ payload: updatedPlayer }));
       const player = this.gameComponent?.lobbyPlayers.filter(
-        (p) => p.name === updatedPlayer.name
+        (p) => p.name === updatedPlayer.name,
       )[0];
       if (player?.loadedIn) {
         this.facade.gameData$.pipe(take(1)).subscribe((data) => {
@@ -141,7 +147,7 @@ export class AppComponent implements OnInit {
     });
     this.socket.on('changePlayerTool', (data) => {
       const player = this.gameComponent?.lobbyPlayers.filter(
-        (player) => player.name === data.player
+        (player) => player.name === data.player,
       )[0];
       if (player) {
         player.equippedTool = data.tool;
@@ -154,7 +160,7 @@ export class AppComponent implements OnInit {
     this.socket.on('cultivateOther', (player) => {
       if (this.gameComponent && player) {
         this.gameComponent.lobbyPlayers.filter(
-          (p) => p.name === player
+          (p) => p.name === player,
         )[0].isCultivating = true;
       }
     });
@@ -162,7 +168,7 @@ export class AppComponent implements OnInit {
     this.socket.on('hitPlayer', (player) => {
       if (this.gameComponent) {
         this.gameComponent.lobbyPlayers.filter(
-          (p) => p.name === player.name
+          (p) => p.name === player.name,
         )[0].isBeingHit = true;
       }
     });
@@ -170,7 +176,7 @@ export class AppComponent implements OnInit {
     this.socket.on('stopHittingPlayer', (player) => {
       if (this.gameComponent) {
         this.gameComponent.lobbyPlayers.filter(
-          (p) => p.name === player.name
+          (p) => p.name === player.name,
         )[0].isBeingHit = false;
       }
     });
@@ -243,15 +249,54 @@ export class AppComponent implements OnInit {
     }
   }
   changeScene(event) {
+    if (event === 'solo') {
+      this.startSoloOffline();
+      return;
+    }
     if (event === 'game') {
       this.facade.gameData$.pipe(take(1)).subscribe((data) => {
         let player = data.lobbyPlayers.filter(
-          (player) => player.name === data.me
+          (player) => player.name === data.me,
         )[0];
         this.socket.emit('StartGame', player);
       });
     }
     this.facade.dispatch(ChangeScene({ payload: event }));
+  }
+
+  /** Build a local single-player lobby and skip multiplayer. */
+  private startSoloOffline() {
+    this.facade.gameData$.pipe(take(1)).subscribe((data) => {
+      const me: any = {
+        name: data.me || 'Player',
+        id: data.me || 'Player',
+        loadedIn: true,
+        state: 'idle',
+        roomId: 0,
+        moveup: false,
+        movedown: false,
+        moveleft: false,
+        moveright: false,
+        useRightAnims: true,
+        canMoveHorizontal: true,
+        canMoveVertical: true,
+        moving: false,
+        equippedTool: 'shovel',
+        isCarrying: false,
+        isCultivating: false,
+        isWatering: false,
+        isBeingHit: false,
+        canCarry: true,
+        badgeCount: 0,
+        width: 0,
+        height: 0,
+        position: { x: 200, y: 200 },
+        hitdirection: { x: 0, y: 0 },
+      };
+      this.facade.dispatch(AddPlayerToLobby({ payload: [me] }));
+      this.facade.dispatch(UpdatePlayer({ payload: me }));
+      this.facade.dispatch(ChangeScene({ payload: 'game' }));
+    });
   }
   addPlayer(event) {
     this.facade.dispatch(Me({ payload: event }));
@@ -262,6 +307,10 @@ export class AppComponent implements OnInit {
   }
   changeHoveredFarm(event) {
     this.socket.emit('ChangeHoveredFarm', event);
+    // Always process the state change for the originating client. The relay
+    // server only broadcasts to OTHER clients, so the sender must apply its
+    // own dig/water/plant state changes locally.
+    this.gameComponent?.changeStateOfHoveredFarmable(event);
   }
   cultivateOthers(event) {
     this.socket.emit('CultivateOthers', event);
@@ -280,7 +329,7 @@ export class AppComponent implements OnInit {
     this.facade.gameData$.pipe(take(1)).subscribe((data) => {
       if (this.gameComponent) {
         this.gameComponent.upg = this.gameComponent.getUpgradeVaules(
-          data.learnedUpgrades
+          data.learnedUpgrades,
         );
       }
     });
@@ -292,9 +341,22 @@ export class AppComponent implements OnInit {
   }
   dropPickupable(event) {
     this.socket.emit('DropPickupable', event);
+    this.facade.gameData$.pipe(take(1)).subscribe(() => {
+      const position = this.gameComponent?.farmableArea.filter(
+        (area) => area.id === event.positionId,
+      )[0]?.position;
+      this.gameComponent?.createPickupablePlantAtArea(
+        event.plant,
+        position,
+        event.id,
+        event.playerName,
+        true,
+      );
+    });
   }
   removePickupable(event) {
     this.socket.emit('RemovePickupable', event);
+    this.gameComponent?.removePickupableFromArray(event);
   }
   playerCultivate(event) {
     this.socket.emit('PlayerCultivate', event);
@@ -304,5 +366,6 @@ export class AppComponent implements OnInit {
   }
   goInHouse(event) {
     this.socket.emit('GoInHouse', event);
+    this.gameComponent?.goIntoHouse(event);
   }
 }
