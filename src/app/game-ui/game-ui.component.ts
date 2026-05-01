@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
@@ -8,13 +9,14 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { GameState } from '../_store/models';
+import { GameState, LobbyPlayer } from '../_store/models';
 import { intializeState } from '../_store/reducer';
 
 @Component({
   selector: 'app-game-ui',
   templateUrl: './game-ui.component.html',
   styleUrls: ['./game-ui.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameUiComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
@@ -23,6 +25,10 @@ export class GameUiComponent implements AfterViewInit {
   @ViewChild('gameUI') gameUI: ElementRef | null = null;
   showSeeds = false;
   constructor() {}
+
+  trackByPlayerName(_index: number, player: LobbyPlayer): string {
+    return player.name;
+  }
 
   ngAfterViewInit(): void {
     if (this.gameUI) {

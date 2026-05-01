@@ -1,9 +1,16 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+} from '@angular/core';
 
 @Component({
   selector: 'app-game-select',
   templateUrl: './game-select.component.html',
   styleUrls: ['./game-select.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameSelectComponent implements OnInit {
   @Output() changeScene = new EventEmitter();

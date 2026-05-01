@@ -257,7 +257,7 @@ export const intializeState = (): GameState => {
     ],
     rhythm: {
       enabled: true,
-      track: 'assets/music/Quacks-120.wav',
+      track: 'assets/music/Quacks-120.ogg',
       bpm: 120,
       beatOffsetMs: 0,
       lastJudgement: null,

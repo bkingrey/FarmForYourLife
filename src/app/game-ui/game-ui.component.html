@@ -28,7 +28,9 @@
     }}</span>
   </div>
   <div class="badge-count">
-    <div *ngFor="let player of gameData.lobbyPlayers">
+    <div
+      *ngFor="let player of gameData.lobbyPlayers; trackBy: trackByPlayerName"
+    >
       <h6>{{ player.name }}</h6>
       <div>
         {{ player.badgeCount }} <img src="../../assets/ui/progress-medal.png" />

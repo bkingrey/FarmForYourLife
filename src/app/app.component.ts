@@ -24,10 +24,18 @@ import {
   ShowWinScreen,
   UpdatePlayer,
 } from './_store/actions';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../environments/environment';
 import { AppFacade } from './app.facade';
-import io, { Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import { SocketService } from './socket.service';
 import { KeyWASD, Upgrade } from './_store/models';
 import { GameComponent } from './game/game.component';
 import { take } from 'rxjs';
@@ -39,17 +47,34 @@ import { take } from 'rxjs';
 })
 export class AppComponent implements OnInit {
   title = 'Hops Farm Game';
-  socket: Socket = io(environment.socketUrl);
+  socket: Socket;
   @ViewChild('gameComp') gameComponent: GameComponent | null = null;
-  constructor(public facade: AppFacade) {}
+  private destroyRef = inject(DestroyRef);
+  constructor(
+    public facade: AppFacade,
+    private socketService: SocketService,
+  ) {
+    this.socket = this.socketService.socket;
+  }
 
   ngOnInit() {
     this.facade.dispatch(getGameData());
-    this.facade.gameData$.subscribe((g) => {
-      if (g && typeof g.displayScale === 'number') {
-        document.body.style.setProperty('--game-scale', String(g.displayScale));
-      }
-    });
+    let lastScale: number | null = null;
+    this.facade.gameData$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((g) => {
+        if (
+          g &&
+          typeof g.displayScale === 'number' &&
+          g.displayScale !== lastScale
+        ) {
+          lastScale = g.displayScale;
+          document.body.style.setProperty(
+            '--game-scale',
+            String(g.displayScale),
+          );
+        }
+      });
   }
 
   ngAfterViewInit(): void {

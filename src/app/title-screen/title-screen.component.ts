@@ -1,4 +1,9 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+} from '@angular/core';
 import { AppFacade } from '../app.facade';
 import { ChangeDisplayScale } from '../_store/actions';
 
@@ -11,6 +16,7 @@ interface ScaleOption {
   selector: 'app-title-screen',
   templateUrl: './title-screen.component.html',
   styleUrls: ['./title-screen.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TitleScreenComponent {
   @Output() changeScene = new EventEmitter();

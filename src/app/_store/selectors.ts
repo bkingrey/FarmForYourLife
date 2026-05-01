@@ -13,11 +13,33 @@ export const selectGameData = createSelector(
     return gameData ? gameData : intializeState();
   },
 );
+
+// --- Atomic slice selectors. Each one only invalidates when its own slice
+// changes, which keeps the composite selectors below from recomputing on
+// every unrelated state change.
+const selectLearnedUpgrades = createSelector(
+  selectGameData,
+  (g) => g.learnedUpgrades,
+);
+const selectUpgrades = createSelector(selectGameData, (g) => g.upgrades);
+const selectBuyableItems = createSelector(
+  selectGameData,
+  (g) => g.buyableItems,
+);
+const selectLobbyPlayers = createSelector(
+  selectGameData,
+  (g) => g.lobbyPlayers,
+);
+const selectMe = createSelector(selectGameData, (g) => g.me);
+const selectBargainValue = createSelector(
+  selectGameData,
+  (g) => g.bargainValue,
+);
+
 export const selectUpgradeChoices = createSelector(
-  getGameData,
-  (gameData: GameState): Array<Upgrade> => {
-    const learned = gameData.learnedUpgrades;
-    const unlearned = gameData.upgrades;
+  selectLearnedUpgrades,
+  selectUpgrades,
+  (learned: Array<Upgrade>, unlearned: Array<Upgrade>): Array<Upgrade> => {
     const upgradesToShow: Array<Upgrade> = [];
     learned.forEach((upgrade) => {
       unlearned.forEach((newUp) => {
@@ -30,38 +52,32 @@ export const selectUpgradeChoices = createSelector(
       });
     });
     const shuffledArray = shuffle(upgradesToShow);
-    const threeUpgrades = [
-      shuffledArray[0],
-      shuffledArray[1],
-      shuffledArray[2],
-    ];
-    return threeUpgrades;
+    return [shuffledArray[0], shuffledArray[1], shuffledArray[2]];
   },
 );
 
 export const selectItemCosts = createSelector(
-  getGameData,
-  (gameData: GameState): Array<MerchantItems> => {
-    return gameData.buyableItems.map((item) => {
+  selectBuyableItems,
+  selectLobbyPlayers,
+  selectMe,
+  selectBargainValue,
+  (buyableItems, lobbyPlayers, me, bargainValue): Array<MerchantItems> => {
+    return buyableItems.map((item) => {
       let newCost = item.cost;
       if (item.name === 'Progress Badge') {
-        newCost =
-          item.cost *
-          (gameData.lobbyPlayers.filter(
-            (player) => player.name === gameData.me,
-          )[0].badgeCount +
-            1);
+        const mePlayer = lobbyPlayers.filter((p) => p.name === me)[0];
+        if (mePlayer) newCost = item.cost * (mePlayer.badgeCount + 1);
       }
       return {
         ...item,
-        cost: Math.round(newCost / gameData.bargainValue),
+        cost: Math.round(newCost / bargainValue),
       };
     });
   },
 );
 
 export const selectRhythm = createSelector(
-  getGameData,
+  selectGameData,
   (gameData: GameState): RhythmState => gameData.rhythm,
 );
 
