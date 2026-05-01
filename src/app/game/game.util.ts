@@ -1,7 +1,9 @@
 import { GameState, Upgrade } from '../_store/models';
 
 export class GameUtils {
-  isShovelable(state, player, mousePos) {
+  private readonly interactionRangePx = 88;
+
+  isShovelable(state, player, target) {
     return (
       state !== 'merchant' &&
       state !== 'merchant-left' &&
@@ -12,18 +14,46 @@ export class GameUtils {
       state !== 'well' &&
       state !== 'house' &&
       state !== 'untargetable' &&
-      this.isMouseCloseToPlayer(player, mousePos)
+      this.isTargetCloseToPlayer(player, target)
+    );
+  }
+
+  isTargetCloseToPlayer(player, target) {
+    if (target?.position && typeof target?.width === 'number') {
+      return this.isAreaCloseToPlayer(player, target);
+    }
+    return this.isMouseCloseToPlayer(player, target);
+  }
+
+  isAreaCloseToPlayer(player, area) {
+    if (!player?.center || !area?.position) return false;
+
+    const range = this.interactionRangePx;
+    const minReachX = player.center.x - range;
+    const maxReachX = player.center.x + range;
+    const minReachY = player.center.y - range;
+    const maxReachY = player.center.y + range;
+
+    return (
+      area.position.x < maxReachX &&
+      area.position.x + area.width > minReachX &&
+      area.position.y < maxReachY &&
+      area.position.y + area.height > minReachY
     );
   }
 
   isMouseCloseToPlayer(player, mousePos) {
-    if (player.center) {
+    if (player?.center && mousePos) {
+      const range = this.interactionRangePx;
       return (
-        ((mousePos.x >= player.center.x && mousePos.x - player.center.x < 88) ||
+        ((mousePos.x >= player.center.x &&
+          mousePos.x - player.center.x < range) ||
           (player.center.x >= mousePos.x &&
-            player.center.x - mousePos.x < 88)) &&
-        ((mousePos.y >= player.center.y && mousePos.y - player.center.y < 88) ||
-          (player.center.y >= mousePos.y && player.center.y - mousePos.y < 88))
+            player.center.x - mousePos.x < range)) &&
+        ((mousePos.y >= player.center.y &&
+          mousePos.y - player.center.y < range) ||
+          (player.center.y >= mousePos.y &&
+            player.center.y - mousePos.y < range))
       );
     }
     return false;

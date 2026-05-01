@@ -14,6 +14,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostListener,
   Input,
   NgZone,
   OnDestroy,
@@ -287,6 +288,9 @@ export class GameComponent
   then = 0;
   startTime = 0;
   elaspsed = 0;
+  private autoRestRequested = false;
+  private autoRefillRequested = false;
+  private static readonly MAX_ACTION_ENERGY_COST = 5;
 
   /** Current music BPM (defaults to 120). */
   private get currentBpm(): number {
@@ -314,8 +318,9 @@ export class GameComponent
       case 'pickaxe':
       case 'hammer':
       case 'broom':
-      case 'shovel':
         return 2;
+      case 'shovel':
+        return 1;
       default:
         // seeds + watering + misc
         return 1;
@@ -353,8 +358,40 @@ export class GameComponent
     screenX?: number,
     screenY?: number,
   ) {
-    if (!this.gameData.rhythm?.enabled) return;
+    if (!this.gameData.rhythm?.enabled) {
+      if (this.actionConsumesEnergy(action)) {
+        this.changeEnergy.emit(-this.energyCostForJudgementLabel('Good'));
+      }
+      return;
+    }
     this.phaserService.judge(action, screenX, screenY);
+  }
+
+  private actionConsumesEnergy(action: FarmActionType): boolean {
+    return (
+      action === 'dig' ||
+      action === 'water' ||
+      action === 'plant' ||
+      action === 'harvest' ||
+      action === 'mine' ||
+      action === 'fish'
+    );
+  }
+
+  private energyCostForJudgementLabel(label: string): number {
+    switch (label) {
+      case 'Perfect':
+        return 1;
+      case 'Great':
+        return 2;
+      case 'Good':
+        return 3;
+      case 'Okay':
+        return 4;
+      case 'Poor':
+      default:
+        return 5;
+    }
   }
 
   drawingCode() {
@@ -397,6 +434,7 @@ export class GameComponent
           this.drawFarmable(wellTile);
         }
       });
+      this.advanceMerchantAnimation();
       this.traders.forEach((trader) => {
         this.drawMerchant(trader);
       });
@@ -429,6 +467,10 @@ export class GameComponent
       });
 
       this.getPlayerAndMultiplayerPositions();
+      this.maybeAutoRestAtHouse();
+      this.maybeAutoRefillAtWell();
+
+      this.drawHeroRangeOverlay();
 
       // SLEEP
       if (this.queuedActivation) {
@@ -499,7 +541,7 @@ export class GameComponent
         this.player.position.y,
       );
       this.ctx.restore();
-      if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
+      if (!this.isTargetCloseToPlayer(this.player, this.hoveredFarmableArea)) {
         if (this.gameData.canHarvest === true) {
           this.canHarvest.emit(false);
         }
@@ -1311,6 +1353,11 @@ export class GameComponent
       })
       .catch((err) => console.error('[Phaser] mount failed', err));
     this.phaserSub = this.phaserService.judgements.subscribe((judgement) => {
+      if (this.actionConsumesEnergy(judgement.action)) {
+        this.changeEnergy.emit(
+          -this.energyCostForJudgementLabel(judgement.label),
+        );
+      }
       this.facade.dispatch(AddRhythmJudgement({ payload: judgement }));
     });
   }
@@ -1690,6 +1737,28 @@ export class GameComponent
     this.traders.push(newTrader2);
   }
 
+  private advanceMerchantAnimation() {
+    const frames =
+      this.gameData.spriteAnimations['goblinMerchantRight']?.frames ??
+      this.gameData.spriteAnimations['goblinMerchantLeft']?.frames ??
+      8;
+    // Sample animation frame directly from beat phase so loop timing is
+    // exact (counter stepping can drift due to tick quantization).
+    // At 120 BPM, 2 beats = 1 second per full merchant idle loop.
+    const safeFrames = Math.max(1, frames);
+    const beatMs = 60000 / Math.max(1, this.currentBpm);
+    const cycleMs = beatMs * 2;
+    const now = performance.now();
+    const nextBeat = this.phaserService.nextBeatWallMs();
+    const anchor = nextBeat !== null ? nextBeat - beatMs : now;
+    const elapsedInCycle = (((now - anchor) % cycleMs) + cycleMs) % cycleMs;
+    this.goblinFrameIndex = Math.min(
+      safeFrames - 1,
+      Math.floor((elapsedInCycle / cycleMs) * safeFrames),
+    );
+    this.goblinFramesDrawn = 0;
+  }
+
   drawMerchant(trader) {
     let traderHitbox = {
       position: {
@@ -1700,20 +1769,10 @@ export class GameComponent
       height: trader.height + 66,
       state: 'merchant',
     };
-    const spriteSheet =
-      trader.state === 'merchant-left'
-        ? this.goblinMerchantLeft
-        : this.goblinMerchantRight;
-    if (this.goblinFramesDrawn > this.animThreshold(8, 1)) {
-      if (this.goblinFrameIndex < 7) {
-        this.goblinFrameIndex++;
-      } else {
-        this.goblinFrameIndex = 0;
-      }
-      this.goblinFramesDrawn = 0;
-    } else {
-      this.goblinFramesDrawn++;
-    }
+    const facingLeft = trader.state === 'merchant-left';
+    const spriteSheet = facingLeft
+      ? this.goblinMerchantLeft
+      : this.goblinMerchantRight;
     if (this.canvas && this.ctx) {
       this.ctx.drawImage(
         spriteSheet,
@@ -1838,16 +1897,18 @@ export class GameComponent
     } else {
       if (this.ctx) this.ctx.globalAlpha = 1;
     }
-    if (this.otherPlayersFramesDrawn[i] > this.animThreshold(frames, 1)) {
-      if (this.otherPlayersFrameIndex[i] < frames - 1) {
-        this.otherPlayersFrameIndex[i]++;
-      } else {
-        this.otherPlayersFrameIndex[i] = 0;
-      }
-      this.otherPlayersFramesDrawn[i] = 0;
-    } else {
-      this.otherPlayersFramesDrawn[i]++;
-    }
+    const safeFrames = Math.max(1, frames);
+    const beatMs = 60000 / Math.max(1, this.currentBpm);
+    const cycleMs = beatMs * 2;
+    const now = performance.now();
+    const nextBeat = this.phaserService.nextBeatWallMs();
+    const anchor = nextBeat !== null ? nextBeat - beatMs : now;
+    const elapsedInCycle = (((now - anchor) % cycleMs) + cycleMs) % cycleMs;
+    this.otherPlayersFrameIndex[i] = Math.min(
+      safeFrames - 1,
+      Math.floor((elapsedInCycle / cycleMs) * safeFrames),
+    );
+    this.otherPlayersFramesDrawn[i] = 0;
     if (this.canvas && this.ctx && this.player.width && this.player.height) {
       const spriteWidth = otherplayer.isCarrying ? 128 : width;
       const spriteHeight = otherplayer.isCarrying ? this.squareSize : height;
@@ -1881,20 +1942,18 @@ export class GameComponent
   }
 
   drawSpriteAnimation(spriteSheet: HTMLImageElement, frames: number) {
+    this.drawBeatSyncedSpriteAnimation(spriteSheet, frames, 2);
+  }
+
+  private drawBeatSyncedSpriteAnimation(
+    spriteSheet: HTMLImageElement,
+    frames: number,
+    beatsPerLoop = 1,
+  ) {
     if (this.gameData.isSleeping && this.ctx) {
       this.ctx.globalAlpha = 0;
     } else {
       if (this.ctx) this.ctx.globalAlpha = 1;
-    }
-    if (this.actionsDrawn > this.animThreshold(frames, 1)) {
-      if (this.frameIndex < frames - 1) {
-        this.frameIndex++;
-      } else {
-        this.frameIndex = 0;
-      }
-      this.actionsDrawn = 0;
-    } else {
-      this.actionsDrawn++;
     }
     if (this.canvas && this.ctx && !this.isWatering) {
       this.player.width = 13;
@@ -1920,9 +1979,21 @@ export class GameComponent
         y: this.player.position.y + this.player.height * 2,
       };
 
+      const safeFrames = Math.max(1, frames);
+      const safeBeats = Math.max(0.01, beatsPerLoop);
+      const beatMs = 60000 / Math.max(1, this.currentBpm);
+      const cycleMs = beatMs * safeBeats;
+      const now = performance.now();
+      const nextBeat = this.phaserService.nextBeatWallMs();
+      // Anchor player loops to the global beat clock when available so
+      // transitions (move <-> idle) stay phase-locked.
+      const anchor = nextBeat !== null ? nextBeat - beatMs : now;
+      const elapsedInCycle = (((now - anchor) % cycleMs) + cycleMs) % cycleMs;
+      const beatFrame = Math.floor((elapsedInCycle / cycleMs) * safeFrames);
+
       this.ctx.drawImage(
         spriteSheet,
-        spriteWidth * this.frameIndex,
+        spriteWidth * beatFrame,
         0,
         spriteWidth,
         spriteHeight,
@@ -1931,13 +2002,6 @@ export class GameComponent
         dx,
         dy,
       );
-      // ***** SHOWING HIT BOX *****
-      // if (this.ctx && this.player.height && this.player.width) {
-      //   this.ctx.beginPath();
-      //   this.ctx.rect(positionX, positionY, dx, dy);
-      //   this.ctx.stroke();
-      // }
-      // ***** SHOWING HIT BOX *****
     }
   }
 
@@ -2082,6 +2146,7 @@ export class GameComponent
       clickedFarmableArea: area,
       isWatering: this.isWatering,
       equippedTool: this.gameData.equippedTool,
+      allowSeedPlanting: false,
       me: this.gameData.me,
       upg: this.upg,
     };
@@ -2204,13 +2269,10 @@ export class GameComponent
       if (area) {
         if (!area.watered) {
           area.watered = true;
-          // Beat-driven growth: stamp the wall-clock when watering started.
-          // drawFarmable() advances the crop one stage per `GROW_BEATS` and
-          // renders a progress bar above the plant.
-          area.wateredAtMs = performance.now();
-          if (evt.me === this.gameData.me) {
-            this.changeEnergy.emit(-3);
-          }
+          // Beat-driven growth: align growth start to the next music-beat
+          // boundary so a slightly-off watering still ticks on-beat.
+          area.wateredAtMs =
+            this.phaserService.nextBeatWallMs() ?? performance.now();
         }
       }
       if (evt.me === this.gameData.me && !this.isShiftDown) {
@@ -2246,10 +2308,17 @@ export class GameComponent
     if (evt.equippedTool === 'shovel') {
       this.farmAction(evt.clickedFarmableArea, evt.upg);
     }
-    if (this.isAPlantSeed(evt.equippedTool)) {
+    if (
+      this.isAPlantSeed(evt.equippedTool) &&
+      evt.allowSeedPlanting !== false
+    ) {
       this.plantSeed(evt);
+    } else if (
+      this.isAPlantSeed(evt.equippedTool) &&
+      evt.allowSeedPlanting === false
+    ) {
+      this.farmAction(evt.clickedFarmableArea, evt.upg);
     }
-    if (evt.me === this.gameData.me) this.changeEnergy.emit(-3);
   }
 
   /** Beats of music a watered crop needs to advance to the next stage. */
@@ -2269,7 +2338,11 @@ export class GameComponent
     if (prefix === 'soil') return 0;
     const beatMs = 60000 / Math.max(1, this.currentBpm);
     const elapsedBeats = (performance.now() - area.wateredAtMs) / beatMs;
-    const progress = Math.min(1, elapsedBeats / GameComponent.GROW_BEATS);
+    // Snap the bar to each whole beat so it ticks in time with the music
+    // instead of sliding smoothly between beats. Clamp to >=0 so a
+    // future-aligned wateredAtMs (next beat) doesn't read negative.
+    const snappedBeats = Math.max(0, Math.floor(elapsedBeats));
+    const progress = Math.min(1, snappedBeats / GameComponent.GROW_BEATS);
     if (progress >= 1) {
       const stage = +area.state.substring(dash + 1);
       if (stage === 4) {
@@ -2716,10 +2789,15 @@ export class GameComponent
     ];
   }
 
+  @HostListener('document:keydown', ['$event'])
   keyDownEvent(e: KeyboardEvent) {
+    const isMoveKey = ['w', 'a', 's', 'd'].includes(e.key.toLowerCase());
     if (e.key === 'CapsLock') {
       e.preventDefault();
       return;
+    }
+    if (isMoveKey && this.gameData.isSleeping) {
+      this.activatable();
     }
     if (e.key === 'Shift' && !this.isShiftDown && !this.gameData.isCarrying) {
       this.isShiftDown = true;
@@ -2754,49 +2832,77 @@ export class GameComponent
       this.moveRight(true);
     }
     switch (e.key.toLowerCase()) {
-      case 'b':
-        this.changeTool.emit('basket');
-        break;
       case '1':
-        if (this.gameData.seedsOwned['potato'].count > 0)
-          this.changeTool.emit('potato-seeds');
+        this.handleSeedHotkey('potato-seeds', 'potato');
         break;
       case '2':
-        if (this.gameData.seedsOwned['carrot'].count > 0)
-          this.changeTool.emit('carrot-seeds');
+        this.handleSeedHotkey('carrot-seeds', 'carrot');
         break;
       case '3':
-        if (this.gameData.seedsOwned['wheat'].count > 0)
-          this.changeTool.emit('wheat-seeds');
+        this.handleSeedHotkey('wheat-seeds', 'wheat');
         break;
       case '4':
-        if (this.gameData.seedsOwned['cabbage'].count > 0)
-          this.changeTool.emit('cabbage-seeds');
+        this.handleSeedHotkey('cabbage-seeds', 'cabbage');
         break;
       case '5':
-        if (this.gameData.seedsOwned['cauliflower'].count > 0)
-          this.changeTool.emit('cauliflower-seeds');
+        this.handleSeedHotkey('cauliflower-seeds', 'cauliflower');
         break;
       case '6':
-        if (this.gameData.seedsOwned['beets'].count > 0)
-          this.changeTool.emit('beet-seeds');
+        this.handleSeedHotkey('beet-seeds', 'beets');
         break;
       case '7':
-        if (this.gameData.seedsOwned['radish'].count > 0)
-          this.changeTool.emit('radish-seeds');
+        this.handleSeedHotkey('radish-seeds', 'radish');
         break;
       case '8':
-        if (this.gameData.seedsOwned['kale'].count > 0)
-          this.changeTool.emit('kale-seeds');
+        this.handleSeedHotkey('kale-seeds', 'kale');
         break;
       case '9':
-        if (this.gameData.seedsOwned['sunflower'].count > 0)
-          this.changeTool.emit('sunflower-seeds');
+        this.handleSeedHotkey('sunflower-seeds', 'sunflower');
         break;
       default:
         break;
     }
   }
+
+  private handleSeedHotkey(seedTool: string, seedKey: string) {
+    const owned = this.gameData.seedsOwned[seedKey];
+    if (!owned || owned.count <= 0) return;
+
+    this.changeTool.emit(seedTool);
+
+    const hovered = this.hoveredFarmableArea;
+    const canPlantNow =
+      !this.gameData.isSleeping &&
+      !this.gameData.isCarrying &&
+      !this.gameData.openShop &&
+      !this.isShiftDown &&
+      !this.isWatering &&
+      this.gameData.energy.current >= GameComponent.MAX_ACTION_ENERGY_COST &&
+      this.gameData.canHarvest &&
+      hovered?.state === 'soil-3' &&
+      this.isAreaCloseToPlayer(this.player, hovered);
+
+    if (!canPlantNow) return;
+
+    const targets = this.otherFarmableArea.filter(
+      (area) => area?.state === 'soil-3',
+    );
+    const plantAreas = targets.length ? targets : [hovered];
+
+    for (const area of plantAreas) {
+      this.changeStateOfHoveredFarmable({
+        clickedFarmableArea: area,
+        isWatering: false,
+        equippedTool: seedTool,
+        allowSeedPlanting: true,
+        me: this.gameData.me,
+        upg: this.upg,
+      });
+    }
+
+    this.judgeRhythm('plant');
+  }
+  @HostListener('document:keyup', ['$event'])
   keyUpEvent(e: KeyboardEvent) {
     switch (e.key.toLowerCase()) {
       case 'shift':
@@ -3359,11 +3465,12 @@ export class GameComponent
       );
     } else {
       if (!isMoving) {
-        this.drawSpriteAnimation(
+        this.drawBeatSyncedSpriteAnimation(
           useRightAnims ? this.spriteSheetIdleRight : this.spriteSheetIdleLeft,
           useRightAnims
             ? this.gameData.spriteAnimations['playerIdleRight'].frames
             : this.gameData.spriteAnimations['playerIdleLeft'].frames,
+          2,
         );
       } else {
         this.drawSpriteAnimation(
@@ -3497,10 +3604,7 @@ export class GameComponent
         this.areasByAreas(a, this.upg.irrigate),
       );
       if (this.areasByAreas(area, this.upg.plow)) {
-        if (
-          this.isMouseCloseToPlayer(this.player, this.mousePos) &&
-          !this.isShiftDown
-        ) {
+        if (this.isAreaCloseToPlayer(this.player, area) && !this.isShiftDown) {
           this.changeEquippedTool(area.state);
           this.hoveredFarmableArea = area;
           if (!this.otherFarmableArea.includes(area))
@@ -3521,10 +3625,7 @@ export class GameComponent
         }
       }
       if (this.areasByAreas(area, this.upg.irrigate)) {
-        if (
-          this.isMouseCloseToPlayer(this.player, this.mousePos) &&
-          !this.isShiftDown
-        ) {
+        if (this.isAreaCloseToPlayer(this.player, area) && !this.isShiftDown) {
           if (!this.waterableArea.includes(area)) this.waterableArea.push(area);
           if (
             this.hoveredFarmableArea.state !== 'house' &&
@@ -3576,7 +3677,7 @@ export class GameComponent
       this.changeTool.emit('shovel');
       this.canHarvest.emit(true);
     }
-    if (!this.isMouseCloseToPlayer(this.player, this.mousePos)) {
+    if (!this.isTargetCloseToPlayer(this.player, this.hoveredFarmableArea)) {
       this.canHarvest.emit(false);
     }
   }
@@ -3713,6 +3814,77 @@ export class GameComponent
     this.activatedArea = this.defaultFarmState;
   }
 
+  private drawHeroRangeOverlay() {
+    if (!this.ctx || !this.player.center) return;
+
+    this.ctx.fillStyle = 'rgba(140, 215, 255, 0.08)';
+    this.ctx.strokeStyle = 'rgba(220, 245, 255, 0.18)';
+    this.ctx.lineWidth = 1;
+
+    const reachableAreas = [
+      ...this.farmableArea,
+      ...this.fishableArea,
+      ...this.minableArea,
+      ...this.houseArea,
+      ...this.wellArea,
+    ];
+
+    for (const area of reachableAreas) {
+      if (!this.isAreaCloseToPlayer(this.player, area)) continue;
+      this.ctx.fillRect(
+        area.position.x,
+        area.position.y,
+        area.width,
+        area.height,
+      );
+      this.ctx.strokeRect(
+        area.position.x,
+        area.position.y,
+        area.width,
+        area.height,
+      );
+    }
+  }
+
+  private maybeAutoRestAtHouse() {
+    if (!this.player.width || !this.player.height) return;
+
+    const tooTired =
+      this.gameData.energy.current < GameComponent.MAX_ACTION_ENERGY_COST;
+    const atHouseDoor = this.houseArea.some((area) =>
+      this.retangularCollision({
+        rectangle1: this.player,
+        rectangle2: area,
+      }),
+    );
+
+    if (!tooTired || this.gameData.isSleeping || !atHouseDoor) {
+      this.autoRestRequested = false;
+      return;
+    }
+
+    if (!this.autoRestRequested) {
+      this.autoRestRequested = true;
+      this.goInHouse.emit(this.gameData.me);
+    }
+  }
+
+  private maybeAutoRefillAtWell() {
+    const nearWell = this.wellArea.some((area) =>
+      this.isAreaCloseToPlayer(this.player, area),
+    );
+
+    if (!nearWell || this.gameData.water.current >= this.gameData.water.max) {
+      this.autoRefillRequested = false;
+      return;
+    }
+
+    if (!this.autoRefillRequested) {
+      this.autoRefillRequested = true;
+      this.refillWaterCan();
+    }
+  }
+
   doLeftClickOnMouse(evt) {
     if (this.gameData.isSleeping) {
       return;
@@ -3729,16 +3901,25 @@ export class GameComponent
     if (this.gameData.isCarrying) {
       this.dropCarriedItem();
       this.judgeRhythm('drop', evt?.offsetX, evt?.offsetY);
-    } else if (this.gameData.energy.current < 3) {
+    } else if (
+      this.gameData.energy.current < GameComponent.MAX_ACTION_ENERGY_COST
+    ) {
       this.setHeadText('Too tired...');
     } else if (
       this.player.center &&
       this.mayFarm &&
       this.ctx &&
-      this.gameData.energy.current >= 3 &&
+      this.gameData.energy.current >= GameComponent.MAX_ACTION_ENERGY_COST &&
       this.gameData.canHarvest
     ) {
-      this.clickedFarmableArea = this.otherFarmableArea;
+      // Re-clicking during cultivate should restart the action animation.
+      // Reset counters before re-arming the current target set.
+      this.actionFrameIndex = this.actionFrameIndex.map(() => 0);
+      this.framesDrawn = this.framesDrawn.map(() => 0);
+      this.clickedFarmableArea = [...this.otherFarmableArea];
+      if (!this.clickedFarmableArea.length && this.hoveredFarmableArea?.id) {
+        this.clickedFarmableArea = [this.hoveredFarmableArea];
+      }
       if (this.hoveredFarmableArea.state !== 'well') {
         this.clickedFarmableArea.forEach((area) => {
           area.queuedCultivate = true;
@@ -3766,54 +3947,45 @@ export class GameComponent
 
   doRightClickOnMouse(evt) {
     evt.preventDefault();
-    if (this.gameData.openShop === true) {
-      this.openShop.emit(false);
+    if (this.gameData.isSleeping || this.isWatering) return;
+
+    this.queuedActivation = true;
+    this.activatedArea = this.hoveredFarmableArea;
+
+    if (
+      this.activatedArea.state === 'merchant' &&
+      this.gameData.canOpenShop &&
+      !this.gameData.openShop &&
+      !this.gameData.isCarrying
+    ) {
+      this.openShop.emit(true);
+      this.judgeRhythm('open-shop', evt?.offsetX, evt?.offsetY);
+      return;
+    }
+
+    if (this.gameData.water.current <= 7) {
+      this.setHeadText('Need Water!');
+      return;
+    }
+    if (this.gameData.energy.current < GameComponent.MAX_ACTION_ENERGY_COST) {
+      this.setHeadText('Too tired...');
       return;
     }
     if (
-      this.isHoldingSeed(this.gameData.equippedTool) ||
-      this.gameData.equippedTool === 'basket'
+      !this.isShovelable(
+        this.activatedArea.state,
+        this.player,
+        this.activatedArea,
+      )
     ) {
-      if (!this.gameData.openShop && !this.isShiftDown)
-        this.carryCoolDown(this.gameData.me);
-      this.changeTool.emit('shovel');
       return;
     }
-    if (!this.isWatering) {
-      if (this.gameData.isSleeping) {
-        this.queuedActivation = false;
-        this.activatable();
-        return;
-      }
-      this.queuedActivation = true;
-      this.activatedArea = this.hoveredFarmableArea;
-      if (
-        this.activatedArea.state === 'merchant' &&
-        this.gameData.canOpenShop &&
-        this.gameData.openShop === false
-      ) {
-        this.openShop.emit(true);
-        this.judgeRhythm('open-shop', evt?.offsetX, evt?.offsetY);
-      }
-      if (this.activatedArea.state === 'well') {
-        this.refillWaterCan();
-        this.judgeRhythm('fill-water', evt?.offsetX, evt?.offsetY);
-      } else if (this.gameData.water.current <= 7) {
-        this.setHeadText('Need Water!');
-      } else if (this.gameData.energy.current <= 2) {
-        this.setHeadText('Too tired...');
-      } else if (
-        this.gameData.water.current > 7 &&
-        this.gameData.energy.current > 2 &&
-        this.isShovelable(this.activatedArea.state, this.player, this.mousePos)
-      ) {
-        this.clickedFarmableArea = [];
-        this.waterableArea.forEach((area) => {
-          this.waterArea(area);
-        });
-        this.judgeRhythm('water', evt?.offsetX, evt?.offsetY);
-      }
-    }
+
+    this.clickedFarmableArea = [];
+    this.waterableArea.forEach((area) => {
+      this.waterArea(area);
+    });
+    this.judgeRhythm('water', evt?.offsetX, evt?.offsetY);
   }
 
   /** Map the currently hovered farmable area state to a rhythm-judged action label. */
@@ -3824,7 +3996,6 @@ export class GameComponent
     if (state === 'house') return 'sleep';
     if (state === 'merchant') return 'open-shop';
     if (state === 'well') return 'fill-water';
-    if (this.isHoldingSeed(this.gameData.equippedTool)) return 'plant';
     if (this.gameData.canHarvest && (this.hoveredFarmableArea as any)?.ready) {
       return 'harvest';
     }
@@ -3842,12 +4013,10 @@ export class GameComponent
   }
 
   waterArea(clickedArea) {
-    if (this.gameData.equippedTool === 'shovel') {
-      if (!this.clickedFarmableArea.includes(clickedArea)) {
-        this.clickedFarmableArea.push(clickedArea);
-        this.changeWaterMeter.emit(-8);
-        this.isWatering = true;
-      }
+    if (!this.clickedFarmableArea.includes(clickedArea)) {
+      this.clickedFarmableArea.push(clickedArea);
+      this.changeWaterMeter.emit(-8);
+      this.isWatering = true;
     }
   }
   waterAnimation(area, i) {

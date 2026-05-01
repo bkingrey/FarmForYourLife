@@ -61,23 +61,10 @@
       <img
         [ngClass]="{
           hideShovel:
-            gameData.equippedTool !== 'potato-seeds' &&
-            gameData.equippedTool !== 'carrot-seeds' &&
-            gameData.equippedTool !== 'wheat-seeds' &&
-            gameData.equippedTool !== 'cabbage-seeds' &&
-            gameData.equippedTool !== 'cauliflower-seeds' &&
-            gameData.equippedTool !== 'beet-seeds' &&
-            gameData.equippedTool !== 'radish-seeds' &&
-            gameData.equippedTool !== 'kale-seeds' &&
-            gameData.equippedTool !== 'sunflower-seeds',
-        }"
-        class="tool-icon"
-        src="../../assets/ui/plant-big.png"
-      />
-      <img
-        [ngClass]="{
-          hideShovel:
-            !gameData.canHarvest || gameData.equippedTool !== 'shovel',
+            !gameData.canHarvest ||
+            gameData.isCarrying ||
+            gameData.equippedTool === 'pickaxe' ||
+            gameData.equippedTool === 'rod',
         }"
         class="tool-icon"
         src="../../assets/ui/shovel-big.png"
@@ -104,17 +91,7 @@
       <img class="click-image" src="../../assets/ui/mouse-drop-right.png" />
       <img
         [ngClass]="{
-          hideShovel:
-            gameData.equippedTool !== 'potato-seeds' &&
-            gameData.equippedTool !== 'carrot-seeds' &&
-            gameData.equippedTool !== 'wheat-seeds' &&
-            gameData.equippedTool !== 'cabbage-seeds' &&
-            gameData.equippedTool !== 'cauliflower-seeds' &&
-            gameData.equippedTool !== 'beet-seeds' &&
-            gameData.equippedTool !== 'radish-seeds' &&
-            gameData.equippedTool !== 'kale-seeds' &&
-            gameData.equippedTool !== 'sunflower-seeds' &&
-            gameData.equippedTool !== 'basket',
+          hideShovel: true,
         }"
         class="tool-icon"
         src="../../assets/ui/go-back.png"
@@ -135,8 +112,7 @@
       />
       <img
         [ngClass]="{
-          hideShovel:
-            !gameData.canHarvest || gameData.equippedTool !== 'shovel',
+          hideShovel: !gameData.canHarvest,
         }"
         class="tool-icon"
         src="../../assets/ui/water-big.png"
@@ -169,8 +145,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'potato-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['potato'].count === 0,
       }"
       (click)="changeTools('potato-seeds')"
@@ -186,8 +161,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'carrot-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['carrot'].count === 0,
       }"
       (click)="changeTools('carrot-seeds')"
@@ -203,8 +177,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'wheat-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['wheat'].count === 0,
       }"
       (click)="changeTools('wheat-seeds')"
@@ -220,8 +193,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'cabbage-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['cabbage'].count === 0,
       }"
       (click)="changeTools('cabbage-seeds')"
@@ -237,8 +209,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'cauliflower-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['cauliflower'].count === 0,
       }"
       (click)="changeTools('cauliflower-seeds')"
@@ -254,8 +225,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'beet-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['beets'].count === 0,
       }"
       (click)="changeTools('beet-seeds')"
@@ -271,8 +241,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'radish-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['radish'].count === 0,
       }"
       (click)="changeTools('radish-seeds')"
@@ -288,8 +257,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'kale-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['kale'].count === 0,
       }"
       (click)="changeTools('kale-seeds')"
@@ -306,8 +274,7 @@
       class="seed"
       [ngClass]="{
         active: gameData.equippedTool === 'sunflower-seeds',
-        opened: allSeeds(),
-        closed: !allSeeds(),
+        opened: true,
         grayout: gameData.seedsOwned['sunflower'].count === 0,
       }"
       (click)="changeTools('sunflower-seeds')"
@@ -317,29 +284,6 @@
       ><img src="../../assets/ui/sunflower-ui.png" />
       <div class="seed-count">
         {{ gameData.seedsOwned["sunflower"].count }}
-      </div>
-    </div>
-
-    <div
-      class="basket"
-      [ngClass]="{ active: gameData.equippedTool === 'basket' }"
-      (click)="changeTools('basket')"
-      (mousedown)="$event.preventDefault()"
-    >
-      <span class="floating-number">B</span>
-      <img src="../../assets/ui/seed-basket.png" />
-      <div class="total-seed-count">
-        {{
-          gameData.seedsOwned["sunflower"].count +
-            gameData.seedsOwned["kale"].count +
-            gameData.seedsOwned["radish"].count +
-            gameData.seedsOwned["beets"].count +
-            gameData.seedsOwned["cauliflower"].count +
-            gameData.seedsOwned["cabbage"].count +
-            gameData.seedsOwned["wheat"].count +
-            gameData.seedsOwned["carrot"].count +
-            gameData.seedsOwned["potato"].count
-        }}
       </div>
     </div>
   </div>

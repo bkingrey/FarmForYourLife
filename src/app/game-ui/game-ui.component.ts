@@ -21,9 +21,7 @@ import { intializeState } from '../_store/reducer';
 export class GameUiComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() changeTool = new EventEmitter();
-  @Output() openBasket = new EventEmitter();
   @ViewChild('gameUI') gameUI: ElementRef | null = null;
-  showSeeds = false;
   constructor() {}
 
   trackByPlayerName(_index: number, player: LobbyPlayer): string {
@@ -37,20 +35,6 @@ export class GameUiComponent implements AfterViewInit {
     }
   }
 
-  allSeeds() {
-    return (
-      this.gameData.equippedTool === 'potato-seeds' ||
-      this.gameData.equippedTool === 'carrot-seeds' ||
-      this.gameData.equippedTool === 'wheat-seeds' ||
-      this.gameData.equippedTool === 'cabbage-seeds' ||
-      this.gameData.equippedTool === 'cauliflower-seeds' ||
-      this.gameData.equippedTool === 'beet-seeds' ||
-      this.gameData.equippedTool === 'radish-seeds' ||
-      this.gameData.equippedTool === 'kale-seeds' ||
-      this.gameData.equippedTool === 'sunflower-seeds' ||
-      this.gameData.equippedTool === 'basket'
-    );
-  }
   changeTools(tool) {
     this.changeTool.emit(tool);
     setTimeout(() => {

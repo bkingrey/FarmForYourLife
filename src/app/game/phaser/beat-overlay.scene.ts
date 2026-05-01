@@ -95,10 +95,20 @@ export function createBeatOverlaySceneClass(
     }
 
     /** Music time in ms (since first play); falls back to wall clock. */
-    private musicTimeMs(): number {
+    musicTimeMs(): number {
       const m: any = this.music;
       if (m && typeof m.seek === 'number') return m.seek * 1000;
       return performance.now() - this.musicStartedAt;
+    }
+
+    /** BPM-derived ms per beat (configured value). */
+    getBeatMs(): number {
+      return 60000 / Math.max(1, this.bpm);
+    }
+
+    /** Player-configured beat offset (ms). */
+    getBeatOffsetMs(): number {
+      return this.beatOffsetMs;
     }
 
     override update() {

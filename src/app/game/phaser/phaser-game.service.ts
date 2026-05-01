@@ -99,6 +99,21 @@ export class PhaserGameService implements OnDestroy {
     return this.mounting;
   }
 
+  /**
+   * Wall-clock (`performance.now()`) timestamp of the next music-beat
+   * boundary >= now. Returns null if the scene isn't running yet.
+   */
+  nextBeatWallMs(): number | null {
+    const scene: any = this.scene;
+    if (!scene || typeof scene.musicTimeMs !== 'function') return null;
+    const beatMs = scene.getBeatMs();
+    const offset = scene.getBeatOffsetMs?.() ?? 0;
+    const musicNow = scene.musicTimeMs() - offset;
+    const nextBoundaryMusic = Math.ceil(musicNow / beatMs) * beatMs;
+    const gapMs = Math.max(0, nextBoundaryMusic - musicNow);
+    return performance.now() + gapMs;
+  }
+
   /** Judge a player action against current beat. */
   judge(action: FarmActionType, screenX?: number, screenY?: number) {
     if (this.scene) {
