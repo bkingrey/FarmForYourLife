@@ -1,0 +1,26 @@
+<div class="controls-overlay" (click)="dismiss()">
+  <div class="controls-card" (click)="$event.stopPropagation()">
+    <h2>Controls</h2>
+    <ul>
+      <li><span class="key">WASD</span> Move</li>
+      <li>
+        <span class="key">Left Click</span> Dig / Mine / Fish / Drop &amp; Sell
+      </li>
+      <li>
+        <span class="key">Right Click</span> Water (near Merchant: Open Shop)
+      </li>
+      <li><span class="key">1–9</span> Plant seed (instant if mode is on)</li>
+      <li><span class="key">Shift + Click</span> Attack</li>
+      <li><span class="key">WASD</span> Wake from sleep</li>
+    </ul>
+    <p class="tip">Beat your actions to the music to save energy!</p>
+    <p class="cost-hint">
+      Action energy cost:
+      <span class="poor">Poor 5</span> › <span class="okay">Okay 4</span> ›
+      <span class="good">Good 3</span> › <span class="great">Great 2</span> ›
+      <span class="perfect">Perfect 1</span>
+    </p>
+    <button class="dismiss-btn" (click)="dismiss()">Got it!</button>
+    <p class="reopen-hint">Re-open anytime from the pause menu.</p>
+  </div>
+</div>

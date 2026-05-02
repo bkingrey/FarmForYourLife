@@ -28,6 +28,10 @@ export const ChangeDisplayScale = createAction(
   '[GameData] Change Display Scale',
   props<{ payload: number }>(),
 );
+
+export const ToggleSeedInstantPlant = createAction(
+  '[GameData] Toggle Seed Instant Plant',
+);
 export const MapLoaded = createAction(
   '[GameData] Map Loaded',
   props<{ payload: boolean }>(),

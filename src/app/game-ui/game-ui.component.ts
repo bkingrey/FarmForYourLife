@@ -21,6 +21,7 @@ import { intializeState } from '../_store/reducer';
 export class GameUiComponent implements AfterViewInit {
   @Input() gameData: GameState = intializeState();
   @Output() changeTool = new EventEmitter();
+  @Output() toggleSeedMode = new EventEmitter<void>();
   @ViewChild('gameUI') gameUI: ElementRef | null = null;
   constructor() {}
 

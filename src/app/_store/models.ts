@@ -23,6 +23,7 @@ export interface GameState {
   openUpgrades: boolean;
   canHarvest: boolean;
   canFillWater: boolean;
+  seedInstantPlant: boolean;
   minerValue: number;
   fisherValue: number;
   bargainValue: number;

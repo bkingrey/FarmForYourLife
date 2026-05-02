@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { UpgradeComponent } from './upgrade/upgrade.component';
 import { ShadeComponent } from './shade/shade.component';
 import { WinScreenComponent } from './win-screen/win-screen.component';
+import { ControlsCardComponent } from './controls-card/controls-card.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { WinScreenComponent } from './win-screen/win-screen.component';
     UpgradeComponent,
     ShadeComponent,
     WinScreenComponent,
+    ControlsCardComponent,
   ],
   imports: [
     BrowserModule,

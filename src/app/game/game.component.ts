@@ -115,10 +115,22 @@ export class GameComponent
   houseArea: any = [];
   wellArea: any = [];
   untargetableArea: any = [];
+  /** Cached flat array of all interactive areas for range-overlay; rebuilt once after map init. */
+  private _reachableAreas: any[] = [];
+  /** Throttle: last key used to guard changePlayerState.emit. */
+  private _lastPlayerStateKey = '';
+  /** Throttle: last emitted playerFromMiddle position. */
+  private _lastFromMiddleX: number | null = null;
+  private _lastFromMiddleY: number | null = null;
   traders: any = [];
+  /** How many of the same item the player is currently carrying (1-4). */
+  carryCount = 0;
   isShiftDown = false;
   attackInitiated = false;
   headText = '';
+  /** Energy cost shown briefly after each rhythm judgement (e.g. "-2"). */
+  private energyDeltaText = '';
+  private energyDeltaExpiresMs = 0;
 
   spriteSheetIdleRight = new Image();
   spriteSheetIdleLeft = new Image();
@@ -216,8 +228,12 @@ export class GameComponent
   };
   queuedActivation = false;
   mayFarm = false;
+  /** If the player left-clicks while mayFarm is momentarily false, buffer the
+   *  request and replay it on the next frame when mayFarm becomes true. */
+  private pendingDigUntilMs = 0;
   otherFarmableArea: any = [];
   waterableArea: any = [];
+  sowableArea: any = [];
   hoveredFarmableArea = {
     position: {
       x: -1,
@@ -266,6 +282,9 @@ export class GameComponent
   pickupables: Array<Pickupable> = [];
   bubblesFramesDrawn: number = 0;
   bubblesFrameIndex: number = 0;
+  private sleepEnergyBeatIndex = -1;
+  private sleepBeatAnchorMs: number | null = null;
+  private sleepEnteredAtMs = 0;
   memoryKeys: KeyWASD = {
     w: {
       pressed: false,
@@ -409,6 +428,24 @@ export class GameComponent
       // Likewise untargetableArea: state 'untargetable' falls through
       // drawFarmable to a transparent fillRect, and targetNearestSquare
       // filters 'untargetable' out of every interactive branch.
+      //
+      // Prune out-of-range selections once per frame (moved here from
+      // targetNearestSquare which ran this filter once *per tile* per frame).
+      if (this.otherFarmableArea.length) {
+        this.otherFarmableArea = this.otherFarmableArea.filter((a) =>
+          this.areasByAreas(a, this.currentCultivateAreaUpgrade()),
+        );
+      }
+      if (this.waterableArea.length) {
+        this.waterableArea = this.waterableArea.filter((a) =>
+          this.areasByAreas(a, this.upg.irrigate),
+        );
+      }
+      if (this.sowableArea.length) {
+        this.sowableArea = this.sowableArea.filter((a) =>
+          this.areasByAreas(a, this.upg.sow),
+        );
+      }
       this.farmableArea.forEach((farmableArea) => {
         if (this.ctx) {
           this.drawFarmable(farmableArea);
@@ -540,6 +577,37 @@ export class GameComponent
         this.player.position.x + 26,
         this.player.position.y,
       );
+      // Draw energy delta feedback (e.g. "-2") floating briefly above the player.
+      if (
+        this.energyDeltaText &&
+        performance.now() <= this.energyDeltaExpiresMs
+      ) {
+        const remaining = this.energyDeltaExpiresMs - performance.now();
+        const alpha = Math.min(1, remaining / 400);
+        const rise = (1 - remaining / 1200) * 18;
+        this.ctx.font = '14px "Press Start 2P", cursive';
+        this.ctx.fillStyle = `rgba(255, 220, 80, ${alpha})`;
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(
+          this.energyDeltaText,
+          this.player.position.x + 26,
+          this.player.position.y - 20 - rise,
+        );
+      } else {
+        this.energyDeltaText = '';
+      }
+      // Draw carry-stack count (x2 / x3 / x4) above player when holding multiple items.
+      if (this.gameData.isCarrying && this.carryCount > 1) {
+        this.ctx.font = '14px "Press Start 2P", cursive';
+        this.ctx.fillStyle = 'rgba(255, 255, 100, 1)';
+        this.ctx.textAlign = 'center';
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+        this.ctx.lineWidth = 3;
+        const tx = this.player.position.x + 26;
+        const ty = this.player.position.y - 100;
+        this.ctx.strokeText(`x${this.carryCount}`, tx, ty);
+        this.ctx.fillText(`x${this.carryCount}`, tx, ty);
+      }
       this.ctx.restore();
       if (!this.isTargetCloseToPlayer(this.player, this.hoveredFarmableArea)) {
         if (this.gameData.canHarvest === true) {
@@ -603,22 +671,24 @@ export class GameComponent
     const lobbyPlayer = this.lobbyPlayers.filter(
       (player) => player.name === this.gameData.me,
     )[0];
-    if (this.gameData.isCarrying || !lobbyPlayer.canCarry) {
+    // Already at stack cap.
+    if (this.carryCount >= 4) return false;
+    // Carrying a different item type — can't stack.
+    if (this.gameData.isCarrying && item.plant !== this.gameData.equippedTool)
       return false;
-    }
-    if (
-      this.player.center &&
-      item.width &&
-      item.height &&
-      !this.gameData.isCarrying
-    ) {
+    if (!lobbyPlayer.canCarry) return false;
+    if (this.player.center && item.width && item.height) {
       if (
         this.player.center.x > item.position.x &&
         this.player.center.x < item.position.x + item.width &&
         this.player.center.y > item.position.y &&
         this.player.center.y < item.position.y + item.height
       ) {
-        this.changeTool.emit(item.plant);
+        if (this.carryCount === 0) {
+          // First pickup — set the equipped tool / isCarrying via the store.
+          this.changeTool.emit(item.plant);
+        }
+        this.carryCount++;
         return true;
       }
     }
@@ -678,10 +748,19 @@ export class GameComponent
   }
 
   activatable() {
-    if (this.activatedArea.state === 'house' && !this.gameData.isSleeping) {
+    const nearHouse = this.houseArea.some((area) =>
+      this.isAreaCloseToPlayer(this.player, area),
+    );
+
+    if (
+      (this.activatedArea.state === 'house' || nearHouse) &&
+      !this.gameData.isSleeping
+    ) {
       this.goInHouse.emit(this.gameData.me);
     } else {
       this.isSleeping.emit(false);
+      this.sleepEnergyBeatIndex = -1;
+      this.sleepBeatAnchorMs = null;
       this.changeVelocity.emit(
         this.defaultVelocity *
           Number(
@@ -718,6 +797,8 @@ export class GameComponent
             y: house.y - map.y,
           };
           this.isSleeping.emit(true);
+          this.sleepEnteredAtMs = performance.now();
+          this.sleepEnergyBeatIndex = this.getCurrentBeatIndex();
           this.changeVelocity.emit(0);
           this.moveAllMovables(difference);
         }
@@ -737,6 +818,8 @@ export class GameComponent
             y: house.y - map.y,
           };
           this.isSleeping.emit(true);
+          this.sleepEnteredAtMs = performance.now();
+          this.sleepEnergyBeatIndex = this.getCurrentBeatIndex();
           this.changeVelocity.emit(0);
           this.moveAllMovables(difference);
         }
@@ -756,6 +839,8 @@ export class GameComponent
             y: house.y - map.y,
           };
           this.isSleeping.emit(true);
+          this.sleepEnteredAtMs = performance.now();
+          this.sleepEnergyBeatIndex = this.getCurrentBeatIndex();
           this.changeVelocity.emit(0);
           this.moveAllMovables(difference);
         }
@@ -775,6 +860,8 @@ export class GameComponent
             y: house.y - map.y,
           };
           this.isSleeping.emit(true);
+          this.sleepEnteredAtMs = performance.now();
+          this.sleepEnergyBeatIndex = this.getCurrentBeatIndex();
           this.changeVelocity.emit(0);
           this.moveAllMovables(difference);
         }
@@ -1354,9 +1441,10 @@ export class GameComponent
       .catch((err) => console.error('[Phaser] mount failed', err));
     this.phaserSub = this.phaserService.judgements.subscribe((judgement) => {
       if (this.actionConsumesEnergy(judgement.action)) {
-        this.changeEnergy.emit(
-          -this.energyCostForJudgementLabel(judgement.label),
-        );
+        const cost = this.energyCostForJudgementLabel(judgement.label);
+        this.changeEnergy.emit(-cost);
+        this.energyDeltaText = `-${cost}`;
+        this.energyDeltaExpiresMs = performance.now() + 1200;
       }
       this.facade.dispatch(AddRhythmJudgement({ payload: judgement }));
     });
@@ -1394,6 +1482,14 @@ export class GameComponent
         this.createMinableArea(this.gameData.minableAreaMap);
         this.createHouseArea(this.gameData.houseAreaMap);
         this.createWellArea(this.gameData.wellAreaMap);
+        // Build cached flat array used by drawHeroRangeOverlay every frame.
+        this._reachableAreas = [
+          ...this.farmableArea,
+          ...this.fishableArea,
+          ...this.minableArea,
+          ...this.houseArea,
+          ...this.wellArea,
+        ];
         this.createTraders();
         this.createMovables();
         this.loadCanvas();
@@ -1790,11 +1886,10 @@ export class GameComponent
   }
 
   drawSleepAnimation() {
+    this.applySleepBeatEnergyGain();
+
     if (this.bubblesFramesDrawn > this.animThreshold(16, 4)) {
       if (this.bubblesFrameIndex < 15) {
-        if (this.gameData.energy.current < this.gameData.energy.max) {
-          this.changeEnergy.emit(1);
-        }
         this.bubblesFrameIndex++;
       } else {
         this.bubblesFrameIndex = 0;
@@ -2480,9 +2575,7 @@ export class GameComponent
   }
 
   farmAction(clickedFarmableArea, upg) {
-    // One dig = fully tilled. The upg.dig tiers used to gate this so a
-    // base-tier player needed up to four clicks to reach soil-3; now any
-    // valid soil/none state advances straight to plantable.
+    // One click tills to soil-3 (fully plantable) directly.
     const clickedFarm = this.areaById.get(clickedFarmableArea.id);
     if (clickedFarm) {
       clickedFarm.state = 'soil-3';
@@ -2591,6 +2684,23 @@ export class GameComponent
       rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
       rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
       rectangle1.position.y + rectangle1.height >= rectangle2.position.y
+    );
+  }
+
+  /** Collision check with an offset applied to r2's position, avoiding object spread allocation. */
+  private collisionWithOffset(
+    r1: any,
+    r2: any,
+    ox: number,
+    oy: number,
+  ): boolean {
+    const r2x = r2.position.x + ox;
+    const r2y = r2.position.y + oy;
+    return (
+      r1.position.x + r1.width * 4 >= r2x &&
+      r1.position.x <= r2x + r2.width &&
+      r1.position.y <= r2y + r2.height &&
+      r1.position.y + r1.height >= r2y
     );
   }
 
@@ -2797,7 +2907,11 @@ export class GameComponent
       return;
     }
     if (isMoveKey && this.gameData.isSleeping) {
+      if (performance.now() - this.sleepEnteredAtMs < 2000) {
+        return;
+      }
       this.activatable();
+      return;
     }
     if (e.key === 'Shift' && !this.isShiftDown && !this.gameData.isCarrying) {
       this.isShiftDown = true;
@@ -2870,6 +2984,8 @@ export class GameComponent
 
     this.changeTool.emit(seedTool);
 
+    if (!this.gameData.seedInstantPlant) return;
+
     const hovered = this.hoveredFarmableArea;
     const canPlantNow =
       !this.gameData.isSleeping &&
@@ -2884,9 +3000,7 @@ export class GameComponent
 
     if (!canPlantNow) return;
 
-    const targets = this.otherFarmableArea.filter(
-      (area) => area?.state === 'soil-3',
-    );
+    const targets = this.sowableArea.filter((area) => area?.state === 'soil-3');
     const plantAreas = targets.length ? targets : [hovered];
 
     for (const area of plantAreas) {
@@ -3172,18 +3286,7 @@ export class GameComponent
     if (this.memoryKeys.w.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
-        if (
-          this.retangularCollision({
-            rectangle1: this.player,
-            rectangle2: {
-              ...boundary,
-              position: {
-                x: boundary.position.x,
-                y: boundary.position.y + 3,
-              },
-            },
-          })
-        ) {
+        if (this.collisionWithOffset(this.player, boundary, 0, 3)) {
           moving = false;
           canMoveHorizontal = true;
           canMoveVertical = false;
@@ -3203,18 +3306,7 @@ export class GameComponent
     if (this.memoryKeys.s.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
-        if (
-          this.retangularCollision({
-            rectangle1: this.player,
-            rectangle2: {
-              ...boundary,
-              position: {
-                x: boundary.position.x,
-                y: boundary.position.y - 30,
-              },
-            },
-          })
-        ) {
+        if (this.collisionWithOffset(this.player, boundary, 0, -30)) {
           moving = false;
           canMoveHorizontal = true;
           canMoveVertical = false;
@@ -3234,18 +3326,7 @@ export class GameComponent
     if (this.memoryKeys.d.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
-        if (
-          this.retangularCollision({
-            rectangle1: this.player,
-            rectangle2: {
-              ...boundary,
-              position: {
-                x: boundary.position.x - 3,
-                y: boundary.position.y,
-              },
-            },
-          })
-        ) {
+        if (this.collisionWithOffset(this.player, boundary, -3, 0)) {
           canMoveVertical = true;
           canMoveHorizontal = false;
           moving = false;
@@ -3265,18 +3346,7 @@ export class GameComponent
     if (this.memoryKeys.a.pressed) {
       for (let i = 0; i < this.boundaries.length; i++) {
         const boundary = this.boundaries[i];
-        if (
-          this.retangularCollision({
-            rectangle1: this.player,
-            rectangle2: {
-              ...boundary,
-              position: {
-                x: boundary.position.x + 3,
-                y: boundary.position.y,
-              },
-            },
-          })
-        ) {
+        if (this.collisionWithOffset(this.player, boundary, 3, 0)) {
           canMoveHorizontal = false;
           moving = false;
         }
@@ -3318,16 +3388,20 @@ export class GameComponent
     player.equippedTool = this.gameData.equippedTool;
     player.isWatering = this.isWatering;
 
-    this.changePlayerState.emit({
-      ...player,
-      moving,
-      canMoveHorizontal,
-      canMoveVertical,
-      useRightAnims,
-      isCarrying: this.gameData.isCarrying,
-      isWatering: this.isWatering,
-      equippedTool: this.gameData.equippedTool,
-    });
+    const _stateKey = `${moving}|${canMoveHorizontal}|${canMoveVertical}|${useRightAnims}|${this.gameData.isCarrying}|${this.isWatering}|${this.gameData.equippedTool}|${player.position.x}|${player.position.y}`;
+    if (_stateKey !== this._lastPlayerStateKey) {
+      this._lastPlayerStateKey = _stateKey;
+      this.changePlayerState.emit({
+        ...player,
+        moving,
+        canMoveHorizontal,
+        canMoveVertical,
+        useRightAnims,
+        isCarrying: this.gameData.isCarrying,
+        isWatering: this.isWatering,
+        equippedTool: this.gameData.equippedTool,
+      });
+    }
 
     if (this.player.position.x - player.position.x !== 0) {
       if (player.position.x < this.player.position.x) {
@@ -3343,6 +3417,13 @@ export class GameComponent
         player.position.y -= velocity;
       }
     }
+  }
+
+  private currentCultivateAreaUpgrade() {
+    if (this.isAPlantSeed(this.gameData.equippedTool)) {
+      return this.upg?.sow ?? '1x1';
+    }
+    return this.upg?.plow ?? '1x1';
   }
 
   drawSpriteBasedOnTool(isMoving) {
@@ -3597,13 +3678,9 @@ export class GameComponent
       this.player.height &&
       this.player.center
     ) {
-      this.otherFarmableArea = this.otherFarmableArea.filter((a) =>
-        this.areasByAreas(a, this.upg.plow),
-      );
-      this.waterableArea = this.waterableArea.filter((a) =>
-        this.areasByAreas(a, this.upg.irrigate),
-      );
-      if (this.areasByAreas(area, this.upg.plow)) {
+      // Note: otherFarmableArea / waterableArea pruning moved to once-per-frame
+      // in drawingCode() to avoid running per-tile-per-frame.
+      if (this.areasByAreas(area, this.currentCultivateAreaUpgrade())) {
         if (this.isAreaCloseToPlayer(this.player, area) && !this.isShiftDown) {
           this.changeEquippedTool(area.state);
           this.hoveredFarmableArea = area;
@@ -3611,6 +3688,26 @@ export class GameComponent
             this.otherFarmableArea.push(area);
 
           this.mayFarm = true;
+          // Consume a buffered dig click if one arrived while mayFarm was false.
+          if (
+            this.pendingDigUntilMs > 0 &&
+            performance.now() <= this.pendingDigUntilMs
+          ) {
+            this.pendingDigUntilMs = 0;
+            this.actionFrameIndex = this.actionFrameIndex.map(() => 0);
+            this.framesDrawn = this.framesDrawn.map(() => 0);
+            this.clickedFarmableArea = [...this.otherFarmableArea];
+            if (
+              !this.clickedFarmableArea.length &&
+              this.hoveredFarmableArea?.id
+            ) {
+              this.clickedFarmableArea = [this.hoveredFarmableArea];
+            }
+            this.clickedFarmableArea.forEach((a) => {
+              a.queuedCultivate = true;
+            });
+            this.judgeRhythm(this.actionForHoveredArea());
+          }
           this.hoveredFarmableArea.center = {
             x: area.position.x + 32,
             y: area.position.y + 32,
@@ -3622,6 +3719,11 @@ export class GameComponent
             this.hoveredFarmableArea.state !== 'untargetable'
           )
             this.drawBrokenSquare(area);
+        }
+      }
+      if (this.areasByAreas(area, this.upg.sow)) {
+        if (this.isAreaCloseToPlayer(this.player, area) && !this.isShiftDown) {
+          if (!this.sowableArea.includes(area)) this.sowableArea.push(area);
         }
       }
       if (this.areasByAreas(area, this.upg.irrigate)) {
@@ -3810,8 +3912,33 @@ export class GameComponent
   removeMouseProperties() {
     this.mayFarm = false;
     this.hoveredFarmableArea = this.defaultFarmState;
+    this.otherFarmableArea = [];
+    this.waterableArea = [];
+    this.sowableArea = [];
     this.clickedFarmableArea = [];
     this.activatedArea = this.defaultFarmState;
+  }
+
+  private getReachableWaterTargets() {
+    const targets = this.waterableArea.filter((area) =>
+      this.isShovelable(area.state, this.player, area),
+    );
+
+    if (targets.length) {
+      return targets;
+    }
+
+    if (
+      this.isShovelable(
+        this.hoveredFarmableArea.state,
+        this.player,
+        this.hoveredFarmableArea,
+      )
+    ) {
+      return [this.hoveredFarmableArea];
+    }
+
+    return [];
   }
 
   private drawHeroRangeOverlay() {
@@ -3821,15 +3948,8 @@ export class GameComponent
     this.ctx.strokeStyle = 'rgba(220, 245, 255, 0.18)';
     this.ctx.lineWidth = 1;
 
-    const reachableAreas = [
-      ...this.farmableArea,
-      ...this.fishableArea,
-      ...this.minableArea,
-      ...this.houseArea,
-      ...this.wellArea,
-    ];
-
-    for (const area of reachableAreas) {
+    // _reachableAreas is built once after map init; no per-frame allocation.
+    for (const area of this._reachableAreas) {
       if (!this.isAreaCloseToPlayer(this.player, area)) continue;
       this.ctx.fillRect(
         area.position.x,
@@ -3852,10 +3972,7 @@ export class GameComponent
     const tooTired =
       this.gameData.energy.current < GameComponent.MAX_ACTION_ENERGY_COST;
     const atHouseDoor = this.houseArea.some((area) =>
-      this.retangularCollision({
-        rectangle1: this.player,
-        rectangle2: area,
-      }),
+      this.isAreaCloseToPlayer(this.player, area),
     );
 
     if (!tooTired || this.gameData.isSleeping || !atHouseDoor) {
@@ -3902,6 +4019,12 @@ export class GameComponent
       this.dropCarriedItem();
       this.judgeRhythm('drop', evt?.offsetX, evt?.offsetY);
     } else if (
+      this.hoveredFarmableArea?.state === 'house' &&
+      this.isAreaCloseToPlayer(this.player, this.hoveredFarmableArea)
+    ) {
+      this.activatedArea = this.hoveredFarmableArea;
+      this.queuedActivation = true;
+    } else if (
       this.gameData.energy.current < GameComponent.MAX_ACTION_ENERGY_COST
     ) {
       this.setHeadText('Too tired...');
@@ -3912,6 +4035,7 @@ export class GameComponent
       this.gameData.energy.current >= GameComponent.MAX_ACTION_ENERGY_COST &&
       this.gameData.canHarvest
     ) {
+      this.pendingDigUntilMs = 0;
       // Re-clicking during cultivate should restart the action animation.
       // Reset counters before re-arming the current target set.
       this.actionFrameIndex = this.actionFrameIndex.map(() => 0);
@@ -3927,6 +4051,13 @@ export class GameComponent
       }
       const action = this.actionForHoveredArea();
       this.judgeRhythm(action, evt?.offsetX, evt?.offsetY);
+    } else if (
+      !this.mayFarm &&
+      this.gameData.canHarvest &&
+      this.gameData.energy.current >= GameComponent.MAX_ACTION_ENERGY_COST
+    ) {
+      // mayFarm can be momentarily false between frames; buffer for 250 ms.
+      this.pendingDigUntilMs = performance.now() + 250;
     }
   }
 
@@ -3934,6 +4065,15 @@ export class GameComponent
     const player = this.lobbyPlayers.filter(
       (player) => player.name === this.gameData.me,
     )[0];
+    // Only emit when the player has actually moved to avoid per-frame socket spam.
+    if (
+      player.position.x === this._lastFromMiddleX &&
+      player.position.y === this._lastFromMiddleY
+    ) {
+      return;
+    }
+    this._lastFromMiddleX = player.position.x;
+    this._lastFromMiddleY = player.position.y;
     const playerFromMiddle = {
       name: player.name,
       position: player.position,
@@ -3949,11 +4089,10 @@ export class GameComponent
     evt.preventDefault();
     if (this.gameData.isSleeping || this.isWatering) return;
 
-    this.queuedActivation = true;
-    this.activatedArea = this.hoveredFarmableArea;
+    const waterTargets = this.getReachableWaterTargets();
 
     if (
-      this.activatedArea.state === 'merchant' &&
+      this.hoveredFarmableArea.state === 'merchant' &&
       this.gameData.canOpenShop &&
       !this.gameData.openShop &&
       !this.gameData.isCarrying
@@ -3971,18 +4110,12 @@ export class GameComponent
       this.setHeadText('Too tired...');
       return;
     }
-    if (
-      !this.isShovelable(
-        this.activatedArea.state,
-        this.player,
-        this.activatedArea,
-      )
-    ) {
+    if (!waterTargets.length) {
       return;
     }
 
     this.clickedFarmableArea = [];
-    this.waterableArea.forEach((area) => {
+    waterTargets.forEach((area) => {
       this.waterArea(area);
     });
     this.judgeRhythm('water', evt?.offsetX, evt?.offsetY);
@@ -4008,6 +4141,39 @@ export class GameComponent
       this.headText = '';
     }, 1500);
   }
+
+  private getCurrentBeatIndex(): number {
+    const now = performance.now();
+    const beatMs = 60000 / Math.max(1, this.currentBpm);
+    if (this.sleepBeatAnchorMs === null) {
+      const nextBeat = this.phaserService.nextBeatWallMs();
+      this.sleepBeatAnchorMs = nextBeat !== null ? nextBeat - beatMs : now;
+    }
+
+    const base = this.sleepBeatAnchorMs ?? now;
+    return Math.floor((now - base) / beatMs);
+  }
+
+  private applySleepBeatEnergyGain() {
+    if (this.gameData.energy.current >= this.gameData.energy.max) return;
+
+    const currentBeat = this.getCurrentBeatIndex();
+    if (this.sleepEnergyBeatIndex < 0) {
+      this.sleepEnergyBeatIndex = currentBeat;
+      return;
+    }
+    if (currentBeat <= this.sleepEnergyBeatIndex) return;
+
+    const beatsElapsed = currentBeat - this.sleepEnergyBeatIndex;
+    this.sleepEnergyBeatIndex = currentBeat;
+
+    const maxGain = this.gameData.energy.max - this.gameData.energy.current;
+    const gain = Math.min(maxGain, beatsElapsed * 5);
+    if (gain > 0) {
+      this.changeEnergy.emit(gain);
+    }
+  }
+
   refillWaterCan() {
     this.changeWaterMeter.emit('max');
   }
@@ -4076,100 +4242,56 @@ export class GameComponent
       this.hoveredFarmableArea.state === 'merchant' &&
       this.gameData.isCarrying
     ) {
+      const count = this.carryCount || 1;
+      this.carryCount = 0;
       this.carryCoolDown(this.gameData.me);
       this.changeTool.emit('shovel');
+      const getPrice = (base: number): number =>
+        Math.round(base * this.gameData.bargainValue * count);
+      const getPlantPrice = (base: number): number =>
+        Math.round(
+          base * PLANT_MULTIPLIER * this.gameData.bargainValue * count,
+        );
       switch (this.gameData.equippedTool) {
         case 'potato':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.POTATO *
-                PLANT_MULTIPLIER *
-                this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.POTATO));
           break;
         case 'carrot':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.CARROT *
-                PLANT_MULTIPLIER *
-                this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.CARROT));
           break;
         case 'wheat':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.WHEAT * PLANT_MULTIPLIER * this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.WHEAT));
           break;
         case 'cabbage':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.CABBAGE *
-                PLANT_MULTIPLIER *
-                this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.CABBAGE));
           break;
         case 'cauliflower':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.CAULIFLOWER *
-                PLANT_MULTIPLIER *
-                this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.CAULIFLOWER));
           break;
         case 'beets':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.BEETS * PLANT_MULTIPLIER * this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.BEETS));
           break;
         case 'kale':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.KALE * PLANT_MULTIPLIER * this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.KALE));
           break;
         case 'sunflower':
-          this.tickMoney(
-            Math.round(
-              PLANT_COSTS.SUNFLOWER *
-                PLANT_MULTIPLIER *
-                this.gameData.bargainValue,
-            ),
-          );
+          this.tickMoney(getPlantPrice(PLANT_COSTS.SUNFLOWER));
           break;
         case 'smallfish':
-          this.tickMoney(
-            Math.round(PLANT_COSTS.SMALLFISH * this.gameData.bargainValue),
-          );
+          this.tickMoney(getPrice(PLANT_COSTS.SMALLFISH));
           break;
         case 'mediumfish':
-          this.tickMoney(
-            Math.round(PLANT_COSTS.MEDIUMFISH * this.gameData.bargainValue),
-          );
+          this.tickMoney(getPrice(PLANT_COSTS.MEDIUMFISH));
           break;
         case 'hugefish':
-          this.tickMoney(
-            Math.round(PLANT_COSTS.HUGEFISH * this.gameData.bargainValue),
-          );
+          this.tickMoney(getPrice(PLANT_COSTS.HUGEFISH));
           break;
         case 'nugget':
-          this.tickMoney(
-            Math.round(PLANT_COSTS.NUGGET * this.gameData.bargainValue),
-          );
+          this.tickMoney(getPrice(PLANT_COSTS.NUGGET));
           break;
-
         default:
           break;
       }
-
       return;
     }
     if (this.player.center) {
@@ -4201,17 +4323,17 @@ export class GameComponent
         this.gameData.equippedTool === 'hugefish' ||
         this.gameData.equippedTool === 'nugget'
       ) {
-        this.dropPickupable.emit({
-          plant: carriedItem.plant,
-          positionId: this.hoveredFarmableArea.id,
-          id: Date.now(),
-          playerName: this.gameData.me,
-        });
-        // this.createPickupablePlantAtArea(
-        //   carriedItem.plant,
-        //   carriedItem.position,
-        //   true
-        // );
+        // Drop one pickupable per stacked item.
+        const dropCount = this.carryCount || 1;
+        for (let d = 0; d < dropCount; d++) {
+          this.dropPickupable.emit({
+            plant: carriedItem.plant,
+            positionId: this.hoveredFarmableArea.id,
+            id: Date.now() + d,
+            playerName: this.gameData.me,
+          });
+        }
+        this.carryCount = 0;
         this.carryCoolDown(this.gameData.me);
         this.changeTool.emit('shovel');
       }

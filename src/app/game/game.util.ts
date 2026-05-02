@@ -75,8 +75,8 @@ export class GameUtils {
 
   getUpgradeVaules(upgrades: Array<Upgrade>) {
     return {
-      dig: upgrades.filter((upg) => upg.target === 'dig')[0].value,
       plow: upgrades.filter((upg) => upg.target === 'plow')[0].value,
+      sow: upgrades.filter((upg) => upg.target === 'sow')[0].value,
       water: upgrades.filter((upg) => upg.target === 'water')[0].value,
       irrigate: upgrades.filter((upg) => upg.target === 'irrigate')[0].value,
       move: upgrades.filter((upg) => upg.target === 'move')[0].value,

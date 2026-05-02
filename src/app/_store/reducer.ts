@@ -62,6 +62,7 @@ export const intializeState = (): GameState => {
     canOpenShop: false,
     openShop: false,
     openUpgrades: false,
+    seedInstantPlant: true,
     collisions: [],
     farmableAreas: [],
     fishableAreas: [],
@@ -130,19 +131,19 @@ export const intializeState = (): GameState => {
     upgrades: [],
     learnedUpgrades: [
       {
-        name: 'Dig',
-        description: 'Base Dig',
-        tier: 0,
-        target: 'dig',
-        src: 'assets/ui/shovel-big.png',
-        value: 0,
-      },
-      {
         name: 'Plow',
         description: 'Base Plow',
         tier: 0,
         target: 'plow',
         src: 'assets/ui/shovel-x.png',
+        value: '1x1',
+      },
+      {
+        name: 'Sow',
+        description: 'Base Sow',
+        tier: 0,
+        target: 'sow',
+        src: 'assets/ui/plant-big.png',
         value: '1x1',
       },
       {
@@ -559,6 +560,12 @@ export const gameReducer = createReducer(
     return {
       ...state,
       isSleeping: payload,
+    };
+  }),
+  on(GameActions.ToggleSeedInstantPlant, (state) => {
+    return {
+      ...state,
+      seedInstantPlant: !state.seedInstantPlant,
     };
   }),
   on(GameActions.ChangeMoney, (state, { payload }) => {

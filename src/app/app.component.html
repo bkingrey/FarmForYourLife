@@ -57,6 +57,7 @@
     *ngIf="gameData.scene === 'game'"
     [gameData]="gameData"
     (changeTool)="changeTool($event)"
+    (toggleSeedMode)="toggleSeedMode()"
   ></app-game-ui>
   <app-upgrade
     *ngIf="gameData.openUpgrades"
@@ -78,4 +79,8 @@
     *ngIf="gameData.showWinScreen"
     [gameData]="gameData"
   ></app-win-screen>
+  <app-controls-card
+    *ngIf="showControlsCard"
+    (dismissed)="showControlsCard = false"
+  ></app-controls-card>
 </ng-container>

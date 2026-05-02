@@ -324,9 +324,9 @@ First-version behavior:
 
 - Do not change success/failure of the base action.
 - Show floating text for every valid click action.
-- Add the judgement point value to a visible score at the top of the game UI.
+- Keep judgement score internal to the rhythm system instead of showing a top-of-screen score HUD.
 - Use color, scale, and motion to make better judgements feel stronger.
-- Track combo in state if it is cheap to add, but score is the first required UI outcome.
+- Track combo in state if it is cheap to add, but progression and win state should be communicated through earned badges.
 - Buying items should also be scoreable because shop actions happen during online play.
 
 Later reward ideas:

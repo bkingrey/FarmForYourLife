@@ -1,9 +1,5 @@
 <div id="game-ui" [ngClass]="{ R1024x576: gameData.resolution.x === 1024 }">
   <div class="rhythm-hud" *ngIf="gameData.rhythm?.enabled">
-    <div class="rhythm-score">
-      <span class="rhythm-label">SCORE</span>
-      <span class="rhythm-value">{{ gameData.rhythm.score }}</span>
-    </div>
     <div class="rhythm-combo" *ngIf="gameData.rhythm.combo > 1">
       x{{ gameData.rhythm.combo }} combo
     </div>
@@ -14,9 +10,17 @@
     >
       {{ j.label }}
     </div>
+    <div class="rhythm-cost-legend">
+      <span class="cost-poor">P:5</span>
+      <span class="cost-okay">Ok:4</span>
+      <span class="cost-good">G:3</span>
+      <span class="cost-great">Gr:2</span>
+      <span class="cost-perfect">&#9733;:1</span>
+    </div>
   </div>
   <div class="energy-bar" [style.width.%]="(2 * gameData.energy.max) / 10">
     <div
+      [ngClass]="{ 'resting-tick': gameData.isSleeping }"
       class="bar"
       [style.width.%]="(gameData.energy.current / gameData.energy.max) * 100"
     ></div>
@@ -85,34 +89,31 @@
         class="tool-icon"
         src="../../assets/ui/rod-big.png"
       />
+      <span
+        class="tool-desc"
+        [ngClass]="{
+          hideShovel: !gameData.canHarvest || gameData.isCarrying,
+        }"
+        >{{
+          gameData.equippedTool === "pickaxe"
+            ? "Mine"
+            : gameData.equippedTool === "rod"
+              ? "Fish"
+              : "Dig"
+        }}</span
+      >
     </div>
 
     <div (mousedown)="$event.preventDefault()">
       <img class="click-image" src="../../assets/ui/mouse-drop-right.png" />
       <img
         [ngClass]="{
-          hideShovel: true,
-        }"
-        class="tool-icon"
-        src="../../assets/ui/go-back.png"
-      />
-      <img
-        [ngClass]="{
-          hideShovel: !gameData.canEnterHouse || gameData.isSleeping,
-        }"
-        class="tool-icon"
-        src="../../assets/ui/bed-big.png"
-      />
-      <img
-        [ngClass]="{
-          hideShovel: !gameData.isSleeping,
-        }"
-        class="tool-icon"
-        src="../../assets/ui/go-back.png"
-      />
-      <img
-        [ngClass]="{
-          hideShovel: !gameData.canHarvest,
+          hideShovel:
+            !gameData.canHarvest ||
+            (gameData.canOpenShop &&
+              !gameData.openShop &&
+              !gameData.isCarrying) ||
+            gameData.canFillWater,
         }"
         class="tool-icon"
         src="../../assets/ui/water-big.png"
@@ -132,6 +133,25 @@
         class="tool-icon"
         src="../../assets/ui/coins-big.png"
       />
+      <span
+        class="tool-desc"
+        [ngClass]="{
+          hideShovel:
+            gameData.openShop || !gameData.canOpenShop || gameData.isCarrying,
+        }"
+        >Open Shop</span
+      >
+      <span
+        class="tool-desc"
+        [ngClass]="{
+          hideShovel:
+            !gameData.canHarvest ||
+            (gameData.canOpenShop &&
+              !gameData.openShop &&
+              !gameData.isCarrying),
+        }"
+        >{{ gameData.canFillWater ? "Refill" : "Water" }}</span
+      >
       <div class="water-bar">
         <div
           class="bar"
@@ -141,6 +161,17 @@
     </div>
   </div>
   <div class="seed-ui" *ngIf="!gameData.isCarrying">
+    <div
+      class="seed-mode-toggle"
+      [ngClass]="{ 'seed-mode-instant': gameData.seedInstantPlant }"
+      (click)="toggleSeedMode.emit()"
+      (mousedown)="$event.preventDefault()"
+      title="Seed key mode: {{
+        gameData.seedInstantPlant ? 'Instant Plant' : 'Equip Only'
+      }}"
+    >
+      <span>{{ gameData.seedInstantPlant ? "&#9654;" : "&#9632;" }}</span>
+    </div>
     <div
       class="seed"
       [ngClass]="{
@@ -286,5 +317,8 @@
         {{ gameData.seedsOwned["sunflower"].count }}
       </div>
     </div>
+  </div>
+  <div class="sleep-hint" *ngIf="gameData.isSleeping">
+    Zzz&hellip; Press WASD to wake
   </div>
 </div>

@@ -22,6 +22,7 @@ import {
   PurchaseItem,
   ReduceSeedCount,
   ShowWinScreen,
+  ToggleSeedInstantPlant,
   UpdatePlayer,
 } from './_store/actions';
 import {
@@ -38,6 +39,7 @@ import type { Socket } from 'socket.io-client';
 import { SocketService } from './socket.service';
 import { KeyWASD, Upgrade } from './_store/models';
 import { GameComponent } from './game/game.component';
+import { ControlsCardComponent } from './controls-card/controls-card.component';
 import { take } from 'rxjs';
 
 @Component({
@@ -48,6 +50,7 @@ import { take } from 'rxjs';
 export class AppComponent implements OnInit {
   title = 'Hops Farm Game';
   socket: Socket;
+  showControlsCard = ControlsCardComponent.shouldShow();
   @ViewChild('gameComp') gameComponent: GameComponent | null = null;
   private destroyRef = inject(DestroyRef);
   constructor(
@@ -228,6 +231,10 @@ export class AppComponent implements OnInit {
       };
       this.socket.emit('ChangePlayerTool', sendData);
     });
+  }
+
+  toggleSeedMode() {
+    this.facade.dispatch(ToggleSeedInstantPlant());
   }
 
   reduceSeedCount(event) {
