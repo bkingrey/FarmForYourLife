@@ -29,9 +29,19 @@ import {
 import { jsonData } from 'src/assets/json/jsonData';
 import { GameState } from './models';
 
+export function calculateMovementVelocity(
+  moveValue: number,
+  bpm = 120,
+): number {
+  return 4 * (Math.max(1, bpm) / 120) * moveValue;
+}
+
 @Injectable()
 export class GameEffects {
-  constructor(private action$: Actions, public store: Store<GameState>) {}
+  constructor(
+    private action$: Actions,
+    public store: Store<GameState>,
+  ) {}
 
   private jsonData = of(jsonData);
 
@@ -45,10 +55,10 @@ export class GameEffects {
           }),
           catchError((error: Error) => {
             return of(ErrorGameDataAction(error));
-          })
-        )
-      )
-    )
+          }),
+        ),
+      ),
+    ),
   );
 
   UpdateLobbyPlayers$: Observable<Action> = createEffect(() =>
@@ -60,7 +70,7 @@ export class GameEffects {
         if (gameData.loadedPlayers.length && gameData.lobbyPlayers.length) {
           newLobby = gameData.lobbyPlayers.map((lobbyPlayer) => {
             const loadedPlayers = gameData.loadedPlayers.find(
-              (loadedPlayer) => loadedPlayer.name === lobbyPlayer.name
+              (loadedPlayer) => loadedPlayer.name === lobbyPlayer.name,
             );
             return loadedPlayers
               ? { ...lobbyPlayer, loadedIn: true }
@@ -68,8 +78,8 @@ export class GameEffects {
           });
         }
         return AddPlayerToLobby({ payload: newLobby });
-      })
-    )
+      }),
+    ),
   );
 
   UpgradeChanges$: Observable<Action> = createEffect(() =>
@@ -77,21 +87,51 @@ export class GameEffects {
       ofType(GetUpgrade),
       withLatestFrom(this.store.pipe(select(selectGameData))),
       map(([action, gameData]) => {
-        const newEnergyMaxValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'energy')[0].value)
-        const newMoveValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'move')[0].value)
-        const newWaterMaxValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'water')[0].value)
-        const newBargainValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'bargain')[0].value)
-        const newMinerValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'miner')[0].value)
-        const newFisherValue = Number(gameData.learnedUpgrades.filter(upg => upg.target === 'fisher')[0].value)
-        this.store.dispatch(ChangeBargainValue({payload: 1*newBargainValue}))
-        this.store.dispatch(ChangeMinerValue({payload: 0.01*newMinerValue}))
-        this.store.dispatch(ChangeFisherValue({payload: 5*newFisherValue}))
-        this.store.dispatch(ChangeEnergyMax({payload: 1*newEnergyMaxValue}))
+        const newEnergyMaxValue = Number(
+          gameData.learnedUpgrades.filter((upg) => upg.target === 'energy')[0]
+            .value,
+        );
+        const newMoveValue = Number(
+          gameData.learnedUpgrades.filter((upg) => upg.target === 'move')[0]
+            .value,
+        );
+        const newWaterMaxValue = Number(
+          gameData.learnedUpgrades.filter((upg) => upg.target === 'water')[0]
+            .value,
+        );
+        const newBargainValue = Number(
+          gameData.learnedUpgrades.filter((upg) => upg.target === 'bargain')[0]
+            .value,
+        );
+        const newMinerValue = Number(
+          gameData.learnedUpgrades.filter((upg) => upg.target === 'miner')[0]
+            .value,
+        );
+        const newFisherValue = Number(
+          gameData.learnedUpgrades.filter((upg) => upg.target === 'fisher')[0]
+            .value,
+        );
+        this.store.dispatch(
+          ChangeBargainValue({ payload: 1 * newBargainValue }),
+        );
+        this.store.dispatch(ChangeMinerValue({ payload: 0.1 * newMinerValue }));
+        this.store.dispatch(ChangeFisherValue({ payload: 5 * newFisherValue }));
+        this.store.dispatch(
+          ChangeVelocity({
+            payload: calculateMovementVelocity(
+              newMoveValue,
+              gameData.rhythm?.bpm ?? 120,
+            ),
+          }),
+        );
+        this.store.dispatch(
+          ChangeEnergyMax({ payload: 100 + 25 * newEnergyMaxValue }),
+        );
         setTimeout(() => {
           document.getElementById('game-canvas')?.focus();
         });
         return ChangeWaterMax({ payload: newWaterMaxValue });
-      })
-    )
+      }),
+    ),
   );
 }

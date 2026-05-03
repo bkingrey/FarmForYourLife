@@ -1,25 +1,28 @@
-<div
-  id="merchant-shop"
-  (contextmenu)="doRightClickOnMouse($event)"
-  [ngClass]="{
-    R1024x576: gameData.resolution.x === 1024,
-    makeClickThroughable: !gameData.openShop
-  }"
->
-  <div class="close-button" (click)="openShop.emit(false); focusOnCanvas()">
-    <img src="assets/ui/cancel.png" alt="" />
-  </div>
-  <h5 class="title"><img src="assets/ui/shop-title.png" alt="" /></h5>
-  <ng-container *ngFor="let item of merchantItems">
-    <div class="merch-item" (click)="buyItem(item.name, item.cost)">
-      <img [src]="item.img" />
-      <h6>{{ item.name }}</h6>
-      <img class="coin" src="assets/ui/coin.png" alt="" /><span>{{
-        item.cost
-      }}</span>
-    </div>
-  </ng-container>
-  <span class="error" [ngClass]="{ showError: showError }"
-    >Not Enough Coins!</span
+<div class="merchant-backdrop" (click)="closeShop()">
+  <div
+    id="merchant-shop"
+    (click)="$event.stopPropagation()"
+    (contextmenu)="doRightClickOnMouse($event)"
+    [ngClass]="{
+      R1024x576: gameData.resolution.x === 1024,
+      makeClickThroughable: !gameData.openShop,
+    }"
   >
+    <div class="close-button" (click)="closeShop()">
+      <img src="assets/ui/cancel.png" alt="" />
+    </div>
+    <h5 class="title"><img src="assets/ui/shop-title.png" alt="" /></h5>
+    <ng-container *ngFor="let item of merchantItems">
+      <div class="merch-item" (click)="buyItem(item.name, item.cost)">
+        <img [src]="item.img" />
+        <h6>{{ item.name }}</h6>
+        <img class="coin" src="assets/ui/coin.png" alt="" /><span>{{
+          item.cost
+        }}</span>
+      </div>
+    </ng-container>
+    <span class="error" [ngClass]="{ showError: showError }"
+      >Not Enough Coins!</span
+    >
+  </div>
 </div>

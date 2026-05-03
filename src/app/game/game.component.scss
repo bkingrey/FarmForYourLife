@@ -42,6 +42,31 @@ canvas#game-canvas {
   padding: 0;
 }
 
+.startup-countdown {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.32);
+  color: #ffffff;
+  font-family: "Press Start 2P", cursive;
+  font-size: 64px;
+  line-height: 1;
+  text-align: center;
+  text-shadow:
+    0 0 0 #000,
+    4px 0 0 #000,
+    -4px 0 0 #000,
+    0 4px 0 #000,
+    0 -4px 0 #000;
+}
+
+.startup-countdown.go {
+  color: #7cfc00;
+}
+
 .water {
   cursor:
     url("../../assets/ui/water-big.png"), url("../../assets/ui/cursor_03.cur"),

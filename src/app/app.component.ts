@@ -48,6 +48,7 @@ import { take } from 'rxjs';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  private static readonly PROGRESS_BADGE_GOAL = 10;
   title = 'Hops Farm Game';
   socket: Socket;
   showControlsCard = ControlsCardComponent.shouldShow();
@@ -82,14 +83,7 @@ export class AppComponent implements OnInit {
 
   ngAfterViewInit(): void {
     this.socket.on('changeBadgeCount', (data) => {
-      this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
-        this.facade.dispatch(AddBadgeToLobbyPlayer({ payload: data }));
-        gameData.lobbyPlayers.forEach((player) => {
-          if (player.name === data && player.badgeCount >= 9) {
-            this.facade.dispatch(ShowWinScreen());
-          }
-        });
-      });
+      this.awardProgressBadge(data);
     });
     this.socket.on('removePickupable', (data) => {
       if (this.gameComponent) {
@@ -276,9 +270,22 @@ export class AppComponent implements OnInit {
     this.facade.dispatch(PurchaseItem({ payload: event }));
     if (event.name === 'Progress Badge') {
       this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
-        this.socket.emit('ChangeBadgeCount', gameData.me);
+        if (gameData.me) {
+          this.awardProgressBadge(gameData.me);
+          this.socket.emit('ChangeBadgeCount', gameData.me);
+        }
       });
     }
+  }
+
+  private awardProgressBadge(playerName: string) {
+    this.facade.dispatch(AddBadgeToLobbyPlayer({ payload: playerName }));
+    this.facade.gameData$.pipe(take(1)).subscribe((gameData) => {
+      const player = gameData.lobbyPlayers.find((p) => p.name === playerName);
+      if (player && player.badgeCount >= AppComponent.PROGRESS_BADGE_GOAL) {
+        this.facade.dispatch(ShowWinScreen());
+      }
+    });
   }
   changeScene(event) {
     if (event === 'solo') {

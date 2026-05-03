@@ -37,7 +37,8 @@
     >
       <h6>{{ player.name }}</h6>
       <div>
-        {{ player.badgeCount }} <img src="../../assets/ui/progress-medal.png" />
+        {{ player.badgeCount }}/10
+        <img src="../../assets/ui/progress-medal.png" />
       </div>
     </div>
   </div>
@@ -319,6 +320,7 @@
     </div>
   </div>
   <div class="sleep-hint" *ngIf="gameData.isSleeping">
-    Zzz&hellip; Press WASD to wake
+    <img src="../../assets/ui/mouse-drop.png" alt="" />
+    <span>Zzz&hellip; Left click to wake</span>
   </div>
 </div>

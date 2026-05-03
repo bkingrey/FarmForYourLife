@@ -1,5 +1,1 @@
--Change wasd movement to not affect going in or out of the house, it should be left click only. We have a left click image we can use to tell the user to use left click to rest or use left click to leave.
--When resting at a house that is not yours, it teleports you to your house, that shouldnt happen. If you try to rest at someone else's house it should not let you.
--Mining is not working, Or the chance for mining a nugget needs to go up. Right now it seems impossible to get a nuggett.
--Lets make the goal 10 progress badges for now. When you get 10 progress badges, you should win and the game should end. This should all be clear to the user.
--some of the text is unreadable such as the x3 combo Great text at the top. The Perfect/great and so on text after doing something above the character works perfectly.
+

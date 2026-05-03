@@ -65,12 +65,14 @@ export const selectItemCosts = createSelector(
     return buyableItems.map((item) => {
       let newCost = item.cost;
       if (item.name === 'Progress Badge') {
-        const mePlayer = lobbyPlayers.filter((p) => p.name === me)[0];
-        if (mePlayer) newCost = item.cost * (mePlayer.badgeCount + 1);
+        newCost = 1000;
       }
       return {
         ...item,
-        cost: Math.round(newCost / bargainValue),
+        cost:
+          item.name === 'Progress Badge'
+            ? newCost
+            : Math.round(newCost / bargainValue),
       };
     });
   },

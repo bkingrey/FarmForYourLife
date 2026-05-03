@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TitleScreenComponent } from './title-screen.component';
+import { AppFacade } from '../app.facade';
 
 describe('TitleScreenComponent', () => {
   let component: TitleScreenComponent;
@@ -8,9 +9,14 @@ describe('TitleScreenComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TitleScreenComponent ]
-    })
-    .compileComponents();
+      declarations: [TitleScreenComponent],
+      providers: [
+        {
+          provide: AppFacade,
+          useValue: { dispatch: jasmine.createSpy('dispatch') },
+        },
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {

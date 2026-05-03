@@ -40,7 +40,7 @@ export const intializeState = (): GameState => {
       },
       potato: {
         name: 'potato-seeds',
-        count: 4,
+        count: 0,
       },
       radish: {
         name: 'radish-seeds',
@@ -116,7 +116,7 @@ export const intializeState = (): GameState => {
       current: 100,
       max: 100,
     },
-    minerValue: 0.01,
+    minerValue: 0.1,
     fisherValue: 5,
     bargainValue: 1,
     player: {
@@ -145,6 +145,14 @@ export const intializeState = (): GameState => {
         target: 'sow',
         src: 'assets/ui/plant-big.png',
         value: '1x1',
+      },
+      {
+        name: 'Range',
+        description: 'Base Range',
+        tier: 0,
+        target: 'range',
+        src: 'assets/ui/hammer-big.png',
+        value: 1,
       },
       {
         name: 'Water',
@@ -176,7 +184,15 @@ export const intializeState = (): GameState => {
         tier: 0,
         target: 'energy',
         src: 'assets/ui/plant-big.png',
-        value: 1,
+        value: 0,
+      },
+      {
+        name: 'Resting',
+        description: 'Base Resting',
+        tier: 0,
+        target: 'resting',
+        src: 'assets/ui/bed-big.png',
+        value: 0,
       },
       {
         name: 'Bargain',
@@ -397,9 +413,9 @@ export const gameReducer = createReducer(
         ...state,
         seedsOwned: {
           ...state.seedsOwned,
-          potato: {
+          [payload.keyname]: {
             ...state.seedsOwned[payload.keyname],
-            count: state.seedsOwned[payload.keyname].count - 1,
+            count: Math.max(0, state.seedsOwned[payload.keyname].count - 1),
           },
         },
       };
@@ -411,9 +427,9 @@ export const gameReducer = createReducer(
   }),
   on(GameActions.ChangeEnergy, (state, { payload }) => {
     let total = state.energy.current + payload;
-    if (state.energy.current > state.energy.max) {
+    if (total > state.energy.max) {
       total = state.energy.max;
-    } else if (state.energy.current < 0) {
+    } else if (total < 0) {
       total = 0;
     }
     return {
@@ -600,7 +616,7 @@ export const gameReducer = createReducer(
       ...state,
       energy: {
         ...state.energy,
-        max: 100 * payload,
+        max: payload,
       },
     };
   }),

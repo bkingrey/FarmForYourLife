@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 
 import { GameSelectComponent } from './game-select.component';
 
@@ -8,9 +9,9 @@ describe('GameSelectComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GameSelectComponent ]
-    })
-    .compileComponents();
+      declarations: [GameSelectComponent],
+      imports: [FormsModule],
+    }).compileComponents();
   });
 
   beforeEach(() => {

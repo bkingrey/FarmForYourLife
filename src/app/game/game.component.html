@@ -21,3 +21,10 @@
   [style.width.px]="gameData.resolution.x"
   [style.height.px]="gameData.resolution.y"
 ></div>
+<div
+  class="startup-countdown"
+  [class.go]="startupCountdownLabel === 'GO'"
+  *ngIf="startupCountdownLabel"
+>
+  {{ startupCountdownLabel }}
+</div>

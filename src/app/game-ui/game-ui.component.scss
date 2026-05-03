@@ -13,13 +13,16 @@
 .rhythm-hud {
   position: absolute;
   top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 10px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: 4px;
   font-family: "Press Start 2P", monospace, sans-serif;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 6px;
+  padding: 5px 6px;
   text-shadow:
     2px 2px 0 #000,
     -2px 2px 0 #000,
@@ -370,6 +373,8 @@
     div {
       display: flex;
       justify-content: center;
+      align-items: center;
+      gap: 3px;
       img {
         width: 20px;
       }
@@ -404,6 +409,14 @@
   pointer-events: none;
   z-index: 20;
   animation: sleep-pulse 2s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  img {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 @keyframes sleep-pulse {
@@ -423,6 +436,7 @@
   display: flex;
   gap: 6px;
   margin-top: 2px;
+  white-space: nowrap;
   text-shadow: 1px 1px 0 #000;
 
   .cost-poor {

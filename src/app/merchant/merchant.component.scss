@@ -1,6 +1,14 @@
 $dash-size: 5px;
 $theme-color: #d77643;
 $fill-color: #ead4aa;
+
+.merchant-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 4999;
+  pointer-events: auto;
+}
+
 #merchant-shop {
   pointer-events: none;
   width: 900px;

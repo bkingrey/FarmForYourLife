@@ -1,5 +1,12 @@
 import { GameState, MerchantItems } from './../_store/models';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { intializeState } from '../_store/reducer';
 
 @Component({
@@ -20,6 +27,11 @@ export class MerchantComponent implements OnInit {
 
   ngOnInit(): void {
     this.changeTool.emit('basket');
+  }
+
+  @HostListener('document:keydown.escape')
+  closeOnEscape() {
+    this.closeShop();
   }
 
   buyItem(name: string, cost: number) {
@@ -48,9 +60,14 @@ export class MerchantComponent implements OnInit {
 
   doRightClickOnMouse(evt) {
     evt.preventDefault();
+    this.closeShop();
+  }
+
+  closeShop() {
     this.openShop.emit(false);
     this.focusOnCanvas();
   }
+
   focusOnCanvas() {
     this.changeTool.emit('shovel');
     setTimeout(() => {
