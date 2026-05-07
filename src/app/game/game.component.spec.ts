@@ -167,7 +167,9 @@ describe('GameComponent', () => {
     spyOn(component, 'drawWaterSquare');
     spyOn(component, 'drawPlantCircle');
 
-    [left, center, right].forEach((area) => component.targetNearestSquare(area));
+    [left, center, right].forEach((area) =>
+      component.targetNearestSquare(area),
+    );
 
     expect(component.waterableArea).toEqual([left, center, right]);
   });
