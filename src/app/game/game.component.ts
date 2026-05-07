@@ -17,8 +17,10 @@ import {
   HostListener,
   Input,
   NgZone,
+  OnChanges,
   OnDestroy,
   Output,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { intializeState } from '../_store/reducer';
@@ -34,7 +36,7 @@ import { Subscription } from 'rxjs';
 })
 export class GameComponent
   extends GameUtils
-  implements AfterViewInit, OnDestroy
+  implements AfterViewInit, OnChanges, OnDestroy
 {
   protected override get interactionRangePx(): number {
     return 88 * Number(this.upg?.range ?? 1);
@@ -360,7 +362,7 @@ export class GameComponent
   }
 
   private get countdownBeatsPerStep(): number {
-    return Math.max(1, Math.round(1000 / this.beatMs));
+    return Math.max(1, Math.round(500 / this.beatMs));
   }
 
   private get isStartupCountdownLocked(): boolean {
@@ -1554,6 +1556,18 @@ export class GameComponent
     this.mountPhaserOverlay();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['gameData']) {
+      this.syncUpgradeValues();
+    }
+  }
+
+  private syncUpgradeValues() {
+    if (this.gameData?.learnedUpgrades?.length) {
+      this.upg = this.getUpgradeVaules(this.gameData.learnedUpgrades);
+    }
+  }
+
   ngOnDestroy(): void {
     this.phaserSub?.unsubscribe();
     this.phaserSub = null;
@@ -1633,7 +1647,7 @@ export class GameComponent
         this.createTraders();
         this.createMovables();
         this.loadCanvas();
-        this.upg = this.getUpgradeVaules(this.gameData.learnedUpgrades);
+        this.syncUpgradeValues();
       }, 1000);
     });
   }

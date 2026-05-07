@@ -120,6 +120,58 @@ describe('GameComponent', () => {
     expect(component.drawPlantCircle).toHaveBeenCalledWith(area);
   });
 
+  it('uses newly learned Irrigate I for 1x3 watering targets', () => {
+    component.ctx = {} as CanvasRenderingContext2D;
+    component.upg = {
+      plow: '1x1',
+      sow: '1x1',
+      irrigate: '1x1',
+    };
+    component.gameData = {
+      ...component.gameData,
+      learnedUpgrades: component.gameData.learnedUpgrades.map((upgrade) =>
+        upgrade.target === 'irrigate'
+          ? {
+              ...upgrade,
+              name: 'Irrigate I',
+              tier: 1,
+              value: '1x3',
+            }
+          : upgrade,
+      ),
+    };
+    component.ngOnChanges({ gameData: {} as any });
+    component.mousePos = { x: 160, y: 160 };
+    const left = {
+      id: 'left',
+      state: 'soil-3',
+      position: { x: 64, y: 128 },
+      width: 64,
+      height: 64,
+    };
+    const center = {
+      id: 'center',
+      state: 'soil-3',
+      position: { x: 128, y: 128 },
+      width: 64,
+      height: 64,
+    };
+    const right = {
+      id: 'right',
+      state: 'soil-3',
+      position: { x: 192, y: 128 },
+      width: 64,
+      height: 64,
+    };
+    spyOn(component, 'drawBrokenSquare');
+    spyOn(component, 'drawWaterSquare');
+    spyOn(component, 'drawPlantCircle');
+
+    [left, center, right].forEach((area) => component.targetNearestSquare(area));
+
+    expect(component.waterableArea).toEqual([left, center, right]);
+  });
+
   it('allows stacking more than four matching pickupables', () => {
     component.gameData = {
       ...component.gameData,
@@ -394,11 +446,11 @@ describe('GameComponent', () => {
 
     expect((component as any).updateStartupCountdown(900)).toBe('5');
     expect((component as any).updateStartupCountdown(1000)).toBe('5');
-    expect((component as any).updateStartupCountdown(2000)).toBe('4');
-    expect((component as any).updateStartupCountdown(3000)).toBe('3');
-    expect((component as any).updateStartupCountdown(4000)).toBe('2');
-    expect((component as any).updateStartupCountdown(5000)).toBe('1');
-    expect((component as any).updateStartupCountdown(6000)).toBe('GO');
+    expect((component as any).updateStartupCountdown(1500)).toBe('4');
+    expect((component as any).updateStartupCountdown(2000)).toBe('3');
+    expect((component as any).updateStartupCountdown(2500)).toBe('2');
+    expect((component as any).updateStartupCountdown(3000)).toBe('1');
+    expect((component as any).updateStartupCountdown(3500)).toBe('GO');
     expect((component as any).isStartupCountdownLocked).toBeFalse();
   });
 
